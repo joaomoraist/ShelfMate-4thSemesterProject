@@ -9,7 +9,7 @@ const router = express.Router();
 // ===============================================
 // Configuração do nodemailer com suas credenciais
 // ===============================================
-const transporter = nodemailer.createTransporter({
+const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: 'semestretrabalhofecaf@gmail.com',
