@@ -17,7 +17,7 @@ git add -A
 
 echo Criando commit...
 :: O comando commit pode falhar se não houver nada para commitar, então não verificamos o erro aqui.
-git commit -m "Atualização automatica" >nul 2>&1
+git commit -m "Atualizacao automatica" >nul 2>&1
 
 echo Enviando atualizacoes para o servidor remoto...
 git push origin main

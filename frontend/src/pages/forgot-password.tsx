@@ -1,14 +1,17 @@
 import React, { useState } from "react";
+import { useNavigation } from "../context/NavigationContext";
+import { API_URLS } from "../config/api";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [isEmailSent, setIsEmailSent] = useState(false);
+  const { navigateTo } = useNavigation();
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://shelfmaterender.onrender.com/api/forgot-password", {
+      const response = await fetch(API_URLS.SEND_RESET_CODE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -16,14 +19,18 @@ export default function ForgotPassword() {
 
       if (response.ok) {
         setIsEmailSent(true);
-        alert("✅ Password reset email sent!");
+        alert("✅ Código de recuperação enviado para seu email!");
+        // Navegar para a página de reset de senha após envio bem-sucedido
+        setTimeout(() => {
+          navigateTo("reset-password");
+        }, 2000);
       } else {
         const error = await response.json();
-        alert("❌ Failed to send reset email: " + (error.message || "Unknown error"));
+        alert("❌ Falha ao enviar email de recuperação: " + (error.error || "Erro desconhecido"));
       }
     } catch (error) {
       console.error(error);
-      alert("⚠️ Error connecting to server.");
+      alert("⚠️ Erro ao conectar com o servidor.");
     }
   };
 
@@ -31,15 +38,15 @@ export default function ForgotPassword() {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
         <h2>📧 Email Sent!</h2>
-        <p>Check your email for password reset instructions.</p>
-        <button onClick={() => setIsEmailSent(false)}>🔄 Try Again</button>
+        <p>Verifique seu email para as instruções de recuperação de senha.</p>
+        <button onClick={() => setIsEmailSent(false)}>🔄 Tentar Novamente</button>
       </div>
     );
   }
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <h2>🔑 Forgot Password</h2>
+      <h2>🔑 Esqueci a Senha</h2>
       <form onSubmit={handleForgotPassword} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
         <input
           type="email"
@@ -48,8 +55,18 @@ export default function ForgotPassword() {
           onChange={(e) => setEmail(e.target.value)}
           required
         />
-        <button type="submit">➡️ Send Reset Email</button>
+        <button type="submit">➡️ Enviar Email de Recuperação</button>
       </form>
+      
+      {/* Botões de navegação para teste */}
+      <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
+        <button onClick={() => navigateTo("login")} style={{ padding: "5px 10px" }}>
+          🔐 Voltar ao Login
+        </button>
+        <button onClick={() => navigateTo("reset-password")} style={{ padding: "5px 10px" }}>
+          🔄 Ir para Reset de Senha
+        </button>
+      </div>
     </div>
   );
 }
