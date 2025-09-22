@@ -12,8 +12,8 @@ const router = express.Router();
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'semestretrabalhofecaf@gmail.com',
-    pass: 'upzg yebt cdrg sgzz'
+    user: process.env.EMAIL_USER || 'semestretrabalhofecaf@gmail.com',
+    pass: process.env.EMAIL_PASS || 'upzg yebt cdrg sgzz'
   }
 });
 
@@ -96,20 +96,19 @@ router.post('/register', async (req, res) => {
 
     let company_id = null;
 
-    // Se CNPJ foi fornecido, verificar se a empresa existe
-    if (company_cnpj) {
-      const companies = await sql`
-        SELECT id FROM companies WHERE cnpj = ${company_cnpj}
-      `;
-
-      if (companies.length === 0) {
-        return res.status(404).json({
-          error: 'Company not found with the provided CNPJ'
-        });
-      }
-
-      company_id = companies[0].id;
-    }
+    // Por enquanto, vamos permitir cadastro sem verificar empresa
+    // TODO: Implementar verificação de empresa quando a tabela estiver disponível
+    // if (company_cnpj) {
+    //   const companies = await sql`
+    //     SELECT id FROM companies WHERE cnpj = ${company_cnpj}
+    //   `;
+    //   if (companies.length === 0) {
+    //     return res.status(404).json({
+    //       error: 'Company not found with the provided CNPJ'
+    //     });
+    //   }
+    //   company_id = companies[0].id;
+    // }
 
     // Inserir novo usuário
     const newUser = await sql`
@@ -176,11 +175,20 @@ router.post('/send-reset-code', async (req, res) => {
     };
 
     // Enviar email
-    await transporter.sendMail(mailOptions);
-
-    res.json({
-      message: 'Recovery code sent successfully'
-    });
+    try {
+      await transporter.sendMail(mailOptions);
+      console.log('Email enviado com sucesso para:', email);
+      
+      res.json({
+        message: 'Recovery code sent successfully'
+      });
+    } catch (emailError) {
+      console.error('Erro ao enviar email:', emailError);
+      res.status(500).json({
+        error: 'Failed to send email',
+        details: emailError.message
+      });
+    }
 
   } catch (error) {
     console.error('Erro ao enviar código de recuperação:', error);
