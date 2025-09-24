@@ -24,6 +24,34 @@ transporter.verify().then(() => {
   console.error('Nodemailer transporter verification failed:', err && err.message ? err.message : err);
 });
 
+// Temporary diagnostics endpoint to check SMTP connectivity from the deployed host
+// Protected by DIAG_KEY environment variable; set DIAG_KEY in Render and call with ?key=YOUR_KEY
+router.get('/diag/smtp', async (req, res) => {
+  try {
+    const key = req.query.key || req.headers['x-diag-key'];
+    if (!process.env.DIAG_KEY || key !== process.env.DIAG_KEY) {
+      return res.status(403).json({ error: 'Forbidden - missing or invalid DIAG_KEY' });
+    }
+
+    // Attempt verify on the transporter (will attempt SMTP connection from the Render host)
+    try {
+      await transporter.verify();
+      return res.json({ ok: true, message: 'SMTP transporter verified successfully' });
+    } catch (verifyErr) {
+      console.error('SMTP diag error:', verifyErr);
+      return res.status(500).json({
+        ok: false,
+        error: verifyErr && verifyErr.message ? verifyErr.message : String(verifyErr),
+        code: verifyErr && verifyErr.code ? verifyErr.code : undefined,
+        stack: verifyErr && verifyErr.stack ? verifyErr.stack : undefined
+      });
+    }
+  } catch (err) {
+    console.error('Unexpected error in /diag/smtp:', err);
+    return res.status(500).json({ error: 'Unexpected error', details: err && err.message ? err.message : String(err) });
+  }
+});
+
 // ===============================================
 // 1. Verificar se um usuário existe pelo email e senha
 // ===============================================
