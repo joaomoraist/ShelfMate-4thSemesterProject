@@ -1,14 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
 
 export default function ForgotPassword() {
-  const [email, setEmail] = useState("");
-  const [isEmailSent, setIsEmailSent] = useState(false);
+  // Steps: 1 = send code, 2 = verify code, 3 = reset password
+  const [step, setStep] = useState<number>(1);
+  const [email, setEmail] = useState<string>("");
+  const [recoveryCode, setRecoveryCode] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
   const { navigateTo } = useNavigation();
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Prefill email if the login page stored it
+  useEffect(() => {
+    const prefill = localStorage.getItem("forgotEmail");
+    if (prefill) {
+      setEmail(prefill);
+      // Remove it so future navigations don't keep it unintentionally
+      localStorage.removeItem("forgotEmail");
+    }
+  }, []);
+
+  const handleSendCode = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
 
     try {
       const response = await fetch(API_URLS.SEND_RESET_CODE, {
@@ -18,15 +31,13 @@ export default function ForgotPassword() {
       });
 
       if (response.ok) {
-        setIsEmailSent(true);
+        setStep(2);
         alert("✅ Código de recuperação enviado para seu email!");
-        // Navegar para a página de reset de senha após envio bem-sucedido
-        setTimeout(() => {
-          navigateTo("reset-password");
-        }, 2000);
       } else {
         const error = await response.json();
-        alert("❌ Falha ao enviar email de recuperação: " + (error.error || "Erro desconhecido"));
+        // Show details if backend provides them
+        const details = (error && (error.details || error.error)) ? (error.details || error.error) : null;
+        alert("❌ Falha ao enviar código: " + (error.error || "Erro desconhecido") + (details ? " - " + details : ""));
       }
     } catch (error) {
       console.error(error);
@@ -34,37 +45,108 @@ export default function ForgotPassword() {
     }
   };
 
-  if (isEmailSent) {
-    return (
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <h2>📧 Email Sent!</h2>
-        <p>Verifique seu email para as instruções de recuperação de senha.</p>
-        <button onClick={() => setIsEmailSent(false)}>🔄 Tentar Novamente</button>
-      </div>
-    );
-  }
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(API_URLS.VERIFY_RESET_CODE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, recoveryCode }),
+      });
+
+      if (response.ok) {
+        setStep(3);
+        alert("✅ Código verificado! Agora defina sua nova senha.");
+      } else {
+        const error = await response.json();
+        alert("❌ Código inválido: " + (error.error || "Erro desconhecido"));
+      }
+    } catch (error) {
+      console.error(error);
+      alert("⚠️ Erro ao conectar com o servidor.");
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(API_URLS.RESET_PASSWORD, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, recoveryCode, newPassword }),
+      });
+
+      if (response.ok) {
+        alert("✅ Senha redefinida com sucesso!");
+        navigateTo("login");
+      } else {
+        const error = await response.json();
+        alert("❌ Falha ao redefinir senha: " + (error.error || "Erro desconhecido"));
+      }
+    } catch (error) {
+      console.error(error);
+      alert("⚠️ Erro ao conectar com o servidor.");
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <h2>🔑 Esqueci a Senha</h2>
-      <form onSubmit={handleForgotPassword} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
-        <input
-          type="email"
-          placeholder="📧 Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <button type="submit">➡️ Enviar Email de Recuperação</button>
-      </form>
-      
+      <h2>🔑 Redefinir Senha</h2>
+
+      {step === 1 && (
+        <form onSubmit={handleSendCode} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
+          <input
+            type="email"
+            placeholder="📧 Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <button type="submit">➡️ Enviar Código de Recuperação</button>
+        </form>
+      )}
+
+      {step === 2 && (
+        <form onSubmit={handleVerifyCode} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
+          <input type="email" placeholder="📧 Email" value={email} disabled />
+          <input
+            type="text"
+            placeholder="🔢 Código de Recuperação"
+            value={recoveryCode}
+            onChange={(e) => setRecoveryCode(e.target.value)}
+            required
+          />
+          <button type="submit">➡️ Verificar Código</button>
+          <button type="button" onClick={() => setStep(1)} style={{ marginTop: "10px" }}>
+            🔄 Voltar
+          </button>
+        </form>
+      )}
+
+      {step === 3 && (
+        <form onSubmit={handleResetPassword} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
+          <input type="email" placeholder="📧 Email" value={email} disabled />
+          <input type="text" placeholder="🔢 Código de Recuperação" value={recoveryCode} disabled />
+          <input
+            type="password"
+            placeholder="🔑 Nova Senha"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            required
+          />
+          <button type="submit">➡️ Redefinir Senha</button>
+          <button type="button" onClick={() => setStep(2)} style={{ marginTop: "10px" }}>
+            � Voltar
+          </button>
+        </form>
+      )}
+
       {/* Botões de navegação para teste */}
       <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
         <button onClick={() => navigateTo("login")} style={{ padding: "5px 10px" }}>
-          🔐 Voltar ao Login
-        </button>
-        <button onClick={() => navigateTo("reset-password")} style={{ padding: "5px 10px" }}>
-          🔄 Ir para Reset de Senha
+          � Voltar ao Login
         </button>
       </div>
     </div>

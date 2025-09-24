@@ -17,6 +17,13 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+// Verifica a configuração do transportador de email ao iniciar (útil para debugging)
+transporter.verify().then(() => {
+  console.log('Nodemailer transporter is ready to send messages');
+}).catch((err) => {
+  console.error('Nodemailer transporter verification failed:', err && err.message ? err.message : err);
+});
+
 // ===============================================
 // 1. Verificar se um usuário existe pelo email e senha
 // ===============================================

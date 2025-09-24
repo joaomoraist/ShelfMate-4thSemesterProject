@@ -7,6 +7,37 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const { navigateTo } = useNavigation();
 
+  const handleForgotFromLogin = async () => {
+    if (!email) {
+      // If no email filled, just navigate to forgot-password page where user can type email
+      navigateTo("forgot-password");
+      return;
+    }
+
+    try {
+      const response = await fetch(API_URLS.SEND_RESET_CODE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (response.ok) {
+        alert("✅ Código de recuperação enviado para seu email!");
+        // Save email so forgot-password page can pre-fill
+        localStorage.setItem("forgotEmail", email);
+        // Navegar para a página unificada de forgot-password
+        navigateTo("forgot-password");
+      } else {
+        const errorData = await response.json();
+        const details = (errorData && (errorData.details || errorData.error)) ? (errorData.details || errorData.error) : null;
+        alert("❌ Falha ao enviar código: " + (errorData.error || "Erro desconhecido") + (details ? " - " + details : ""));
+      }
+    } catch (err) {
+      console.error(err);
+      alert("⚠️ Erro ao conectar com o servidor.");
+    }
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -59,7 +90,7 @@ export default function Login() {
         <button onClick={() => navigateTo("signup")} style={{ padding: "5px 10px" }}>
           📝 Ir para Cadastro
         </button>
-        <button onClick={() => navigateTo("forgot-password")} style={{ padding: "5px 10px" }}>
+        <button onClick={handleForgotFromLogin} style={{ padding: "5px 10px" }}>
           🔑 Esqueci a Senha
         </button>
       </div>

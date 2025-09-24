@@ -6,14 +6,15 @@ export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [cnpj, setCnpj] = useState("");
   const { navigateTo } = useNavigation();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (password !== confirmPassword) {
-      alert("❌ As senhas não coincidem!");
+    // Limpa CNPJ de quaisquer caracteres não numéricos (usuário pode colar com máscara)
+    const cleanCnpj = cnpj.replace(/\D/g, "");
+    if (cleanCnpj.length !== 14) {
+      alert("❌ CNPJ inválido. Informe 14 dígitos numéricos.");
       return;
     }
 
@@ -21,7 +22,7 @@ export default function Signup() {
       const response = await fetch(API_URLS.REGISTER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, company_cnpj: "12345678000100" }),
+        body: JSON.stringify({ name, email, password, company_cnpj: cleanCnpj }),
       });
 
       if (response.ok) {
@@ -65,11 +66,14 @@ export default function Signup() {
           required
         />
         <input
-          type="password"
-          placeholder="🔑 Confirmar Senha"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          type="text"
+          placeholder="🏢 CNPJ da Empresa (somente números)"
+          value={cnpj}
+          onChange={(e) => setCnpj(e.target.value)}
           required
+          maxLength={14}
+          pattern="[0-9]{14}"
+          title="Informe 14 dígitos numéricos do CNPJ"
         />
         <button type="submit">➡️ Cadastrar</button>
       </form>

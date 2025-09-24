@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { NavigationProvider } from "./context/NavigationContext";
 import Login from "./pages/login";
 import Signup from "./pages/signup";
 import ForgotPassword from "./pages/forgot-password";
-import ResetPassword from "./pages/reset-password";
 import Home from "./pages/home";
 
-type Page = "login" | "signup" | "forgot-password" | "reset-password" | "home";
+type Page = "login" | "signup" | "forgot-password" | "home";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("login");
@@ -25,8 +24,6 @@ function App() {
         return <Signup />;
       case "forgot-password":
         return <ForgotPassword />;
-      case "reset-password":
-        return <ResetPassword />;
       case "home":
         return <Home />;
       default:
@@ -57,12 +54,7 @@ function App() {
           >
             🔑 Esqueci a Senha
           </button>
-          <button 
-            onClick={() => setCurrentPage("reset-password")}
-            style={{ margin: "5px", padding: "8px 16px" }}
-          >
-            🔄 Redefinir Senha
-          </button>
+          {/* Reset-password merged into ForgotPassword page */}
           <button 
             onClick={() => setCurrentPage("home")}
             style={{ margin: "5px", padding: "8px 16px" }}
