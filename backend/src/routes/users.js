@@ -162,10 +162,11 @@ router.post('/send-reset-code', async (req, res) => {
     // Enviar email usando Resend
     try {
       await resend.emails.send({
-        from: 'onboarding@resend.dev',
-        to: email,
+        from: 'ShelfMate <onboarding@resend.dev>',
+        to: [email],
         subject: 'Seu código de recuperação - ShelfMate!',
-        text: `Seu código é: ${recoveryCode}.`
+        text: `Seu código é: ${recoveryCode}.`,
+        html: `<p>Seu código é: <strong>${recoveryCode}</strong>.</p>`
       });
       console.log('Email enviado com sucesso para:', email);
       
