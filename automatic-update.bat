@@ -77,4 +77,4 @@ echo ==============================
 
 :end
 echo Pressione qualquer tecla para sair...
-pause >nul
+pause
