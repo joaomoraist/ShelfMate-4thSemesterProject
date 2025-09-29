@@ -162,7 +162,7 @@ router.post('/send-reset-code', async (req, res) => {
     // Enviar email usando Resend
     try {
       await resend.emails.send({
-        from: 'Resend <onboarding@resend.dev>',
+        from: 'ShelfMate <noreply@semestralproject.com>',
         to: [email],
         subject: 'Seu código de recuperação - ShelfMate!',
         text: `Seu código é: ${recoveryCode}.`,
@@ -175,6 +175,22 @@ router.post('/send-reset-code', async (req, res) => {
       });
     } catch (emailError) {
       console.error('Erro ao enviar email:', emailError);
+      
+      // Tratar erros específicos do Resend
+      if (emailError.message?.includes('Invalid API key')) {
+        return res.status(500).json({
+          error: 'Email service configuration error',
+          details: 'Invalid API key'
+        });
+      }
+      
+      if (emailError.message?.includes('Invalid domain')) {
+        return res.status(500).json({
+          error: 'Email service configuration error',
+          details: 'Invalid sender domain'
+        });
+      }
+      
       res.status(500).json({
         error: 'Failed to send email',
         details: emailError.message
