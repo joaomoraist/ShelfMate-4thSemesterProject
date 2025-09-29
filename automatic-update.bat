@@ -76,5 +76,6 @@ echo   Sincronizacao concluida com SUCESSO!
 echo ==============================
 
 :end
+echo.
 echo Pressione qualquer tecla para sair...
 pause
