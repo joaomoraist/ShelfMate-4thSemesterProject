@@ -1,56 +1,14 @@
 import express from 'express';
 import sql from '../db.js';
-import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 const router = express.Router();
 
 // ===============================================
-// Configuração do nodemailer com suas credenciais
+// Configuração do Resend
 // ===============================================
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER || 'semestretrabalhofecaf@gmail.com',
-    pass: process.env.EMAIL_PASS || 'upzg yebt cdrg sgzz'
-  }
-});
-
-// Verifica a configuração do transportador de email ao iniciar (útil para debugging)
-transporter.verify().then(() => {
-  console.log('Nodemailer transporter is ready to send messages');
-}).catch((err) => {
-  console.error('Nodemailer transporter verification failed:', err && err.message ? err.message : err);
-});
-
-// Temporary diagnostics endpoint to check SMTP connectivity from the deployed host
-// Protected by DIAG_KEY environment variable; set DIAG_KEY in Render and call with ?key=YOUR_KEY
-router.get('/diag/smtp', async (req, res) => {
-  try {
-    const key = req.query.key || req.headers['x-diag-key'];
-    if (!process.env.DIAG_KEY || key !== process.env.DIAG_KEY) {
-      return res.status(403).json({ error: 'Forbidden - missing or invalid DIAG_KEY' });
-    }
-
-    // Attempt verify on the transporter (will attempt SMTP connection from the Render host)
-    try {
-      await transporter.verify();
-      return res.json({ ok: true, message: 'SMTP transporter verified successfully' });
-    } catch (verifyErr) {
-      console.error('SMTP diag error:', verifyErr);
-      return res.status(500).json({
-        ok: false,
-        error: verifyErr && verifyErr.message ? verifyErr.message : String(verifyErr),
-        code: verifyErr && verifyErr.code ? verifyErr.code : undefined,
-        stack: verifyErr && verifyErr.stack ? verifyErr.stack : undefined
-      });
-    }
-  } catch (err) {
-    console.error('Unexpected error in /diag/smtp:', err);
-    return res.status(500).json({ error: 'Unexpected error', details: err && err.message ? err.message : String(err) });
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ===============================================
 // 1. Verificar se um usuário existe pelo email e senha
@@ -201,17 +159,14 @@ router.post('/send-reset-code', async (req, res) => {
       WHERE email = ${email}
     `;
 
-    // Configurar email
-    const mailOptions = {
-      from: 'semestretrabalhofecaf@gmail.com',
-      to: email,
-      subject: 'Your code from the best Fecaf App!!!',
-      text: `Your code is: ${recoveryCode}.`
-    };
-
-    // Enviar email
+    // Enviar email usando Resend
     try {
-      await transporter.sendMail(mailOptions);
+      await resend.emails.send({
+        from: 'no-reply@semestralproject.com',
+        to: email,
+        subject: 'Seu código de recuperação - ShelfMate!',
+        text: `Seu código é: ${recoveryCode}.`
+      });
       console.log('Email enviado com sucesso para:', email);
       
       res.json({

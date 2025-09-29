@@ -1,9 +1,13 @@
 @echo off
 echo ==============================
-echo   ShelfMate - Sync Automático
+echo   ShelfMate - Sync Automatico
 echo ==============================
 
 cd /d %~dp0
+
+:: Mostra o usuário atual do PC
+echo Usuario atual do PC: %USERNAME%
+echo ==============================
 
 :: Verifica se é um repositório Git
 if not exist ".git" (
@@ -12,27 +16,57 @@ if not exist ".git" (
     exit /b
 )
 
-echo Adicionando todas as alteracoes...
+echo ==============================
+echo   Limpeza de arquivos temporarios e node_modules...
+echo ==============================
+:: Remove arquivos não rastreados e diretórios (node_modules, logs, etc.)
+git clean -fd
+
+:: Remove objetos corrompidos conhecidos (desktop.ini)
+if exist ".git\refs\desktop.ini" del ".git\refs\desktop.ini"
+if exist ".git\objects\desktop.ini" del ".git\objects\desktop.ini"
+
+echo ==============================
+echo   Verificando integridade do repositório...
+echo ==============================
+git fsck --full
+if %errorlevel% neq 0 (
+    echo.
+    echo !!!!! REPOSITORIO CORROMPIDO !!!!! 
+    echo Limpe manualmente os objetos corrompidos ou recrie o .git
+    pause
+    exit /b
+)
+
+echo ==============================
+echo   Adicionando todas as alteracoes...
+echo ==============================
 git add -A
 
-echo Criando commit...
-:: O comando commit pode falhar se não houver nada para commitar, então não verificamos o erro aqui.
-git commit -m "Atualizacao automatica" >nul 2>&1
+:: Conta quantos commits já existem no branch atual
+for /f %%i in ('git rev-list --count HEAD') do set COMMIT_NUM=%%i
 
-echo Enviando atualizacoes para o servidor remoto...
+echo Criando commit...
+git commit -m "Atualizacao automatica - %USERNAME% Numero: #%COMMIT_NUM%" >nul 2>&1
+
+echo ==============================
+echo   Enviando atualizacoes para o servidor remoto...
+echo ==============================
 git push origin main
 if %errorlevel% neq 0 (
     echo.
-    echo !!!!! ERRO AO ENVIAR (PUSH) !!!!!
+    echo !!!!! ERRO AO ENVIAR (PUSH) !!!!! 
     echo Verifique sua conexao com a internet ou se ha conflitos.
     goto end
 )
 
-echo Puxando atualizacoes do servidor remoto...
-git pull origin main
+echo ==============================
+echo   Puxando atualizacoes do servidor remoto...
+echo ==============================
+git pull origin main --rebase
 if %errorlevel% neq 0 (
     echo.
-    echo !!!!! ERRO AO PUXAR (PULL) !!!!!
+    echo !!!!! ERRO AO PUXAR (PULL) !!!!! 
     echo Pode haver um conflito de merge. Resolva-o manualmente.
     goto end
 )
