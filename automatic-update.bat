@@ -46,11 +46,11 @@ git add -A
 :: Conta quantos commits já existem no branch atual
 for /f %%i in ('git rev-list --count HEAD') do set COMMIT_NUM=%%i
 
-echo Criando commit...
+echo Criando commit automatico...
 git commit -m "Atualizacao automatica - %USERNAME% Numero: #%COMMIT_NUM%" >nul 2>&1
 
 echo ==============================
-echo   Enviando atualizacoes para o servidor remoto...
+echo   Enviando atualizacoes para o servidor remoto (branch main)...
 echo ==============================
 git push origin main
 if %errorlevel% neq 0 (
@@ -61,7 +61,7 @@ if %errorlevel% neq 0 (
 )
 
 echo ==============================
-echo   Puxando atualizacoes do servidor remoto...
+echo   Puxando atualizacoes do servidor remoto (branch main)...
 echo ==============================
 git pull origin main --rebase
 if %errorlevel% neq 0 (

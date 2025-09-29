@@ -3,7 +3,7 @@
 :: Nome do arquivo: update-git.bat
 
 echo ================================
-echo  🚀 Atualizando repositório Git
+echo  Atualizando repositorio GitHub
 echo ================================
 echo.
 
@@ -23,5 +23,5 @@ echo Enviando para o GitHub...
 git push origin main
 
 echo.
-echo ✅ Repositório atualizado com sucesso!
+echo Repositorio atualizado com sucesso!
 pause
