@@ -164,7 +164,7 @@ router.post('/send-reset-code', async (req, res) => {
       await resend.emails.send({
         from: 'ShelfMate <noreply@semestralproject.com>',
         to: [email],
-        subject: 'Seu código de recuperação - ShelfMate!',
+        subject: 'Seu código de recuperação - ShelfMate',
         text: `Seu código é: ${recoveryCode}.`,
         html: `<p>Seu código é: <strong>${recoveryCode}</strong>.</p>`
       });
