@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
-import "../styles/signup.css";
+import "../styles/auth.css";
 
 export default function Signup() {
   const [name, setName] = useState("");

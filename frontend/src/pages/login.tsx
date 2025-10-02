@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
-import "../styles/login.css";
+import "../styles/auth.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -25,9 +25,9 @@ export default function Login() {
 
       if (response.ok) {
         showToast("Código enviado. Verifique seu email.");
-        // Save email so forgot-password page can pre-fill
-        localStorage.setItem("forgotEmail", email);
-        // Navegar para a página unificada de forgot-password
+        // Mark reset flow allowed and store email
+        localStorage.setItem("resetFlowEmail", email);
+        // Navegar para a página de forgot-password somente após o envio
         navigateTo("forgot-password");
       } else {
         const errorData = await response.json();
@@ -99,7 +99,7 @@ export default function Login() {
 
       <p className="muted">Páginas simples para testar as rotas da API.</p>
 
-      {toast && <div className="toast" id="toast">{toast}</div>}
+      {toast && <div className="toast show" id="toast">{toast}</div>}
     </div>
   );
 }

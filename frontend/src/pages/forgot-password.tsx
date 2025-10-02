@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
-import "../styles/reset-password.css";
+import "../styles/auth.css";
 
 export default function ForgotPassword() {
   // Steps: 1 = send code, 2 = verify code, 3 = reset password
@@ -13,12 +13,14 @@ export default function ForgotPassword() {
 
   // Prefill email if the login page stored it
   useEffect(() => {
-    const prefill = localStorage.getItem("forgotEmail");
-    if (prefill) {
-      setEmail(prefill);
-      // Remove it so future navigations don't keep it unintentionally
-      localStorage.removeItem("forgotEmail");
+    const allowedEmail = localStorage.getItem("resetFlowEmail");
+    if (!allowedEmail) {
+      // Not allowed to be here unless code was requested from login
+      alert("Solicite o código na página de login.");
+      navigateTo("login");
+      return;
     }
+    setEmail(allowedEmail);
   }, []);
 
   const handleSendCode = async (e?: React.FormEvent) => {
@@ -81,6 +83,8 @@ export default function ForgotPassword() {
 
       if (response.ok) {
         alert("✅ Senha redefinida com sucesso!");
+        // Clear reset flow flag and navigate to login
+        localStorage.removeItem("resetFlowEmail");
         navigateTo("login");
       } else {
         const error = await response.json();
