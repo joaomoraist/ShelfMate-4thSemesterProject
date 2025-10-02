@@ -19,7 +19,7 @@ router.post('/login', async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        error: 'Email and password are required'
+        error: 'Email e Senha são obrigatórios'
       });
     }
 
@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
 
     if (users.length === 0) {
       return res.status(401).json({
-        error: 'Invalid credentials'
+        error: 'Email inválido'
       });
     }
 
@@ -43,7 +43,7 @@ router.post('/login', async (req, res) => {
 
     if (!isPasswordValid) {
       return res.status(401).json({
-        error: 'Invalid credentials'
+        error: 'Senha errada'
       });
     }
 
@@ -72,7 +72,7 @@ router.post('/register', async (req, res) => {
 
     if (!name || !email || !password || !company_cnpj) {
       return res.status(400).json({
-        error: 'Name, email, password and company CNPJ are required'
+        error: 'Nome, email, senha e CNPJ são obrigatórios'
       });
     }
 
@@ -83,7 +83,7 @@ router.post('/register', async (req, res) => {
 
     if (existingUsers.length > 0) {
       return res.status(409).json({
-        error: 'Email already in use'
+        error: 'Este email já esta sendo usado'
       });
     }
 
@@ -132,7 +132,7 @@ router.post('/send-reset-code', async (req, res) => {
 
     if (!email) {
       return res.status(400).json({
-        error: 'Email is required'
+        error: 'Email é obrigatório'
       });
     }
 
@@ -143,7 +143,7 @@ router.post('/send-reset-code', async (req, res) => {
 
     if (users.length === 0) {
       return res.status(404).json({
-        error: 'User not found'
+        error: 'Usuario não encontrado'
       });
     }
 
