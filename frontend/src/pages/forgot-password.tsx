@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
 import "../styles/auth.css";
+import AuthIllustration from "../components/AuthIllustration";
 
 export default function ForgotPassword() {
   // Steps: 1 = send code, 2 = verify code, 3 = reset password
@@ -153,12 +154,7 @@ export default function ForgotPassword() {
           <p className="muted">Apoie nossos desenvolvedores visitando-nos, no linkedin e github</p>
         </div>
 
-        <div className="auth-illustration">
-          <div className="auth-phone">
-            <img src="/wallpaper.jpg" alt="Phone" />
-            <div className="auth-dots"><span></span><span></span><span></span><span></span></div>
-          </div>
-        </div>
+        <AuthIllustration images={["/wallpaper.jpg", "/public/wallpaper.jpg", "/logo.png"]} intervalMs={1000} />
       </div>
     </div>
   );

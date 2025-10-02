@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
 import "../styles/auth.css";
+import AuthIllustration from "../components/AuthIllustration";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -74,12 +75,7 @@ export default function Login() {
   return (
     <div className="page-auth">
       <div className="auth-shell">
-        <div className="auth-illustration">
-          <div className="auth-phone">
-            <img src="/wallpaper.jpg" alt="Phone" />
-            <div className="auth-dots"><span></span><span></span><span></span><span></span></div>
-          </div>
-        </div>
+        <AuthIllustration images={["/wallpaper.jpg", "/public/wallpaper.jpg", "/logo.png"]} intervalMs={1000} />
         <div className="auth-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 28 }}>🏠</div>
