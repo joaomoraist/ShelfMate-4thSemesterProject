@@ -97,50 +97,69 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="card">
-      <h1>Redefinir Senha</h1>
-      <p className="sub">Informe o código recebido por email e a nova senha</p>
-
-      {step === 1 && (
-        <form onSubmit={handleSendCode}>
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <div className="row" style={{ marginTop: 16 }}>
-            <button className="primary" type="submit">Enviar Código</button>
+    <div className="page-auth">
+      <div className="auth-shell">
+        <div className="auth-content">
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 28 }}>🔑</div>
+            <h1 className="auth-title">Redefinir a Senha</h1>
+            <p className="auth-sub">Digite as suas informações</p>
           </div>
-        </form>
-      )}
 
-      {step === 2 && (
-        <form onSubmit={handleVerifyCode}>
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" value={email} disabled />
+          {step === 1 && (
+            <form onSubmit={handleSendCode}>
+              <label htmlFor="email">Email</label>
+              <input id="email" type="email" placeholder="Digite seu email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <div className="row" style={{ marginTop: 16 }}>
+                <button className="primary" type="submit">Enviar Código</button>
+              </div>
+            </form>
+          )}
 
-          <label htmlFor="code">Código de verificação</label>
-          <input id="code" type="text" placeholder="CÓDIGO RECEBIDO" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value)} />
+          {step === 2 && (
+            <form onSubmit={handleVerifyCode}>
+              <label htmlFor="email">Email</label>
+              <input id="email" type="email" value={email} disabled />
 
-          <div className="row" style={{ marginTop: 16 }}>
-            <button className="primary" type="submit">Verificar</button>
+              <label htmlFor="code">Código encaminhado</label>
+              <input id="code" type="text" placeholder="Digite o código encaminhado" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value)} />
+
+              <div className="row" style={{ marginTop: 16 }}>
+                <button className="primary" type="submit">Verificar</button>
+              </div>
+            </form>
+          )}
+
+          {step === 3 && (
+            <form onSubmit={handleResetPassword}>
+              <label htmlFor="email">Email</label>
+              <input id="email" type="email" value={email} disabled />
+
+              <label htmlFor="newpass">Nova senha</label>
+              <input id="newpass" type="password" placeholder="Digite sua nova senha" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+
+              <div className="row" style={{ marginTop: 16 }}>
+                <button className="primary" type="submit">Atualizar</button>
+              </div>
+            </form>
+          )}
+
+          <hr style={{ margin: '18px 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
+
+          <div className="row" style={{ marginTop: 4 }}>
+            <button className="secondary" onClick={() => navigateTo("login")}>Login</button>
           </div>
-        </form>
-      )}
 
-      {step === 3 && (
-        <form onSubmit={handleResetPassword}>
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" value={email} disabled />
+          <p className="muted">Apoie nossos desenvolvedores visitando-nos, no linkedin e github</p>
+        </div>
 
-          <label htmlFor="code">Código de verificação</label>
-          <input id="code" type="text" value={recoveryCode} disabled />
-
-          <label htmlFor="newpass">Nova senha</label>
-          <input id="newpass" type="password" placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
-
-          <div className="row" style={{ marginTop: 16 }}>
-            <button className="primary" type="submit">Atualizar</button>
+        <div className="auth-illustration">
+          <div className="auth-phone">
+            <img src="/wallpaper.jpg" alt="Phone" />
+            <div className="auth-dots"><span></span><span></span><span></span><span></span></div>
           </div>
-        </form>
-      )}
+        </div>
+      </div>
     </div>
   );
 }

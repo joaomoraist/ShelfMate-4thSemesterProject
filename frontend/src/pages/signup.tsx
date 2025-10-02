@@ -48,32 +48,49 @@ export default function Signup() {
   };
 
   return (
-    <div className="card">
-      <h1>Cadastre-se</h1>
-      <p className="sub">Crie sua conta</p>
+    <div className="page-auth">
+      <div className="auth-shell">
+        <div className="auth-content">
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 28 }}>📇</div>
+            <h1 className="auth-title">Cadastre-se</h1>
+            <p className="auth-sub">Digite as suas informações</p>
+          </div>
 
-      <form onSubmit={handleSignup}>
-        <label htmlFor="name">Nome</label>
-        <input id="name" type="text" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)} />
+          <form onSubmit={handleSignup}>
+            <label htmlFor="name">Nome</label>
+            <input id="name" type="text" placeholder="Digite seu nome" value={name} onChange={(e) => setName(e.target.value)} />
 
-        <label htmlFor="email">Email</label>
-        <input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <label htmlFor="email">Email</label>
+            <input id="email" type="email" placeholder="Digite seu email" value={email} onChange={(e) => setEmail(e.target.value)} />
 
-        <label htmlFor="cnpj">CNPJ da Empresa</label>
-        <input id="cnpj" type="text" placeholder="00.000.000/0000-00" value={cnpj} onChange={(e) => setCnpj(e.target.value)} maxLength={18} />
+            <label htmlFor="cnpj">CNPJ da Empresa</label>
+            <input id="cnpj" type="text" placeholder="Digite o CNPJ da empresa" value={cnpj} onChange={(e) => setCnpj(e.target.value)} maxLength={18} />
 
-        <label htmlFor="password">Senha</label>
-        <input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <label htmlFor="password">Senha</label>
+            <input id="password" type="password" placeholder="Digite sua senha" value={password} onChange={(e) => setPassword(e.target.value)} />
 
-        <div className="row" style={{ marginTop: 16 }}>
-          <button className="primary" type="submit">Cadastrar</button>
+            <div className="row" style={{ marginTop: 16 }}>
+              <button className="primary" type="submit">Cadastrar-se</button>
+            </div>
+          </form>
+
+          <hr style={{ margin: '18px 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
+
+          <div className="row" style={{ marginTop: 4 }}>
+            <button className="secondary" onClick={() => navigateTo("login")}>Login</button>
+          </div>
+
+          <p className="muted">Apoie nossos desenvolvedores visitando-nos, no linkedin e github</p>
         </div>
-      </form>
 
-      <div className="row" style={{ marginTop: 10 }}>
-        <button className="secondary" onClick={() => navigateTo("login")}>Voltar ao Login</button>
+        <div className="auth-illustration">
+          <div className="auth-phone">
+            <img src="/wallpaper.jpg" alt="Phone" />
+            <div className="auth-dots"><span></span><span></span><span></span><span></span></div>
+          </div>
+        </div>
       </div>
-
       {toast && <div className="toast show" id="toast">{toast}</div>}
     </div>
   );
