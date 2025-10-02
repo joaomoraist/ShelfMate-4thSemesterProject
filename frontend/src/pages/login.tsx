@@ -53,7 +53,7 @@ export default function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        showToast("Login efetuado.");
+        showToast("Login efetuado com sucesso.");
         localStorage.setItem("user", JSON.stringify(data.user));
         // Navegar para a página home após login bem-sucedido
         navigateTo("home");

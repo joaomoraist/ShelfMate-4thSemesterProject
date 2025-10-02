@@ -10,15 +10,15 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState<string>("");
   const [recoveryCode, setRecoveryCode] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
+  const [toast, setToast] = useState<string>("");
   const { navigateTo } = useNavigation();
 
   // Prefill email if the login page stored it
   useEffect(() => {
     const allowedEmail = localStorage.getItem("resetFlowEmail");
     if (!allowedEmail) {
-      // Not allowed to be here unless code was requested from login
-      alert("Solicite o código na página de login.");
-      navigateTo("login");
+      showToast("Solicite o código na página de login.");
+      setTimeout(() => navigateTo("login"), 1200);
       return;
     }
     setEmail(allowedEmail);
@@ -36,16 +36,15 @@ export default function ForgotPassword() {
 
       if (response.ok) {
         setStep(2);
-        alert("✅ Código de recuperação enviado para seu email!");
+        showToast("Código de recuperação enviado para seu email.");
       } else {
         const error = await response.json();
-        // Show details if backend provides them
         const details = (error && (error.details || error.error)) ? (error.details || error.error) : null;
-        alert("❌ Falha ao enviar código: " + (error.error || "Erro desconhecido") + (details ? " - " + details : ""));
+        showToast("Falha ao enviar código: " + (error.error || "Erro desconhecido") + (details ? " - " + details : ""));
       }
     } catch (error) {
       console.error(error);
-      alert("⚠️ Erro ao conectar com o servidor.");
+      showToast("Erro ao conectar com o servidor.");
     }
   };
 
@@ -61,14 +60,14 @@ export default function ForgotPassword() {
 
       if (response.ok) {
         setStep(3);
-        alert("✅ Código verificado! Agora defina sua nova senha.");
+        showToast("Código verificado. Agora defina sua nova senha.");
       } else {
         const error = await response.json();
-        alert("❌ Código inválido: " + (error.error || "Erro desconhecido"));
+        showToast("Código inválido: " + (error.error || "Erro desconhecido"));
       }
     } catch (error) {
       console.error(error);
-      alert("⚠️ Erro ao conectar com o servidor.");
+      showToast("Erro ao conectar com o servidor.");
     }
   };
 
@@ -83,18 +82,22 @@ export default function ForgotPassword() {
       });
 
       if (response.ok) {
-        alert("✅ Senha redefinida com sucesso!");
-        // Clear reset flow flag and navigate to login
+        showToast("Senha redefinida com sucesso.");
         localStorage.removeItem("resetFlowEmail");
-        navigateTo("login");
+        setTimeout(() => navigateTo("login"), 900);
       } else {
         const error = await response.json();
-        alert("❌ Falha ao redefinir senha: " + (error.error || "Erro desconhecido"));
+        showToast("Falha ao redefinir senha: " + (error.error || "Erro desconhecido"));
       }
     } catch (error) {
       console.error(error);
-      alert("⚠️ Erro ao conectar com o servidor.");
+      showToast("Erro ao conectar com o servidor.");
     }
+  };
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2500);
   };
 
   return (
@@ -156,6 +159,7 @@ export default function ForgotPassword() {
 
         <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={3500} />
       </div>
+      {toast && <div className="toast show" id="toast">{toast}</div>}
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default function Signup() {
     // Limpa CNPJ de quaisquer caracteres não numéricos (usuário pode colar com máscara)
     const cleanCnpj = cnpj.replace(/\D/g, "");
     if (cleanCnpj.length !== 14) {
-      alert("❌ CNPJ inválido. Informe 14 dígitos numéricos.");
+      showToast("CNPJ inválido. Informe 14 dígitos numéricos.");
       return;
     }
 
