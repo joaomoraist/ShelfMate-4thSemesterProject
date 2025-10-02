@@ -22,7 +22,11 @@ export default function AuthIllustration({ images, intervalMs = 1000 }: AuthIllu
     <div className="auth-illustration">
       <div className="auth-phone">
         {current ? <img src={current} alt="Phone" /> : null}
-        <div className="auth-dots"><span></span><span></span><span></span><span></span></div>
+        <div className="auth-dots">
+          {images.map((_, i) => (
+            <span key={i} className={i === index ? 'active' : ''}></span>
+          ))}
+        </div>
       </div>
     </div>
   );
