@@ -5,7 +5,7 @@ interface AuthIllustrationProps {
   intervalMs?: number;
 }
 
-export default function AuthIllustration({ images, intervalMs = 1000 }: AuthIllustrationProps) {
+export default function AuthIllustration({ images, intervalMs = 3500 }: AuthIllustrationProps) {
   const [index, setIndex] = useState<number>(0);
 
   useEffect(() => {

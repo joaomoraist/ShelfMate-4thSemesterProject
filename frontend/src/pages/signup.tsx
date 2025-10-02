@@ -85,7 +85,7 @@ export default function Signup() {
           <p className="muted">Apoie nossos desenvolvedores visitando-nos, no linkedin e github</p>
         </div>
 
-        <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={1000} />
+        <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={3500} />
       </div>
       {toast && <div className="toast show" id="toast">{toast}</div>}
     </div>

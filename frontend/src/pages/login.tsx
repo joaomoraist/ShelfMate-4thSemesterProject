@@ -75,7 +75,7 @@ export default function Login() {
   return (
     <div className="page-auth">
       <div className="auth-shell">
-        <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={1000} />
+        <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={3500} />
         <div className="auth-content">
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 28 }}>🏠</div>
