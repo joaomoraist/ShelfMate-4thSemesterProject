@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
+import "../styles/login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [toast, setToast] = useState<string>("");
   const { navigateTo } = useNavigation();
 
   const handleForgotFromLogin = async () => {
@@ -22,7 +24,7 @@ export default function Login() {
       });
 
       if (response.ok) {
-        alert("✅ Código de recuperação enviado para seu email!");
+        showToast("Código enviado. Verifique seu email.");
         // Save email so forgot-password page can pre-fill
         localStorage.setItem("forgotEmail", email);
         // Navegar para a página unificada de forgot-password
@@ -30,11 +32,11 @@ export default function Login() {
       } else {
         const errorData = await response.json();
         const details = (errorData && (errorData.details || errorData.error)) ? (errorData.details || errorData.error) : null;
-        alert("❌ Falha ao enviar código: " + (errorData.error || "Erro desconhecido") + (details ? " - " + details : ""));
+        showToast("Falha ao enviar código: " + (errorData.error || "Erro desconhecido") + (details ? " - " + details : ""));
       }
     } catch (err) {
       console.error(err);
-      alert("⚠️ Erro ao conectar com o servidor.");
+      showToast("Erro ao conectar com o servidor.");
     }
   };
 
@@ -50,50 +52,54 @@ export default function Login() {
 
       if (response.ok) {
         const data = await response.json();
-        alert("✅ Login realizado com sucesso! Usuário: " + data.user.name);
+        showToast("Login efetuado.");
         localStorage.setItem("user", JSON.stringify(data.user));
         // Navegar para a página home após login bem-sucedido
         navigateTo("home");
       } else {
         const errorData = await response.json();
-        alert("❌ Erro no login: " + (errorData.error || "Credenciais inválidas"));
+        showToast("Erro no login: " + (errorData.error || "Credenciais inválidas"));
       }
     } catch (error) {
       console.error(error);
-      alert("⚠️ Erro ao conectar com o servidor.");
+      showToast("Erro ao conectar com o servidor.");
     }
   };
 
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2500);
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <h2>🔐 Login</h2>
-      <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
-        <input
-          type="email"
-          placeholder="📧 Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="🔑 Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">➡️ Entrar</button>
+    <div className="card">
+      <h1>Bem-vindo de volta</h1>
+      <p className="sub">Digite suas informações para acessar</p>
+
+      <form onSubmit={handleLogin}>
+        <label htmlFor="email">Email</label>
+        <input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+
+        <label htmlFor="password">Senha</label>
+        <input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+
+        <div className="inline">
+          <span></span>
+          <a href="#" onClick={(e) => { e.preventDefault(); handleForgotFromLogin(); }}>Esqueceu a senha?</a>
+        </div>
+
+        <div className="row" style={{ marginTop: 16 }}>
+          <button className="primary" type="submit">Login</button>
+        </div>
       </form>
-      
-      {/* Botões de navegação para teste */}
-      <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
-        <button onClick={() => navigateTo("signup")} style={{ padding: "5px 10px" }}>
-          📝 Ir para Cadastro
-        </button>
-        <button onClick={handleForgotFromLogin} style={{ padding: "5px 10px" }}>
-          🔑 Esqueci a Senha
-        </button>
+
+      <div className="row" style={{ marginTop: 10 }}>
+        <button className="secondary" onClick={() => navigateTo("signup")}>Cadastrar-se</button>
       </div>
+
+      <p className="muted">Páginas simples para testar as rotas da API.</p>
+
+      {toast && <div className="toast" id="toast">{toast}</div>}
     </div>
   );
 }

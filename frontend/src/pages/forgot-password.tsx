@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
+import "../styles/reset-password.css";
 
 export default function ForgotPassword() {
   // Steps: 1 = send code, 2 = verify code, 3 = reset password
@@ -92,63 +93,50 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <h2>🔑 Redefinir Senha</h2>
+    <div className="card">
+      <h1>Redefinir Senha</h1>
+      <p className="sub">Informe o código recebido por email e a nova senha</p>
 
       {step === 1 && (
-        <form onSubmit={handleSendCode} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
-          <input
-            type="email"
-            placeholder="📧 Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <button type="submit">➡️ Enviar Código de Recuperação</button>
+        <form onSubmit={handleSendCode}>
+          <label htmlFor="email">Email</label>
+          <input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <div className="row" style={{ marginTop: 16 }}>
+            <button className="primary" type="submit">Enviar Código</button>
+          </div>
         </form>
       )}
 
       {step === 2 && (
-        <form onSubmit={handleVerifyCode} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
-          <input type="email" placeholder="📧 Email" value={email} disabled />
-          <input
-            type="text"
-            placeholder="🔢 Código de Recuperação"
-            value={recoveryCode}
-            onChange={(e) => setRecoveryCode(e.target.value)}
-            required
-          />
-          <button type="submit">➡️ Verificar Código</button>
-          <button type="button" onClick={() => setStep(1)} style={{ marginTop: "10px" }}>
-            🔄 Voltar
-          </button>
+        <form onSubmit={handleVerifyCode}>
+          <label htmlFor="email">Email</label>
+          <input id="email" type="email" value={email} disabled />
+
+          <label htmlFor="code">Código de verificação</label>
+          <input id="code" type="text" placeholder="CÓDIGO RECEBIDO" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value)} />
+
+          <div className="row" style={{ marginTop: 16 }}>
+            <button className="primary" type="submit">Verificar</button>
+          </div>
         </form>
       )}
 
       {step === 3 && (
-        <form onSubmit={handleResetPassword} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
-          <input type="email" placeholder="📧 Email" value={email} disabled />
-          <input type="text" placeholder="🔢 Código de Recuperação" value={recoveryCode} disabled />
-          <input
-            type="password"
-            placeholder="🔑 Nova Senha"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            required
-          />
-          <button type="submit">➡️ Redefinir Senha</button>
-          <button type="button" onClick={() => setStep(2)} style={{ marginTop: "10px" }}>
-            � Voltar
-          </button>
+        <form onSubmit={handleResetPassword}>
+          <label htmlFor="email">Email</label>
+          <input id="email" type="email" value={email} disabled />
+
+          <label htmlFor="code">Código de verificação</label>
+          <input id="code" type="text" value={recoveryCode} disabled />
+
+          <label htmlFor="newpass">Nova senha</label>
+          <input id="newpass" type="password" placeholder="••••••••" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+
+          <div className="row" style={{ marginTop: 16 }}>
+            <button className="primary" type="submit">Atualizar</button>
+          </div>
         </form>
       )}
-
-      {/* Botões de navegação para teste */}
-      <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
-        <button onClick={() => navigateTo("login")} style={{ padding: "5px 10px" }}>
-          � Voltar ao Login
-        </button>
-      </div>
     </div>
   );
 }

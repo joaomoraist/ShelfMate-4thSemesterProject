@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
+import "../styles/signup.css";
 
 export default function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [cnpj, setCnpj] = useState("");
+  const [toast, setToast] = useState<string>("");
   const { navigateTo } = useNavigation();
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -27,66 +29,52 @@ export default function Signup() {
 
       if (response.ok) {
         const data = await response.json();
-        alert("✅ Cadastro realizado com sucesso! Usuário: " + data.user.name);
+        showToast("Cadastro realizado.");
         // Navegar para a página de login após cadastro bem-sucedido
-        navigateTo("login");
+        setTimeout(() => navigateTo("login"), 800);
       } else {
         const error = await response.json();
-        alert("❌ Falha no cadastro: " + (error.error || "Erro desconhecido"));
+        showToast("Falha no cadastro: " + (error.error || "Erro desconhecido"));
       }
     } catch (error) {
       console.error(error);
-      alert("⚠️ Erro ao conectar com o servidor.");
+      showToast("Erro ao conectar com o servidor.");
     }
   };
 
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 2500);
+  };
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <h2>📝 Cadastro</h2>
-      <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
-        <input
-          type="text"
-          placeholder="👤 Nome"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          placeholder="📧 Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="🔑 Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="🏢 CNPJ da Empresa (somente números)"
-          value={cnpj}
-          onChange={(e) => setCnpj(e.target.value)}
-          required
-          maxLength={14}
-          pattern="[0-9]{14}"
-          title="Informe 14 dígitos numéricos do CNPJ"
-        />
-        <button type="submit">➡️ Cadastrar</button>
+    <div className="card">
+      <h1>Cadastre-se</h1>
+      <p className="sub">Crie sua conta</p>
+
+      <form onSubmit={handleSignup}>
+        <label htmlFor="name">Nome</label>
+        <input id="name" type="text" placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)} />
+
+        <label htmlFor="email">Email</label>
+        <input id="email" type="email" placeholder="seu@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+
+        <label htmlFor="cnpj">CNPJ da Empresa</label>
+        <input id="cnpj" type="text" placeholder="00.000.000/0000-00" value={cnpj} onChange={(e) => setCnpj(e.target.value)} maxLength={18} />
+
+        <label htmlFor="password">Senha</label>
+        <input id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+
+        <div className="row" style={{ marginTop: 16 }}>
+          <button className="primary" type="submit">Cadastrar</button>
+        </div>
       </form>
-      
-      {/* Botões de navegação para teste */}
-      <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
-        <button onClick={() => navigateTo("login")} style={{ padding: "5px 10px" }}>
-          🔐 Ir para Login
-        </button>
-        <button onClick={() => navigateTo("forgot-password")} style={{ padding: "5px 10px" }}>
-          🔑 Esqueci a Senha
-        </button>
+
+      <div className="row" style={{ marginTop: 10 }}>
+        <button className="secondary" onClick={() => navigateTo("login")}>Voltar ao Login</button>
       </div>
+
+      {toast && <div className="toast" id="toast">{toast}</div>}
     </div>
   );
 }
