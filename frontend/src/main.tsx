@@ -33,39 +33,8 @@ function App() {
 
   return (
     <NavigationProvider navigateTo={navigateTo}>
-      <div style={{ padding: "20px" }}>
-        {/* Navigation */}
-        <nav style={{ marginBottom: "30px", borderBottom: "1px solid #ccc", paddingBottom: "10px" }}>
-          <button 
-            onClick={() => setCurrentPage("login")}
-            style={{ margin: "5px", padding: "8px 16px" }}
-          >
-            🔐 Login
-          </button>
-          <button 
-            onClick={() => setCurrentPage("signup")}
-            style={{ margin: "5px", padding: "8px 16px" }}
-          >
-            📝 Cadastro
-          </button>
-          <button 
-            onClick={() => setCurrentPage("forgot-password")}
-            style={{ margin: "5px", padding: "8px 16px" }}
-          >
-            🔑 Esqueci a Senha
-          </button>
-          {/* Reset-password merged into ForgotPassword page */}
-          <button 
-            onClick={() => setCurrentPage("home")}
-            style={{ margin: "5px", padding: "8px 16px" }}
-          >
-            🏠 Início
-          </button>
-        </nav>
-
-        {/* Current Page */}
-        {renderPage()}
-      </div>
+      {/* Current Page */}
+      {renderPage()}
     </NavigationProvider>
   );
 }
