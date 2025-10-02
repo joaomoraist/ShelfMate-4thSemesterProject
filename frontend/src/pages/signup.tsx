@@ -28,7 +28,7 @@ export default function Signup() {
       });
 
       if (response.ok) {
-        const data = await response.json();
+        await response.json();
         showToast("Cadastro realizado.");
         // Navegar para a página de login após cadastro bem-sucedido
         setTimeout(() => navigateTo("login"), 800);
@@ -74,7 +74,7 @@ export default function Signup() {
         <button className="secondary" onClick={() => navigateTo("login")}>Voltar ao Login</button>
       </div>
 
-      {toast && <div className="toast" id="toast">{toast}</div>}
+      {toast && <div className="toast show" id="toast">{toast}</div>}
     </div>
   );
 }
