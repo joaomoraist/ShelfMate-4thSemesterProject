@@ -1,6 +1,5 @@
-// Configuração da API
 export const API_CONFIG = {
-  // URL base da API - altere aqui se necessário
+  // Sempre apontar para o backend no Render (rotas já funcionais)
   BASE_URL: 'https://shelfmate-4thsemesterproject.onrender.com',
   
   // Endpoints
