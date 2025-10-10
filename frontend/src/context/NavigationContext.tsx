@@ -28,3 +28,4 @@ export const NavigationProvider: React.FC<NavigationProviderProps> = ({ children
     </NavigationContext.Provider>
   );
 };
+
