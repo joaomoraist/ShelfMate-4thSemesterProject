@@ -80,7 +80,14 @@ const Home: React.FC = () => {
                 </div>
                 <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
                     <button style={{ background: "#1537c8", color: "#fff", border: "none", padding: "10px 16px", borderRadius: 8 }}>Meus Produtos</button>
-                    <img src="/icons/user-circle.svg" alt="user" style={{ width: 36, height: 36 }} onError={(e)=> (e.currentTarget.style.display='none')} />
+                    <img
+                        src="/icons/user-circle.svg"
+                        alt="user"
+                        style={{ width: 36, height: 36, cursor: "pointer" }}
+                        onError={(e) => (e.currentTarget.style.display = "none")}
+                        onClick={handleLogout}
+                        title="Sair"
+                    />
                 </div>
             </header>
 
