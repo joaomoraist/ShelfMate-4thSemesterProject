@@ -47,12 +47,15 @@ const Settings: React.FC = () => {
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>
                         <span className={cssModule.navIcon}>📊</span>
+                        <span className={cssModule.navLabel}>Estatísticas</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("products")}>
                         <span className={cssModule.navIcon}>📦</span>
+                        <span className={cssModule.navLabel}>Produtos</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("reports")}>
                         <span className={cssModule.navIcon}>📄</span>
+                        <span className={cssModule.navLabel}>Relatórios</span>
                     </button>
                 </nav>
 

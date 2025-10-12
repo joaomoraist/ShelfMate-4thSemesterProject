@@ -1,5 +1,5 @@
 /* Module styles for reports page */
-.pageWrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; background: #f8fafc; min-height: 100vh; }
+.pageWrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; background: #fff; min-height: 100vh; }
 .topbar { background: #1e3a8a; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(21,55,200,0.12); position: sticky; top: 0; z-index: 10; }
 .topbarLeft { display: flex; align-items: center; gap: 12px; }
 .topbarCenter { display: flex; gap: 18px; align-items: center; }

@@ -122,6 +122,7 @@ const Products: React.FC = () => {
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>
                         <span className={cssModule.navIcon}>📊</span>
+                        <span className={cssModule.navLabel}>Estatísticas</span>
                     </button>
                     <button className={cssModule.navButton} data-active="true">
                         <span className={cssModule.navIcon}>📦</span>
