@@ -3,20 +3,6 @@ import { useState, useEffect } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/products.module.css';
 
-type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
-const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
-    const [error, setError] = React.useState(false);
-    if (error) return <span style={{ fontSize: 28 }}>{emoji}</span>;
-    return (
-        <img
-            src={src}
-            alt={alt}
-            style={{ width: 40, height: 40, objectFit: "contain", ...style }}
-            onError={() => setError(true)}
-        />
-    );
-};
-
 const Products: React.FC = () => {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
