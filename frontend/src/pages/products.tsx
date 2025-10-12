@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigation } from "../context/NavigationContext";
-import cssModule from '../styles/home.module.css';
+import cssModule from '../styles/products.module.css';
 
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
 const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
@@ -17,19 +17,7 @@ const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
     );
 };
 
-const StatCard: React.FC<{ title: string; value: string; iconSrc: string; emoji: string }> = ({ title, value, iconSrc, emoji }) => (
-    <div className={cssModule.statCard}>
-        <div style={{ marginBottom: 8 }}>
-            <Icon src={iconSrc} emoji={emoji} />
-        </div>
-        <div className={cssModule.title}>{title}</div>
-        <div className={cssModule.value}>{value}</div>
-    </div>
-);
-
-// layout handled by CSS module `home.module.css`
-
-const Home: React.FC = () => {
+const Products: React.FC = () => {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showUserMenu, setShowUserMenu] = useState(false);
@@ -51,10 +39,85 @@ const Home: React.FC = () => {
     if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
     if (!user) return (
         <div style={{ padding: 40, textAlign: "center" }}>
-            <h2>🏠 Home</h2>
-            <p>Você não está logado. Por favor, faça login para acessar seu perfil.</p>
+            <h2>📦 Produtos</h2>
+            <p>Você não está logado. Por favor, faça login para acessar seus produtos.</p>
         </div>
     );
+
+    const products = [
+        {
+            name: "Notebook Dell XPS",
+            supplier: "Dell Brasil",
+            stock: 45,
+            minMax: "30/100",
+            sales: 145,
+            lastRestock: "15/03/2024",
+            status: "Disponível",
+            statusColor: "green",
+            alerts: 2,
+            hasAlert: false
+        },
+        {
+            name: "Mouse Logitech MX",
+            supplier: "Logitech",
+            stock: 120,
+            minMax: "50/200",
+            sales: 128,
+            lastRestock: "20/03/2024",
+            status: "Disponível",
+            statusColor: "green",
+            alerts: 1,
+            hasAlert: false
+        },
+        {
+            name: "Teclado Mecânico",
+            supplier: "Keychron",
+            stock: 8,
+            minMax: "20/80",
+            sales: 112,
+            lastRestock: "05/03/2024",
+            status: "Baixo",
+            statusColor: "orange",
+            alerts: 3,
+            hasAlert: true
+        },
+        {
+            name: "Monitor LG 27\"",
+            supplier: "LG Electronics",
+            stock: 32,
+            minMax: "25/75",
+            sales: 98,
+            lastRestock: "18/03/2024",
+            status: "Disponível",
+            statusColor: "green",
+            alerts: 1,
+            hasAlert: false
+        },
+        {
+            name: "Webcam Full HD",
+            supplier: "Logitech",
+            stock: 0,
+            minMax: "15/60",
+            sales: 85,
+            lastRestock: "01/03/2024",
+            status: "Esgotado",
+            statusColor: "red",
+            alerts: 4,
+            hasAlert: true
+        },
+        {
+            name: "Fone Bluetooth",
+            supplier: "Sony",
+            stock: 65,
+            minMax: "40/150",
+            sales: 156,
+            lastRestock: "22/03/2024",
+            status: "Disponível",
+            statusColor: "green",
+            alerts: 1,
+            hasAlert: false
+        }
+    ];
 
     return (
         <div style={{ minHeight: "100vh", background: "transparent" }}>
@@ -67,15 +130,14 @@ const Home: React.FC = () => {
                 </div>
 
                 <nav className={cssModule.topbarCenter}>
-                    <button className={cssModule.navButton} data-active="true">
+                    <button className={cssModule.navButton} onClick={() => navigateTo("home")}>
                         <span className={cssModule.navIcon}>🏠</span>
                         <span className={cssModule.navLabel}>Home</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>
                         <span className={cssModule.navIcon}>📊</span>
-                        <span className={cssModule.navLabel}>Estatísticas</span>
                     </button>
-                    <button className={cssModule.navButton} onClick={() => navigateTo("products")}>
+                    <button className={cssModule.navButton} data-active="true">
                         <span className={cssModule.navIcon}>📦</span>
                         <span className={cssModule.navLabel}>Produtos</span>
                     </button>
@@ -99,9 +161,9 @@ const Home: React.FC = () => {
                             </div>
                             {showUserMenu && (
                                 <div className={cssModule.userMenu}>
-                                    <button className={cssModule.menuItem} onClick={() => setShowUserMenu(false)}>
+                                    <button className={cssModule.menuItem} onClick={() => navigateTo("settings")}>
                                         <span className={cssModule.menuIcon}>⚙️</span>
-                                        Editar suas Informações
+                                        Configurações
                                     </button>
                                     <button className={cssModule.menuItem} onClick={handleLogout}>
                                         <span className={cssModule.menuIcon}>→</span>
@@ -115,98 +177,77 @@ const Home: React.FC = () => {
             </header>
 
             <main className={cssModule.pageWrap}>
-                <section className={cssModule.hero}>
-                    <div className={cssModule.heroContent}>
-                        <div className={cssModule.heroBadge}>
-                            <span className={cssModule.badgeIcon}>✓</span>
-                            <span>Seu estoque cresceu</span>
+                <section className={cssModule.productsSection}>
+                    <h1 className={cssModule.sectionTitle}>Seus Produtos</h1>
+                    
+                    <div className={cssModule.actionBar}>
+                        <div className={cssModule.searchGroup}>
+                            <div className={cssModule.searchInputContainer}>
+                                <span className={cssModule.searchIcon}>🔍</span>
+                                <input className={cssModule.searchField} placeholder="Buscar produto..." />
+                            </div>
+                            <div className={cssModule.categoryFilter}>
+                                <span className={cssModule.filterLabel}>Todas Categorias</span>
+                                <span className={cssModule.filterArrow}>▼</span>
+                            </div>
                         </div>
-                        <h1 className={cssModule.heroTitle}>Bem-vindo de volta, William</h1>
-                        <p className={cssModule.heroDesc}>
-                            Gerencie seu estoque, acompanhe métricas e tome decisões baseadas em dados. Tudo em um só lugar, simples e poderoso.
-                        </p>
-
-                        <div className={cssModule.heroActions}>
-                            <button className={cssModule.ctaPrimary}>
-                                Meus Produtos ➜
+                        <div className={cssModule.actionButtons}>
+                            <button className={cssModule.addButton}>
+                                <span className={cssModule.buttonIcon}>+</span>
+                                Adicionar um Produto
                             </button>
-                            <button className={cssModule.ctaSecondary}>
-                                Ver Relatórios
-                            </button>
-                        </div>
-                    </div>
-                </section>
-
-                <section className={cssModule.quickAccess}>
-                    <div className={cssModule.sectionHeader}>
-                        <div className={cssModule.sectionTitleContainer}>
-                            <h3 className={cssModule.accessHeader}>Acesso Rápido</h3>
-                            <button className={cssModule.statsButton}>
-                                <span className={cssModule.statsIcon}>📊</span>
-                                Veja suas Estatísticas Completas
+                            <button className={cssModule.addMultipleButton}>
+                                <span className={cssModule.buttonIcon}>📄</span>
+                                Adicionar vários Produtos
                             </button>
                         </div>
-                        <p className={cssModule.accessSub}>Sua movimentação nos últimos 30 dias</p>
                     </div>
 
-                    <div className={cssModule.statGrid}>
-                        <StatCard title="Últimos Acessos" value="30 LogIns" iconSrc="/icons/clock.svg" emoji="🕒" />
-                        <StatCard title="Produtos Inseridos" value="40 SKUs" iconSrc="/icons/box.svg" emoji="📦" />
-                        <StatCard title="Mudanças no Perfil" value="2 Mudanças" iconSrc="/icons/settings.svg" emoji="⚙️" />
-                        <StatCard title="Relatórios Baixados" value="30 Emitidos" iconSrc="/icons/report.svg" emoji="📄" />
-                        <StatCard title="Alertas Emitidos" value="50 Enviados" iconSrc="/icons/alert.svg" emoji="⚠️" />
+                    <div className={cssModule.productsTable}>
+                        <div className={cssModule.tableHeader}>
+                            <div className={cssModule.tableColumn}>Produto</div>
+                            <div className={cssModule.tableColumn}>Fornecedor</div>
+                            <div className={cssModule.tableColumn}>Estoque Atual</div>
+                            <div className={cssModule.tableColumn}>Min/Máx</div>
+                            <div className={cssModule.tableColumn}>Vendas</div>
+                            <div className={cssModule.tableColumn}>Última Reposição</div>
+                            <div className={cssModule.tableColumn}>Status</div>
+                            <div className={cssModule.tableColumn}>Alertas</div>
+                        </div>
+                        
+                        {products.map((product, index) => (
+                            <div key={index} className={cssModule.tableRow}>
+                                <div className={cssModule.productCell}>
+                                    <span className={cssModule.productName}>{product.name}</span>
+                                    <span className={cssModule.expandIcon}>▼</span>
+                                </div>
+                                <div className={cssModule.supplierCell}>{product.supplier}</div>
+                                <div className={cssModule.stockCell}>
+                                    <span className={cssModule.stockValue}>{product.stock}</span>
+                                </div>
+                                <div className={cssModule.minMaxCell}>{product.minMax}</div>
+                                <div className={cssModule.salesCell}>{product.sales}</div>
+                                <div className={cssModule.restockCell}>{product.lastRestock}</div>
+                                <div className={cssModule.statusCell}>
+                                    <span className={`${cssModule.status} ${cssModule[product.statusColor]}`}>
+                                        {product.status}
+                                    </span>
+                                </div>
+                                <div className={cssModule.alertsCell}>
+                                    <span className={cssModule.alertIcon}>🔔</span>
+                                    <span className={cssModule.alertCount}>{product.alerts}</span>
+                                    {product.hasAlert && <span className={cssModule.alertDot}>●</span>}
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </section>
 
-                <section className={cssModule.analyticsSection}>
-                    <div className={cssModule.analyticsHeader}>
-                        <h3 className={cssModule.analyticsTitle}>Análise e Relatórios</h3>
-                        <p className={cssModule.analyticsSubtitle}>Acompanhe o Desempenho dos seus principais Produtos</p>
-                    </div>
-
-                    <div className={cssModule.analytics}>
-                        <div className={cssModule.analyticsCard}>
-                            <div className={cssModule.cardHeader}>
-                                <h4 className={cssModule.cardTitle}>Tendência de Crescimento</h4>
-                                <p className={cssModule.cardSubtitle}>Considerando os Próximos 3 meses</p>
-                            </div>
-                            <div className={cssModule.chartContainer}>
-                                <div className={cssModule.lineChart}>
-                                    <div className={cssModule.chartPlaceholder}>📈 Gráfico de Linha</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={cssModule.analyticsCard}>
-                            <div className={cssModule.cardHeader}>
-                                <h4 className={cssModule.cardTitle}>Distribuição dos Produtos</h4>
-                                <p className={cssModule.cardSubtitle}>Considerando Vendas dos últimos 3 meses</p>
-                            </div>
-                            <div className={cssModule.chartContainer}>
-                                <div className={cssModule.pieChart}>
-                                    <div className={cssModule.chartPlaceholder}>🥧 Gráfico de Pizza</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className={cssModule.analyticsCard}>
-                            <div className={cssModule.cardHeader}>
-                                <h4 className={cssModule.cardTitle}>Principais Produtos</h4>
-                                <p className={cssModule.cardSubtitle}>Considerando Vendas dos Últimos 3 meses</p>
-                            </div>
-                            <div className={cssModule.productsTable}>
-                                <div className={cssModule.tableHeader}>
-                                    <span className={cssModule.tableColumn}>SKU</span>
-                                    <span className={cssModule.tableColumn}>Descrição</span>
-                                    <span className={cssModule.tableColumn}>Qntd</span>
-                                </div>
-                                <div className={cssModule.tableRow}>
-                                    <span className={cssModule.tableCell}>10056</span>
-                                    <span className={cssModule.tableCell}>Monster de Laranja</span>
-                                    <span className={cssModule.tableCell}>100</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div className={cssModule.bottomAction}>
+                        <button className={cssModule.salesButton}>
+                            <span className={cssModule.salesIcon}>💰</span>
+                            <span className={cssModule.clockIcon}>🕒</span>
+                            Adicionar últimas Vendas
+                        </button>
                     </div>
                 </section>
 
@@ -261,4 +302,4 @@ const Home: React.FC = () => {
     );
 };
 
-export default Home;
+export default Products;

@@ -6,8 +6,11 @@ import Signup from "./pages/signup";
 import ForgotPassword from "./pages/forgot-password";
 import Home from "./pages/home";
 import Statistics from "./pages/statistics";
+import Products from "./pages/products";
+import Reports from "./pages/reports";
+import Settings from "./pages/settings";
 
-type Page = "login" | "signup" | "forgot-password" | "home" | "statistics";
+type Page = "login" | "signup" | "forgot-password" | "home" | "statistics" | "products" | "reports" | "settings";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("login");
@@ -29,6 +32,12 @@ function App() {
         return <Home />;
       case "statistics":
         return <Statistics />;
+      case "products":
+        return <Products />;
+      case "reports":
+        return <Reports />;
+      case "settings":
+        return <Settings />;
       default:
         return <Login />;
     }
