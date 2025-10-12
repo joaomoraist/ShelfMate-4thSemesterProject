@@ -241,11 +241,14 @@ const Home: React.FC = () => {
                             <div className={cssModule.contactInfo}>
                                 william.carvalho.105637@a.fecaf.com.br
                             </div>
+                             <div className={cssModule.contactInfo}>
+                                +55 11 98432-5997
+                            </div>
                             <div className={cssModule.contactInfo}>
                                 joao.timotio.103916@a.fecaf.com.br
                             </div>
                             <div className={cssModule.contactInfo}>
-                                +55 11 98432-5997
+                                +55 11 96954-1207
                             </div>
                         </div>
 
