@@ -1,6 +1,6 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 
-type Page = "login" | "signup" | "forgot-password" | "home";
+type Page = "login" | "signup" | "forgot-password" | "home" | "statistics";
 
 interface NavigationContextType {
   navigateTo: (page: Page) => void;

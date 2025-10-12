@@ -5,8 +5,9 @@ import Login from "./pages/login";
 import Signup from "./pages/signup";
 import ForgotPassword from "./pages/forgot-password";
 import Home from "./pages/home";
+import Statistics from "./pages/statistics";
 
-type Page = "login" | "signup" | "forgot-password" | "home";
+type Page = "login" | "signup" | "forgot-password" | "home" | "statistics";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("login");
@@ -26,6 +27,8 @@ function App() {
         return <ForgotPassword />;
       case "home":
         return <Home />;
+      case "statistics":
+        return <Statistics />;
       default:
         return <Login />;
     }

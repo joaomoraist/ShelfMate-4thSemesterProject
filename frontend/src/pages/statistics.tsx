@@ -1,7 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigation } from "../context/NavigationContext";
-import cssModule from '../styles/home.module.css';
+import cssModule from '../styles/statistics.module.css';
 
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
 const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
@@ -17,19 +17,32 @@ const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
     );
 };
 
-const StatCard: React.FC<{ title: string; value: string; iconSrc: string; emoji: string }> = ({ title, value, iconSrc, emoji }) => (
-    <div className={cssModule.statCard}>
-        <div style={{ marginBottom: 8 }}>
-            <Icon src={iconSrc} emoji={emoji} />
+const MetricCard: React.FC<{ 
+    title: string; 
+    value: string; 
+    comparison: string; 
+    trend: 'up' | 'down'; 
+    iconSrc: string; 
+    emoji: string 
+}> = ({ title, value, comparison, trend, iconSrc, emoji }) => (
+    <div className={cssModule.metricCard}>
+        <div className={cssModule.metricHeader}>
+            <div className={cssModule.metricIcon}>
+                <Icon src={iconSrc} emoji={emoji} />
+            </div>
+            <div className={cssModule.metricTitle}>{title}</div>
         </div>
-        <div className={cssModule.title}>{title}</div>
-        <div className={cssModule.value}>{value}</div>
+        <div className={cssModule.metricValue}>{value}</div>
+        <div className={cssModule.metricComparison}>
+            <span className={cssModule.comparisonText}>{comparison}</span>
+            <span className={`${cssModule.trendIcon} ${cssModule[trend]}`}>
+                {trend === 'up' ? '↗' : '↘'}
+            </span>
+        </div>
     </div>
 );
 
-// layout handled by CSS module `home.module.css`
-
-const Home: React.FC = () => {
+const Statistics: React.FC = () => {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [showUserMenu, setShowUserMenu] = useState(false);
@@ -51,8 +64,8 @@ const Home: React.FC = () => {
     if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
     if (!user) return (
         <div style={{ padding: 40, textAlign: "center" }}>
-            <h2>🏠 Home</h2>
-            <p>Você não está logado. Por favor, faça login para acessar seu perfil.</p>
+            <h2>📊 Estatísticas</h2>
+            <p>Você não está logado. Por favor, faça login para acessar suas estatísticas.</p>
         </div>
     );
 
@@ -67,11 +80,11 @@ const Home: React.FC = () => {
                 </div>
 
                 <nav className={cssModule.topbarCenter}>
-                    <button className={cssModule.navButton} data-active="true">
+                    <button className={cssModule.navButton} onClick={() => navigateTo("home")}>
                         <span className={cssModule.navIcon}>🏠</span>
                         <span className={cssModule.navLabel}>Home</span>
                     </button>
-                    <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>
+                    <button className={cssModule.navButton} data-active="true">
                         <span className={cssModule.navIcon}>📊</span>
                         <span className={cssModule.navLabel}>Estatísticas</span>
                     </button>
@@ -113,95 +126,95 @@ const Home: React.FC = () => {
             </header>
 
             <main className={cssModule.pageWrap}>
-                <section className={cssModule.hero}>
-                    <div className={cssModule.heroContent}>
-                        <div className={cssModule.heroBadge}>
-                            <span className={cssModule.badgeIcon}>✓</span>
-                            <span>Seu estoque cresceu</span>
-                        </div>
-                        <h1 className={cssModule.heroTitle}>Bem-vindo de volta, William</h1>
-                        <p className={cssModule.heroDesc}>
-                            Gerencie seu estoque, acompanhe métricas e tome decisões baseadas em dados. Tudo em um só lugar, simples e poderoso.
-                        </p>
+                <section className={cssModule.pageHeader}>
+                    <h1 className={cssModule.pageTitle}>Estatísticas</h1>
+                    <p className={cssModule.pageSubtitle}>
+                        Acompanhe suas estatísticas e tome suas decisões baseadas em dados
+                    </p>
+                </section>
 
-                        <div className={cssModule.heroActions}>
-                            <button className={cssModule.ctaPrimary}>
-                                Meus Produtos ➜
-                            </button>
-                            <button className={cssModule.ctaSecondary}>
-                                Ver Relatórios
-                            </button>
+                <section className={cssModule.filtersSection}>
+                    <div className={cssModule.filterGroup}>
+                        <div className={cssModule.filterItem}>
+                            <span className={cssModule.filterIcon}>🔽</span>
+                            <span className={cssModule.filterIcon}>📦</span>
+                            <span className={cssModule.filterLabel}>Produto</span>
+                        </div>
+                        <div className={cssModule.filterItem}>
+                            <span className={cssModule.filterIcon}>📄</span>
+                            <span className={cssModule.filterLabel}>Categoria</span>
+                        </div>
+                        <div className={cssModule.filterItem}>
+                            <span className={cssModule.filterIcon}>📅</span>
+                            <span className={cssModule.filterLabel}>Período</span>
                         </div>
                     </div>
                 </section>
 
-                <section className={cssModule.quickAccess}>
-                    <div className={cssModule.sectionHeader}>
-                        <div className={cssModule.sectionTitleContainer}>
-                            <h3 className={cssModule.accessHeader}>Acesso Rápido</h3>
-                            <button className={cssModule.statsButton}>
-                                <span className={cssModule.statsIcon}>📊</span>
-                                Veja suas Estatísticas Completas
-                            </button>
-                        </div>
-                        <p className={cssModule.accessSub}>Sua movimentação nos últimos 30 dias</p>
-                    </div>
-
-                    <div className={cssModule.statGrid}>
-                        <StatCard title="Últimos Acessos" value="30 LogIns" iconSrc="/icons/clock.svg" emoji="🕒" />
-                        <StatCard title="Produtos Inseridos" value="40 SKUs" iconSrc="/icons/box.svg" emoji="📦" />
-                        <StatCard title="Mudanças no Perfil" value="2 Mudanças" iconSrc="/icons/settings.svg" emoji="⚙️" />
-                        <StatCard title="Relatórios Baixados" value="30 Emitidos" iconSrc="/icons/report.svg" emoji="📄" />
-                        <StatCard title="Alertas Emitidos" value="50 Enviados" iconSrc="/icons/alert.svg" emoji="⚠️" />
+                <section className={cssModule.metricsSection}>
+                    <div className={cssModule.metricsGrid}>
+                        <MetricCard
+                            title="Total de Produtos"
+                            value="540"
+                            comparison="vs Mês Anterior 500 8.5%"
+                            trend="up"
+                            iconSrc="/icons/box.svg"
+                            emoji="📦"
+                        />
+                        <MetricCard
+                            title="Valor em Estoque"
+                            value="R$ 500.650,50"
+                            comparison="vs Mês Anterior 500 8.5%"
+                            trend="up"
+                            iconSrc="/icons/money.svg"
+                            emoji="💰"
+                        />
+                        <MetricCard
+                            title="Produtos com Estoque Baixo"
+                            value="250"
+                            comparison="vs Mês Anterior 500 8.5%"
+                            trend="down"
+                            iconSrc="/icons/alert.svg"
+                            emoji="⚠️"
+                        />
+                        <MetricCard
+                            title="Vendas no Período"
+                            value="250 Pedidos"
+                            comparison="vs Mês Anterior 500 Pedidos 8.5%"
+                            trend="up"
+                            iconSrc="/icons/sales.svg"
+                            emoji="🛒"
+                        />
                     </div>
                 </section>
 
-                <section className={cssModule.analyticsSection}>
-                    <div className={cssModule.analyticsHeader}>
-                        <h3 className={cssModule.analyticsTitle}>Análise e Relatórios</h3>
-                        <p className={cssModule.analyticsSubtitle}>Acompanhe o Desempenho dos seus principais Produtos</p>
-                    </div>
-
-                    <div className={cssModule.analytics}>
-                        <div className={cssModule.analyticsCard}>
-                            <div className={cssModule.cardHeader}>
-                                <h4 className={cssModule.cardTitle}>Tendência de Crescimento</h4>
-                                <p className={cssModule.cardSubtitle}>Considerando os Próximos 3 meses</p>
-                            </div>
+                <section className={cssModule.chartsSection}>
+                    <div className={cssModule.chartsGrid}>
+                        <div className={cssModule.chartCard}>
+                            <h3 className={cssModule.chartTitle}>Evolução do Estoque</h3>
                             <div className={cssModule.chartContainer}>
                                 <div className={cssModule.lineChart}>
-                                    <div className={cssModule.chartPlaceholder}>📈 Gráfico de Linha</div>
+                                    <div className={cssModule.chartPlaceholder}>📈 Gráfico de Linha - Evolução do Estoque</div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className={cssModule.analyticsCard}>
-                            <div className={cssModule.cardHeader}>
-                                <h4 className={cssModule.cardTitle}>Distribuição dos Produtos</h4>
-                                <p className={cssModule.cardSubtitle}>Considerando Vendas dos últimos 3 meses</p>
-                            </div>
+                        <div className={cssModule.chartCard}>
+                            <h3 className={cssModule.chartTitle}>Produtos Mais Vendidos</h3>
                             <div className={cssModule.chartContainer}>
-                                <div className={cssModule.pieChart}>
-                                    <div className={cssModule.chartPlaceholder}>🥧 Gráfico de Pizza</div>
+                                <div className={cssModule.barChart}>
+                                    <div className={cssModule.chartPlaceholder}>📊 Gráfico de Barras - Produtos Mais Vendidos</div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div className={cssModule.analyticsCard}>
-                            <div className={cssModule.cardHeader}>
-                                <h4 className={cssModule.cardTitle}>Principais Produtos</h4>
-                                <p className={cssModule.cardSubtitle}>Considerando Vendas dos Últimos 3 meses</p>
-                            </div>
-                            <div className={cssModule.productsTable}>
-                                <div className={cssModule.tableHeader}>
-                                    <span className={cssModule.tableColumn}>SKU</span>
-                                    <span className={cssModule.tableColumn}>Descrição</span>
-                                    <span className={cssModule.tableColumn}>Qntd</span>
-                                </div>
-                                <div className={cssModule.tableRow}>
-                                    <span className={cssModule.tableCell}>10056</span>
-                                    <span className={cssModule.tableCell}>Monster de Laranja</span>
-                                    <span className={cssModule.tableCell}>100</span>
+                    <div className={cssModule.fullWidthChart}>
+                        <div className={cssModule.chartCard}>
+                            <h3 className={cssModule.chartTitle}>Valor em Estoque</h3>
+                            <div className={cssModule.chartContainer}>
+                                <div className={cssModule.areaChart}>
+                                    <div className={cssModule.chartPlaceholder}>📈 Gráfico de Área - Valor em Estoque</div>
                                 </div>
                             </div>
                         </div>
@@ -259,4 +272,4 @@ const Home: React.FC = () => {
     );
 };
 
-export default Home;
+export default Statistics;
