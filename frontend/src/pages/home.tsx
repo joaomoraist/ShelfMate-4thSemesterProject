@@ -239,8 +239,8 @@ const Home: React.FC = () => {
                         <div className={cssModule.footerSection}>
                             <div className={cssModule.footerTitle}>Suporte</div>
                             <div className={cssModule.contactInfo}>
-                                william.carvalho.105637@a.fecaf.com.br <br>
-                                joao.timotio.103916@a.fecaf.com.br
+                                william.carvalho.105637@a.fecaf.com.br <br> </br>
+                                joao.timotio.103916@a.fecaf.com.br 
                             </div>
                             <div className={cssModule.contactInfo}>
                                 +55 11 98432-5997
