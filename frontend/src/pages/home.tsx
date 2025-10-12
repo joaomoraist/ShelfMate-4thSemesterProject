@@ -61,7 +61,7 @@ const Home: React.FC = () => {
             <header className={cssModule.topbar}>
                 <div className={cssModule.topbarLeft}>
                     <div className={cssModule.logoContainer}>
-                        <div className={cssModule.logoIcon}>📚</div>
+                        <div className={cssModule.logoIcon}>📦</div>
                         <div className={cssModule.logoText}>Shelf Mate</div>
                     </div>
                 </div>
@@ -80,9 +80,6 @@ const Home: React.FC = () => {
                     <button className={cssModule.navButton}>
                         <span className={cssModule.navIcon}>📄</span>
                     </button>
-                    <button className={cssModule.navButton}>
-                        <span className={cssModule.navIcon}>🔍</span>
-                    </button>
                 </nav>
 
                 <div className={cssModule.topbarRight}>
@@ -93,20 +90,18 @@ const Home: React.FC = () => {
                     <div className={cssModule.userContainer}>
                         <span className={cssModule.welcomeText}>Bem vindo William</span>
                         <div className={cssModule.userDropdown}>
-                            <img
-                                src="/icons/user-circle.svg"
-                                alt="user"
-                                className={cssModule.userIcon}
-                                onError={(e) => (e.currentTarget.style.display = "none")}
-                                onClick={() => setShowUserMenu(!showUserMenu)}
-                                title="Menu do usuário"
-                            />
+                            <div className={cssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
+                                <span className={cssModule.userIcon}>👤</span>
+                                <span className={cssModule.dropdownArrow}>▼</span>
+                            </div>
                             {showUserMenu && (
                                 <div className={cssModule.userMenu}>
                                     <button className={cssModule.menuItem} onClick={() => setShowUserMenu(false)}>
+                                        <span className={cssModule.menuIcon}>⚙️</span>
                                         Editar suas Informações
                                     </button>
                                     <button className={cssModule.menuItem} onClick={handleLogout}>
+                                        <span className={cssModule.menuIcon}>→</span>
                                         Sair
                                     </button>
                                 </div>
@@ -120,7 +115,7 @@ const Home: React.FC = () => {
                 <section className={cssModule.hero}>
                     <div className={cssModule.heroContent}>
                         <div className={cssModule.heroBadge}>
-                            <span className={cssModule.badgeIcon}>✅</span>
+                            <span className={cssModule.badgeIcon}>✓</span>
                             <span>Seu estoque cresceu</span>
                         </div>
                         <h1 className={cssModule.heroTitle}>Bem-vindo de volta, William</h1>
@@ -141,7 +136,13 @@ const Home: React.FC = () => {
 
                 <section className={cssModule.quickAccess}>
                     <div className={cssModule.sectionHeader}>
-                        <h3 className={cssModule.accessHeader}>Acesso Rápido</h3>
+                        <div className={cssModule.sectionTitleContainer}>
+                            <h3 className={cssModule.accessHeader}>Acesso Rápido</h3>
+                            <button className={cssModule.statsButton}>
+                                <span className={cssModule.statsIcon}>📊</span>
+                                Veja suas Estatísticas Completas
+                            </button>
+                        </div>
                         <p className={cssModule.accessSub}>Sua movimentação nos últimos 30 dias</p>
                     </div>
 
@@ -151,13 +152,6 @@ const Home: React.FC = () => {
                         <StatCard title="Mudanças no Perfil" value="2 Mudanças" iconSrc="/icons/settings.svg" emoji="⚙️" />
                         <StatCard title="Relatórios Baixados" value="30 Emitidos" iconSrc="/icons/report.svg" emoji="📄" />
                         <StatCard title="Alertas Emitidos" value="50 Enviados" iconSrc="/icons/alert.svg" emoji="⚠️" />
-                    </div>
-
-                    <div className={cssModule.statsButtonContainer}>
-                        <button className={cssModule.statsButton}>
-                            <span className={cssModule.statsIcon}>📊</span>
-                            Veja suas Estatísticas Completas
-                        </button>
                     </div>
                 </section>
 
