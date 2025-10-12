@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { NavigationProvider } from "./context/NavigationContext";
 import "./styles/global.css";
@@ -20,6 +20,14 @@ function App() {
   const navigateTo = (page: Page) => {
     setCurrentPage(page);
   };
+
+  // Aplicar classe no body baseada na página atual
+  React.useEffect(() => {
+    const authPages = ["login", "signup", "forgot-password"];
+    const isAuthPage = authPages.includes(currentPage);
+    
+    document.body.className = isAuthPage ? "auth-page" : "logged-in";
+  }, [currentPage]);
 
   const renderPage = () => {
     switch (currentPage) {

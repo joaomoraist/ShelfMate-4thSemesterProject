@@ -2,7 +2,6 @@
 html, body {
   margin: 0;
   padding: 0;
-  background: #fff;
   overflow-x: hidden;
 }
 
@@ -16,4 +15,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Auth pages keep blue background */
+body.auth-page {
+  background: #1337d8;
+}
+
+/* Logged-in pages have white background */
+body.logged-in {
+  background: #fff;
 }

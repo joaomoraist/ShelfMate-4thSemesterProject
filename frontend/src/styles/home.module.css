@@ -133,4 +133,4 @@
 }
 
 /* Prevent horizontal overflow on extreme viewports */
-html, body { overflow-x: hidden; background: #fff; }
+html, body { overflow-x: hidden; }
