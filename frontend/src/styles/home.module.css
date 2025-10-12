@@ -1,5 +1,5 @@
 /* Module styles for home page */
-.pageWrap { max-width: 1200px; margin: 28px auto; padding: 0 20px; }
+.pageWrap { max-width: 1200px; margin: 28px auto; padding: 0 20px; box-sizing: border-box; }
 .topbar { background: #1537c8; color: #fff; padding: 12px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(21,55,200,0.12); position: sticky; top: 0; z-index: 10; }
 .topbarLeft { display: flex; align-items: center; gap: 12px; }
 .topbarCenter { display: flex; gap: 18px; align-items: center; }
@@ -7,15 +7,18 @@
 .topbarButton { background: rgba(255,255,255,0.06); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
 .searchInput { padding: 8px 12px; border-radius: 8px; border: none; width: 220px; }
 
-.hero { display:flex; gap:28px; align-items:center; background:#fff; padding:48px; border-radius:12px; box-shadow:0 8px 30px rgba(6,24,44,0.06); }
+.hero { display:flex; gap:28px; align-items:center; background:#fff; padding: clamp(20px, 4vw, 48px); border-radius:12px; box-shadow:0 8px 30px rgba(6,24,44,0.06); }
 .heroText { flex: 1; text-align: center; }
 .heroBadge { display: inline-block; background: #ecf4ff; color: #0b6ed1; padding: 6px 10px; border-radius: 20px; margin-bottom: 12px; }
-.heroTitle { color: #1537c8; font-size: 42px; margin: 6px 0 12px; font-weight: 700; }
-.heroDesc { color: #6b7280; font-size: 15px; max-width: 680px; margin: 0 auto; }
+.heroTitle { color: #1537c8; font-size: clamp(22px, 3.5vw, 42px); margin: 6px 0 12px; font-weight: 700; }
+.heroDesc { color: #6b7280; font-size: clamp(13px, 1.2vw, 15px); max-width: 680px; margin: 0 auto; }
 .heroActions { margin-top: 20px; display: flex; gap: 12px; justify-content: center; }
 .ctaPrimary { background: #1537c8; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
 .ctaSecondary { background: #fff; color: #1537c8; border: 1px solid #cfe0ff; padding: 10px 18px; border-radius: 8px; cursor: pointer; }
-.heroImages { width: 420px; display: flex; gap: 8px; }
+.heroImages { width: min(420px, 35vw); display: flex; gap: 8px; }
+.logo { width: 44px; height: 44px; object-fit: contain; }
+.userIcon { width: 36px; height: 36px; cursor: pointer; border-radius: 999px; }
+.heroImg { width: 50%; border-radius: 10px; object-fit: cover; }
 
 .accessHeader { margin-top: 24px; color: #1537c8; font-weight: 700; }
 .accessSub { color: #9aa0b1; margin-top: 4px; }
@@ -36,14 +39,18 @@
 .footerCol { flex: 1; }
 
 @media (max-width: 960px) {
-	.hero { flex-direction: column; padding: 28px; }
+	.hero { flex-direction: column; padding: 20px; }
 	.heroImages { width: 100%; display: flex; gap: 8px; justify-content: center; }
 	.analytics { grid-template-columns: 1fr; }
 	.statGrid { justify-content: center; }
 }
 
 @media (max-width: 480px) {
-	.heroTitle { font-size: 28px; }
+	.heroTitle { font-size: 22px; }
 	.searchInput { width: 140px; }
 	.statCard { width: 100%; max-width: 320px; }
+	.pageWrap { padding: 0 12px; }
 }
+
+/* Prevent horizontal overflow on extreme viewports */
+html, body { overflow-x: hidden; }

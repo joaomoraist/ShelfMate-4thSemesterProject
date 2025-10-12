@@ -59,7 +59,7 @@ const Home: React.FC = () => {
         <div style={{ minHeight: "100vh", background: "transparent" }}>
             <header className={cssModule.topbar}>
                 <div className={cssModule.topbarLeft}>
-                    <img src="/icons/logo.svg" alt="Shelf Mate" style={{ width: 44, height: 44 }} onError={(e) => (e.currentTarget.style.display = "none")} />
+                    <img src="/icons/logo.svg" alt="Shelf Mate" className={cssModule.logo} onError={(e) => (e.currentTarget.style.display = "none")} />
                     <div style={{ fontWeight: 700, fontSize: 18 }}>Shelf Mate</div>
                 </div>
 
@@ -75,7 +75,7 @@ const Home: React.FC = () => {
                     <img
                         src="/icons/user-circle.svg"
                         alt="user"
-                        style={{ width: 36, height: 36, cursor: "pointer", borderRadius: 999 }}
+                        className={cssModule.userIcon}
                         onError={(e) => (e.currentTarget.style.display = "none")}
                         onClick={handleLogout}
                         title="Sair"
@@ -100,8 +100,8 @@ const Home: React.FC = () => {
                     </div>
 
                     <div className={cssModule.heroImages}>
-                        <img src="/hero1.jpg" alt="hero1" style={{ width: "50%", borderRadius: 10, objectFit: "cover" }} onError={(e) => (e.currentTarget.style.display = "none")} />
-                        <img src="/hero2.jpg" alt="hero2" style={{ width: "50%", borderRadius: 10, objectFit: "cover" }} onError={(e) => (e.currentTarget.style.display = "none")} />
+                        <img src="/hero1.jpg" alt="hero1" className={cssModule.heroImg} onError={(e) => (e.currentTarget.style.display = "none")} />
+                        <img src="/hero2.jpg" alt="hero2" className={cssModule.heroImg} onError={(e) => (e.currentTarget.style.display = "none")} />
                     </div>
                 </section>
 
