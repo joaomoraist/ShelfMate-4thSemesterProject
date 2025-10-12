@@ -18,20 +18,12 @@ const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
 };
 
 const StatCard: React.FC<{ title: string; value: string; iconSrc: string; emoji: string }> = ({ title, value, iconSrc, emoji }) => (
-    <div style={{
-        border: "1px solid rgba(0,0,0,0.06)",
-        borderRadius: 10,
-        padding: 18,
-        width: 190,
-        textAlign: "center",
-        boxShadow: "0 6px 20px rgba(6,24,44,0.06)",
-        background: "#fff"
-    }}>
+    <div className={cssModule.statCard}>
         <div style={{ marginBottom: 8 }}>
             <Icon src={iconSrc} emoji={emoji} />
         </div>
-        <div style={{ color: "#6b7280", fontSize: 13 }}>{title}</div>
-        <div style={{ color: "#1537c8", fontWeight: 700, fontSize: 16, marginTop: 6 }}>{value}</div>
+        <div className={cssModule.title}>{title}</div>
+        <div className={cssModule.value}>{value}</div>
     </div>
 );
 
