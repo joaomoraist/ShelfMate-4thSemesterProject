@@ -1,0 +1,18 @@
+/* Styles for login page (module) *//* Styles for login page (module) */
+
+.page-auth { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }.page-auth { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+
+.auth-shell { background:#fff; width:100%; max-width:1100px; border-radius:28px; box-shadow:0 24px 60px rgba(0,0,0,.18); display:grid; grid-template-columns:1fr 1.1fr; overflow:hidden; align-items:stretch; max-height:90vh; }.auth-shell { background:#fff; width:100%; max-width:1100px; border-radius:28px; box-shadow:0 24px 60px rgba(0,0,0,.18); display:grid; grid-template-columns:1fr 1.1fr; overflow:hidden; align-items:stretch; max-height:90vh; }
+
+.auth-content { padding:40px 48px; overflow:auto; max-height: calc(90vh - 48px); }.auth-content { padding:40px 48px; overflow:auto; max-height: calc(90vh - 48px); }
+
+.auth-title { margin:8px 0 4px; font-size:20px; color:#0b1027; }.auth-title { margin:8px 0 4px; font-size:20px; color:#0b1027; }
+
+.auth-sub { margin:0; color:#6b7280; font-size:13px; }.auth-sub { margin:0; color:#6b7280; font-size:13px; }
+
+.row { display:flex; gap:12px; align-items:center; }.row { display:flex; gap:12px; align-items:center; }
+
+.inline { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }.inline { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+
+.muted { color:#9ca3af; font-size:12px; margin-top:12px; }.muted { color:#9ca3af; font-size:12px; margin-top:12px; }
+

@@ -1,0 +1,102 @@
+/* Module styles used by src/pages/signup.tsx *//* Module styles used by src/pages/signup.tsx */
+
+.page-auth {.page-auth {
+
+  min-height: 100vh;  min-height: 100vh;
+
+  display: flex;  display: flex;
+
+  align-items: center;  align-items: center;
+
+  justify-content: center;  justify-content: center;
+
+  padding: 24px;  padding: 24px;
+
+}}
+
+
+
+.auth-shell {.auth-shell {
+
+  background: #fff;  background: #fff;
+
+  width: 100%;  width: 100%;
+
+  max-width: 1100px;  max-width: 1100px;
+
+  border-radius: 28px;  border-radius: 28px;
+
+  box-shadow: 0 24px 60px rgba(0,0,0,.18);  box-shadow: 0 24px 60px rgba(0,0,0,.18);
+
+  display: grid;  display: grid;
+
+  grid-template-columns: 1.1fr 1fr;  grid-template-columns: 1.1fr 1fr;
+
+  overflow: hidden;  overflow: hidden;
+
+  align-items: stretch;  align-items: stretch;
+
+  max-height: 90vh;  max-height: 90vh;
+
+}}
+
+
+
+.auth-content {.auth-content {
+
+  padding: 40px 48px;  padding: 40px 48px;
+
+  overflow: auto;  overflow: auto;
+
+  max-height: calc(90vh - 48px);  max-height: calc(90vh - 48px);
+
+}}
+
+
+
+.auth-title {.auth-title {
+
+  margin: 8px 0 4px;  margin: 8px 0 4px;
+
+  font-size: 20px;  font-size: 20px;
+
+  color: #0b1027;  color: #0b1027;
+
+}}
+
+
+
+.auth-sub {.auth-sub {
+
+  margin: 0;  margin: 0;
+
+  color: #6b7280;  color: #6b7280;
+
+  font-size: 13px;  font-size: 13px;
+
+}}
+
+
+
+.row {.row {
+
+  display: flex;  display: flex;
+
+  gap: 12px;  gap: 12px;
+
+  align-items: center;  align-items: center;
+
+}}
+
+
+
+.muted {.muted {
+
+  color: #9ca3af;  color: #9ca3af;
+
+  font-size: 12px;  font-size: 12px;
+
+  margin-top: 12px;  margin-top: 12px;
+
+}}
+

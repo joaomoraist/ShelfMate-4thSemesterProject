@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigation } from "../context/NavigationContext";
+import cssModule from '../styles/home.module.css';
 
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
 const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
@@ -34,30 +35,7 @@ const StatCard: React.FC<{ title: string; value: string; iconSrc: string; emoji:
     </div>
 );
 
-const styles = {
-    topbar: {
-        background: "#1537c8",
-        color: "#fff",
-        padding: "12px 28px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        boxShadow: "0 4px 12px rgba(21,55,200,0.12)"
-    } as React.CSSProperties,
-    topbarCenterIcons: { display: "flex", gap: 18, alignItems: "center" } as React.CSSProperties,
-    pageWrap: { maxWidth: 1200, margin: "28px auto", padding: "0 20px" } as React.CSSProperties,
-    hero: {
-        display: "flex",
-        gap: 28,
-        alignItems: "center",
-        background: "#fff",
-        padding: 28,
-        borderRadius: 12,
-        boxShadow: "0 8px 30px rgba(6,24,44,0.06)"
-    } as React.CSSProperties,
-    heroText: { flex: 1 } as React.CSSProperties,
-    heroImages: { width: 420, display: "flex", gap: 8 } as React.CSSProperties,
-};
+// layout handled by CSS module `home.module.css`
 
 const Home: React.FC = () => {
     const [user, setUser] = useState<any>(null);
@@ -87,35 +65,21 @@ const Home: React.FC = () => {
 
     return (
         <div style={{ minHeight: "100vh", background: "transparent" }}>
-            <div style={styles.topbar}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <header className={cssModule.topbar}>
+                <div className={cssModule.topbarLeft}>
                     <img src="/icons/logo.svg" alt="Shelf Mate" style={{ width: 44, height: 44 }} onError={(e) => (e.currentTarget.style.display = "none")} />
                     <div style={{ fontWeight: 700, fontSize: 18 }}>Shelf Mate</div>
                 </div>
 
-                <div style={styles.topbarCenterIcons}>
-                    <button style={{
-                        background: "rgba(255,255,255,0.06)",
-                        color: "#fff",
-                        border: "none",
-                        padding: "8px 12px",
-                        borderRadius: 8
-                    }}>Home</button>
-                    <button style={{
-                        background: "transparent",
-                        color: "rgba(255,255,255,0.9)",
-                        border: "none"
-                    }}>Relatórios</button>
-                    <button style={{
-                        background: "transparent",
-                        color: "rgba(255,255,255,0.9)",
-                        border: "none"
-                    }}>Produtos</button>
-                </div>
+                <nav className={cssModule.topbarCenter}>
+                    <button className={cssModule.topbarButton}>Home</button>
+                    <button className={cssModule.topbarButton} style={{ background: 'transparent', color: 'rgba(255,255,255,0.9)' }}>Relatórios</button>
+                    <button className={cssModule.topbarButton} style={{ background: 'transparent', color: 'rgba(255,255,255,0.9)' }}>Produtos</button>
+                </nav>
 
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <input placeholder="Pesquisar" style={{ padding: "8px 12px", borderRadius: 8, border: "none", width: 220 }} />
-                    <button style={{ background: "#fff", color: "#1537c8", border: "none", padding: "8px 12px", borderRadius: 8 }}>Meus Produtos</button>
+                <div className={cssModule.topbarRight}>
+                    <input className={cssModule.searchInput} placeholder="Pesquisar" />
+                    <button className={cssModule.topbarButton} style={{ background: '#fff', color: '#1537c8' }}>Meus Produtos</button>
                     <img
                         src="/icons/user-circle.svg"
                         alt="user"
@@ -125,35 +89,35 @@ const Home: React.FC = () => {
                         title="Sair"
                     />
                 </div>
-            </div>
+            </header>
 
-            <div style={styles.pageWrap as React.CSSProperties}>
-                <section style={styles.hero}>
-                    <div style={styles.heroText}>
-                        <div style={{ display: "inline-block", background: "#ecf4ff", color: "#0b6ed1", padding: "6px 10px", borderRadius: 20, marginBottom: 12 }}>📈 Seu estoque cresceu</div>
-                        <h1 style={{ color: "#1537c8", fontSize: 42, margin: "6px 0 12px" }}>Bem-vindo de volta, William</h1>
-                        <p style={{ color: "#6b7280", fontSize: 15, maxWidth: 680 }}>
+            <main className={cssModule.pageWrap}>
+                <section className={cssModule.hero}>
+                    <div className={cssModule.heroText}>
+                        <div className={cssModule.heroBadge}>📈 Seu estoque cresceu</div>
+                        <h1 className={cssModule.heroTitle}>Bem-vindo de volta, William</h1>
+                        <p className={cssModule.heroDesc}>
                             Gerencie seu estoque, acompanhe métricas e tome decisões baseadas em dados.
                             Tudo em um só lugar, simples e poderoso.
                         </p>
 
-                        <div style={{ marginTop: 20, display: "flex", gap: 12 }}>
-                            <button style={{ background: "#1537c8", color: "#fff", border: "none", padding: "10px 18px", borderRadius: 8 }}>Meus Produtos ➜</button>
-                            <button style={{ background: "#fff", color: "#1537c8", border: "1px solid #cfe0ff", padding: "10px 18px", borderRadius: 8 }}>Ver Relatórios</button>
+                        <div className={cssModule.heroActions}>
+                            <button className={cssModule.ctaPrimary}>Meus Produtos ➜</button>
+                            <button className={cssModule.ctaSecondary}>Ver Relatórios</button>
                         </div>
                     </div>
 
-                    <div style={styles.heroImages}>
+                    <div className={cssModule.heroImages}>
                         <img src="/hero1.jpg" alt="hero1" style={{ width: "50%", borderRadius: 10, objectFit: "cover" }} onError={(e) => (e.currentTarget.style.display = "none")} />
                         <img src="/hero2.jpg" alt="hero2" style={{ width: "50%", borderRadius: 10, objectFit: "cover" }} onError={(e) => (e.currentTarget.style.display = "none")} />
                     </div>
                 </section>
 
                 <section style={{ marginTop: 28 }}>
-                    <h3 style={{ color: "#1537c8", marginBottom: 4 }}>Acesso Rápido</h3>
-                    <p style={{ color: "#9aa0b1", marginTop: 0 }}>Sua movimentação nos últimos 30 dias</p>
+                    <h3 className={cssModule.accessHeader}>Acesso Rápido</h3>
+                    <p className={cssModule.accessSub}>Sua movimentação nos últimos 30 dias</p>
 
-                    <div style={{ display: "flex", gap: 16, marginTop: 16 }}>
+                    <div className={cssModule.statGrid}>
                         <StatCard title="Últimos Acessos" value="30 LogIns" iconSrc="/icons/clock.svg" emoji="🕒" />
                         <StatCard title="Produtos Inseridos" value="40 SKUs" iconSrc="/icons/box.svg" emoji="📦" />
                         <StatCard title="Mudanças no Perfil" value="2 Mudanças" iconSrc="/icons/settings.svg" emoji="⚙️" />
@@ -162,25 +126,46 @@ const Home: React.FC = () => {
                     </div>
                 </section>
 
-                <footer style={{ marginTop: 40, background: "linear-gradient(90deg,#1537c8,#2d3dd6)", color: "#fff", padding: 18, borderRadius: 8 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
-                        <div>
+                <div className={cssModule.analytics}>
+                    <div className={cssModule.analyticsCard}>
+                        <h4>Tendência de Crescimento</h4>
+                        <div style={{ height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9aa0b1' }}>[Gráfico de Linha Placeholder]</div>
+                    </div>
+
+                    <div className={cssModule.analyticsCard}>
+                        <h4>Distribuição dos Produtos</h4>
+                        <div style={{ height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9aa0b1' }}>[Gráfico de Pizza Placeholder]</div>
+                    </div>
+
+                    <div className={cssModule.analyticsCard}>
+                        <h4>Principais Produtos</h4>
+                        <div style={{ color: '#6b7280', marginTop: 8 }}>
+                            <div><strong>SKU</strong> - <strong>Descrição</strong> • <strong>Qtd</strong></div>
+                            <div style={{ marginTop: 12 }}><div>10056 • Monster de Laranja • 100</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <footer className={cssModule.siteFooter}>
+                    <div className={cssModule.footerInner}>
+                        <div className={cssModule.footerCol}>
                             <strong>Shelf Mate</strong>
                             <div style={{ fontSize: 13, opacity: 0.9 }}>Gerencie seu estoque, acompanhe métricas e tome decisões baseadas em dados.</div>
                         </div>
-                        <div style={{ display: "flex", gap: 24 }}>
-                            <div>
+
+                        <div style={{ display: 'flex', gap: 24 }}>
+                            <div className={cssModule.footerCol}>
                                 <div style={{ fontWeight: 700 }}>Recursos</div>
                                 <div style={{ fontSize: 13, opacity: 0.95 }}>Dashboard • Produtos • Configurações</div>
                             </div>
-                            <div>
+                            <div className={cssModule.footerCol}>
                                 <div style={{ fontWeight: 700 }}>Suporte</div>
                                 <div style={{ fontSize: 13, opacity: 0.95 }}>william.carvalho... • +55 11 98432-5997</div>
                             </div>
                         </div>
                     </div>
                 </footer>
-            </div>
+            </main>
         </div>
     );
 };
