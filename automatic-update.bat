@@ -3,7 +3,8 @@ echo ==============================
 echo   ShelfMate - Sync Automático
 echo ==============================
 
-cd /d %~dp0
+:: Vai para o diretório raiz do projeto (um nível acima do backend)
+cd /d "%~dp0.."
 
 :: Mostra o usuário atual do PC
 echo Usuário atual do PC: %USERNAME%
@@ -17,15 +18,28 @@ if not exist ".git" (
 )
 
 echo ==============================
-echo   Adicionando novas alterações...
+echo   Adicionando novas alterações (frontend e backend)...
 echo ==============================
 git add -A
 
 :: Conta quantos commits já existem no branch atual
 for /f %%i in ('git rev-list --count HEAD') do set COMMIT_NUM=%%i
 
-echo Criando commit automático...
-git commit -m "Atualização automática - %USERNAME% Número: #%COMMIT_NUM%" >nul 2>&1
+:: Solicita uma mensagem opcional para o commit
+set /p COMMIT_MSG=Digite a mensagem do commit (ou deixe vazio para padrão): 
+
+if "%COMMIT_MSG%"=="" (
+    set COMMIT_MSG=Atualização automática - %USERNAME% Número: #%COMMIT_NUM%
+)
+
+echo Criando commit: "%COMMIT_MSG%" ...
+git commit -m "%COMMIT_MSG%" >nul 2>&1
+
+if %errorlevel% neq 0 (
+    echo Nenhuma alteração nova para commitar.
+) else (
+    echo Commit criado com sucesso!
+)
 
 echo ==============================
 echo   Limpando arquivos temporários...
