@@ -9,9 +9,9 @@ const Reports: React.FC = () => {
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
-
+    
     // mirror currentUser into local state for compatibility with existing handlers
-    useState(() => { setUser(currentUser); });
+    React.useEffect(() => { setUser(currentUser); }, [currentUser]);
 
     const handleLogout = () => {
         localStorage.removeItem("user");

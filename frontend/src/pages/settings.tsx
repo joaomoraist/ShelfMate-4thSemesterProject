@@ -14,13 +14,8 @@ const Settings: React.FC = () => {
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
-
     // mirror currentUser into local state for compatibility with existing handlers
-    React.useEffect(() => {
-        setUser(currentUser);
-        setNameInput(currentUser?.name || '');
-        setEmailInput(currentUser?.email || '');
-    }, [currentUser]);
+    React.useEffect(() => { setUser(currentUser); }, [currentUser]);
 
     const handleLogout = () => {
         localStorage.removeItem("user");
