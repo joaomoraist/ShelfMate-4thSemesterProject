@@ -46,7 +46,8 @@ app.use(cors({
       'http://localhost:3000',
       'http://localhost:5173',
       'http://127.0.0.1:5173',
-      'https://shelfmate-4thsemesterproject.onrender.com'
+      'https://shelfmate-4thsemesterproject.onrender.com',
+      'https://shelfmate-4th-semester-project.vercel.app/'
     ];
     const vercelRegex = /\.vercel\.app$/i;
 
