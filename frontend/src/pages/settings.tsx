@@ -198,7 +198,7 @@ const Settings: React.FC = () => {
 
                                 const res = await fetch('/users/me', { method: 'PUT', body: form, credentials: 'include' });
                                 if (res.ok) {
-                                    const data = await res.json();
+                                    await res.json();
                                     alert('✅ Salvo com sucesso');
                                     await refresh();
                                 } else {
