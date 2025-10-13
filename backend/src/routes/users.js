@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
 
     // Buscar usuário pelo email
     const users = await sql`
-      SELECT id, name, email, user_password, user_level, company_id, created_at 
+      SELECT id, name, email, password, user_level, company_id, created_at 
       FROM users 
       WHERE email = ${email}
     `;
@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
     const user = users[0];
 
     // Verificar senha (comparar senha fornecida com a do banco)
-    const isPasswordValid = password === user.user_password;
+  const isPasswordValid = password === user.password;
 
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -64,7 +64,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Remover senha da resposta
-    const { user_password, ...userWithoutPassword } = user;
+  const { password: _pwd, ...userWithoutPassword } = user;
 
     // Criar sessão contendo dados essenciais do usuário
     req.session.user = {
@@ -130,7 +130,7 @@ router.post('/register', async (req, res) => {
 
     // Inserir novo usuário
     const newUser = await sql`
-      INSERT INTO users (name, email, user_password, company_id, user_level)
+      INSERT INTO users (name, email, password, company_id, user_level)
       VALUES (${name}, ${email}, ${password}, ${company_id}, 1)
       RETURNING id, name, email, user_level, company_id, created_at
     `;
@@ -320,7 +320,7 @@ router.post('/reset-password', async (req, res) => {
     // Atualizar senha e limpar código de recuperação
     await sql`
       UPDATE users 
-      SET user_password = ${newPassword}, recovery_code = NULL
+      SET password = ${newPassword}, recovery_code = NULL
       WHERE email = ${email}
     `;
 
@@ -354,7 +354,7 @@ router.put('/me', upload.single('image'), async (req, res) => {
     const updates = [];
     if (name) updates.push(sql`name = ${name}`);
     if (email) updates.push(sql`email = ${email}`);
-    if (newPassword) updates.push(sql`user_password = ${newPassword}`);
+  if (newPassword) updates.push(sql`password = ${newPassword}`);
     if (imagePath) updates.push(sql`image = ${imagePath}`);
 
     if (updates.length > 0) {
