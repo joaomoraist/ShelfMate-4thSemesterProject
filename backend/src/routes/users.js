@@ -2,8 +2,24 @@ import express from 'express';
 import sql from '../db.js';
 import crypto from 'crypto';
 import { Resend } from 'resend';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
+
+// setup multer storage for user images
+const uploadsDir = path.join(process.cwd(), 'backend', 'src', 'public', 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) { cb(null, uploadsDir); },
+  filename: function (req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const name = `user_${Date.now()}${ext}`;
+    cb(null, name);
+  }
+});
+const upload = multer({ storage });
 
 // ===============================================
 // Configuração do Resend
@@ -49,6 +65,15 @@ router.post('/login', async (req, res) => {
 
     // Remover senha da resposta
     const { user_password, ...userWithoutPassword } = user;
+
+    // Criar sessão contendo dados essenciais do usuário
+    req.session.user = {
+      id: userWithoutPassword.id,
+      name: userWithoutPassword.name,
+      email: userWithoutPassword.email,
+      user_level: userWithoutPassword.user_level,
+      company_id: userWithoutPassword.company_id
+    };
 
     res.json({
       message: 'Login successful',
@@ -311,4 +336,87 @@ router.post('/reset-password', async (req, res) => {
   }
 });
 
+// PUT /users/me -> atualizar informações do usuário autenticado
+router.put('/me', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.session || !req.session.user) return res.status(401).json({ error: 'Not authenticated' });
+
+    const userId = req.session.user.id;
+    const { name, email, newPassword } = req.body;
+    let imagePath = null;
+
+    if (req.file) {
+      // save relative path for serving via express.static
+      imagePath = `/uploads/${req.file.filename}`;
+    }
+
+    // Build dynamic update
+    const updates = [];
+    if (name) updates.push(sql`name = ${name}`);
+    if (email) updates.push(sql`email = ${email}`);
+    if (newPassword) updates.push(sql`user_password = ${newPassword}`);
+    if (imagePath) updates.push(sql`image = ${imagePath}`);
+
+    if (updates.length > 0) {
+      // Compose SET clause
+      const setClause = updates.reduce((prev, cur, idx) => idx === 0 ? cur : sql`${prev}, ${cur}`);
+      await sql`
+        UPDATE users SET ${setClause} WHERE id = ${userId}
+      `;
+    }
+
+    // fetch updated user
+    const rows = await sql`
+      SELECT id, name, email, user_level, company_id, image FROM users WHERE id = ${userId}
+    `;
+    const updatedUser = rows[0];
+
+    // update session
+    req.session.user = {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      user_level: updatedUser.user_level,
+      company_id: updatedUser.company_id,
+      image: updatedUser.image
+    };
+
+    return res.json({ message: 'User updated', user: req.session.user });
+  } catch (err) {
+    console.error('Erro em PUT /users/me:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 export default router;
+
+// Rota para obter usuário logado a partir da sessão
+// GET /users/me
+router.get('/me', (req, res) => {
+  try {
+    if (req.session && req.session.user) {
+      return res.json({ user: req.session.user });
+    }
+    return res.status(401).json({ error: 'Not authenticated' });
+  } catch (err) {
+    console.error('Erro em /users/me:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Rota para logout (destrói a sessão)
+router.post('/logout', (req, res) => {
+  try {
+    req.session.destroy(err => {
+      if (err) {
+        console.error('Erro ao destruir sessão:', err);
+        return res.status(500).json({ error: 'Failed to logout' });
+      }
+      res.clearCookie('connect.sid');
+      return res.json({ message: 'Logged out' });
+    });
+  } catch (err) {
+    console.error('Erro em /users/logout:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});

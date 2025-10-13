@@ -1,19 +1,25 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/settings.module.css';
 
 const Settings: React.FC = () => {
     const [user, setUser] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const { user: currentUser, loading, refresh } = useCurrentUser();
+    const [nameInput, setNameInput] = useState('');
+    const [emailInput, setEmailInput] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
 
-    useEffect(() => {
-        const u = localStorage.getItem("user");
-        if (u) setUser(JSON.parse(u));
-        setLoading(false);
-    }, []);
+    // mirror currentUser into local state for compatibility with existing handlers
+    React.useEffect(() => {
+        setUser(currentUser);
+        setNameInput(currentUser?.name || '');
+        setEmailInput(currentUser?.email || '');
+    }, [currentUser]);
 
     const handleLogout = () => {
         localStorage.removeItem("user");
@@ -101,7 +107,8 @@ const Settings: React.FC = () => {
                                     <input 
                                         type="text" 
                                         className={cssModule.fieldInput} 
-                                        defaultValue="João Silva"
+                                        value={nameInput}
+                                        onChange={(e) => setNameInput(e.target.value)}
                                     />
                                 </div>
                                 <div className={cssModule.fieldGroup}>
@@ -109,7 +116,8 @@ const Settings: React.FC = () => {
                                     <input 
                                         type="email" 
                                         className={cssModule.fieldInput} 
-                                        defaultValue="joao@exemplo.com"
+                                        value={emailInput}
+                                        onChange={(e) => setEmailInput(e.target.value)}
                                     />
                                     <p className={cssModule.fieldHelp}>
                                         Este é o email usado para login e notificações
@@ -126,7 +134,8 @@ const Settings: React.FC = () => {
                                     <input 
                                         type="password" 
                                         className={cssModule.fieldInput} 
-                                        defaultValue="********"
+                                        disabled
+                                        placeholder="(não aplicável)"
                                     />
                                 </div>
                                 <div className={cssModule.fieldGroup}>
@@ -134,7 +143,8 @@ const Settings: React.FC = () => {
                                     <input 
                                         type="password" 
                                         className={cssModule.fieldInput} 
-                                        defaultValue="********"
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
                                     />
                                     <p className={cssModule.fieldHelp}>
                                         Mínimo de 6 caracteres
@@ -145,7 +155,7 @@ const Settings: React.FC = () => {
                                     <input 
                                         type="password" 
                                         className={cssModule.fieldInput} 
-                                        defaultValue="********"
+                                        placeholder="Digite novamente se desejar alterar"
                                     />
                                 </div>
                             </div>
@@ -158,6 +168,7 @@ const Settings: React.FC = () => {
                                         type="text" 
                                         className={cssModule.fieldInput} 
                                         defaultValue="Minha Empresa LTDA"
+                                        disabled
                                     />
                                 </div>
                                 <div className={cssModule.fieldGroup}>
@@ -173,7 +184,32 @@ const Settings: React.FC = () => {
                     </div>
 
                     <div className={cssModule.saveSection}>
-                        <button className={cssModule.saveButton}>
+                        <div style={{ marginBottom: 12 }}>
+                            <label className={cssModule.fieldLabel}>Foto de Perfil</label>
+                            <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
+                        </div>
+                        <button className={cssModule.saveButton} onClick={async () => {
+                            try {
+                                const form = new FormData();
+                                form.append('name', nameInput);
+                                form.append('email', emailInput);
+                                if (newPassword) form.append('newPassword', newPassword);
+                                if (imageFile) form.append('image', imageFile);
+
+                                const res = await fetch('/users/me', { method: 'PUT', body: form, credentials: 'include' });
+                                if (res.ok) {
+                                    const data = await res.json();
+                                    alert('✅ Salvo com sucesso');
+                                    await refresh();
+                                } else {
+                                    const err = await res.json();
+                                    alert('Erro: ' + (err.error || 'Unknown'));
+                                }
+                            } catch (err) {
+                                console.error(err);
+                                alert('Erro ao salvar');
+                            }
+                        }}>
                             <span className={cssModule.saveIcon}>📄</span>
                             Salvar
                         </button>

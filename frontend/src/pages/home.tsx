@@ -1,5 +1,6 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/home.module.css';
 
@@ -31,21 +32,20 @@ const StatCard: React.FC<{ title: string; value: string; iconSrc: string; emoji:
 
 const Home: React.FC = () => {
     const [user, setUser] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
 
-    useEffect(() => {
-        const u = localStorage.getItem("user");
-        if (u) setUser(JSON.parse(u));
-        setLoading(false);
-    }, []);
+    // mirror currentUser into local state for compatibility with existing handlers
+    useState(() => { setUser(currentUser); });
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
-        setUser(null);
-        alert("👋 Logout realizado com sucesso!");
-        navigateTo("login");
+        fetch('/users/logout', { method: 'POST', credentials: 'include' }).finally(() => {
+            localStorage.removeItem("user");
+            setUser(null);
+            alert("👋 Logout realizado com sucesso!");
+            navigateTo("login");
+        });
     };
 
     if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
@@ -91,7 +91,7 @@ const Home: React.FC = () => {
                         <input className={cssModule.searchInput} placeholder="Pesquisar" />
                     </div>
                     <div className={cssModule.userContainer}>
-                        <span className={cssModule.welcomeText}>Bem vindo William</span>
+                            <span className={cssModule.welcomeText}>Bem vindo {user?.name || 'Usuário'}</span>
                         <div className={cssModule.userDropdown}>
                             <div className={cssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
                                 <span className={cssModule.userIcon}>👤</span>
@@ -121,7 +121,7 @@ const Home: React.FC = () => {
                             <span className={cssModule.badgeIcon}>✓</span>
                             <span>Seu estoque cresceu</span>
                         </div>
-                        <h1 className={cssModule.heroTitle}>Bem-vindo de volta, William</h1>
+                            <h1 className={cssModule.heroTitle}>Bem-vindo de volta, {user?.name || 'Usuário'}</h1>
                         <p className={cssModule.heroDesc}>
                             Gerencie seu estoque, acompanhe métricas e tome decisões baseadas em dados. Tudo em um só lugar, simples e poderoso.
                         </p>

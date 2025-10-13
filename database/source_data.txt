@@ -1,0 +1,7 @@
+DB_HOST=aws-1-us-east-2.pooler.supabase.com
+DB_PORT=5432
+DB_USER=postgres.wvefknlzcspdazbaomjq
+DB_PASSWORD=wv#1RH4w5_6@
+DB_NAME=shelfmate_database
+
+cloud_supplier = supabase

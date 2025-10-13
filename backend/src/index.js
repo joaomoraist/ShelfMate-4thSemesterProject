@@ -4,10 +4,30 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import usersRoutes from './routes/users.js';
+import statsRoutes from './routes/stats.js';
+import importsRoutes from './routes/imports.js';
+import session from 'express-session';
+import pg from 'pg';
+import connectPgSimple from 'connect-pg-simple';
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Session store setup (Postgres)
+const PgSession = connectPgSimple(session);
+const pgPool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+app.use(session({
+  store: new PgSession({ pool: pgPool }),
+  secret: process.env.SESSION_SECRET || 'dev_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 1 day
+}));
 
 // Middleware
 app.use(cors({
@@ -47,6 +67,8 @@ app.get('/health', (req, res) => {
 
 // ============== ROTAS =================
 app.use('/users', usersRoutes);
+app.use('/stats', statsRoutes);
+app.use('/imports', importsRoutes);
 
 // Página inicial -> login.html (para facilitar testes)
 app.get('/', (req, res) => {

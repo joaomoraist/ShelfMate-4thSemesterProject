@@ -1,5 +1,6 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/statistics.module.css';
 
@@ -44,15 +45,12 @@ const MetricCard: React.FC<{
 
 const Statistics: React.FC = () => {
     const [user, setUser] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
+    const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
 
-    useEffect(() => {
-        const u = localStorage.getItem("user");
-        if (u) setUser(JSON.parse(u));
-        setLoading(false);
-    }, []);
+    // mirror currentUser into local state for compatibility with existing handlers
+    useState(() => { setUser(currentUser); });
 
     const handleLogout = () => {
         localStorage.removeItem("user");
