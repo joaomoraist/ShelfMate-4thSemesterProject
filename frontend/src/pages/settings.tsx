@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
+import { API_URLS } from '../config/api';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/settings.module.css';
 
@@ -196,7 +197,7 @@ const Settings: React.FC = () => {
                                 if (newPassword) form.append('newPassword', newPassword);
                                 if (imageFile) form.append('image', imageFile);
 
-                                const res = await fetch('/users/me', { method: 'PUT', body: form, credentials: 'include' });
+                                const res = await fetch(API_URLS.ME, { method: 'PUT', body: form, credentials: 'include' });
                                 if (res.ok) {
                                     await res.json();
                                     alert('✅ Salvo com sucesso');

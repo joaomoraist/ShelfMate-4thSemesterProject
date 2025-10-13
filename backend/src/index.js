@@ -14,6 +14,12 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// When running behind a proxy (Render, Heroku, etc.) Express needs
+// to trust the first proxy for secure cookies to work correctly.
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
 // Session store setup (Postgres)
 const PgSession = connectPgSimple(session);
 const pgPool = new pg.Pool({
@@ -26,7 +32,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'dev_secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 1000 * 60 * 60 * 24 } // 1 day
+  cookie: {
+    secure: process.env.NODE_ENV === 'production', // require HTTPS in production
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 1000 * 60 * 60 * 24 // 1 day
+  }
 }));
 
 // Middleware

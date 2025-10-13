@@ -10,7 +10,9 @@ export const API_CONFIG = {
       REGISTER: '/users/register',
       SEND_RESET_CODE: '/users/send-reset-code',
       VERIFY_RESET_CODE: '/users/verify-reset-code',
-      RESET_PASSWORD: '/users/reset-password'
+      RESET_PASSWORD: '/users/reset-password',
+      ME: '/users/me',
+      LOGOUT: '/users/logout'
     }
   }
 };
@@ -28,4 +30,7 @@ export const API_URLS = {
   SEND_RESET_CODE: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.SEND_RESET_CODE),
   VERIFY_RESET_CODE: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.VERIFY_RESET_CODE),
   RESET_PASSWORD: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.RESET_PASSWORD)
+  ,
+  ME: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.ME),
+  LOGOUT: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.LOGOUT)
 };

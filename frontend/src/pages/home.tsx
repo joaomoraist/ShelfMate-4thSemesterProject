@@ -1,4 +1,5 @@
 import React from "react";
+import { API_URLS } from '../config/api';
 import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
@@ -37,10 +38,10 @@ const Home: React.FC = () => {
     const { navigateTo } = useNavigation();
 
     // mirror currentUser into local state for compatibility with existing handlers
-    useState(() => { setUser(currentUser); });
+    React.useEffect(() => { setUser(currentUser); }, [currentUser]);
 
     const handleLogout = () => {
-        fetch('/users/logout', { method: 'POST', credentials: 'include' }).finally(() => {
+        fetch(API_URLS.LOGOUT, { method: 'POST', credentials: 'include' }).finally(() => {
             localStorage.removeItem("user");
             setUser(null);
             alert("👋 Logout realizado com sucesso!");

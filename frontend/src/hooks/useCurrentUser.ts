@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { API_URLS } from '../config/api';
 
 export default function useCurrentUser() {
   const [user, setUser] = useState<any>(null);
@@ -7,7 +8,7 @@ export default function useCurrentUser() {
   const fetchUser = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/users/me', { credentials: 'include' });
+  const res = await fetch(API_URLS.ME, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
