@@ -85,6 +85,19 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(staticDir, 'login.html'));
 });
 
+// Simple home endpoint to check session-based access
+app.get('/home', (req, res) => {
+  try {
+    if (req.session && req.session.user) {
+      return res.json({ message: 'Home OK', user: req.session.user });
+    }
+    return res.status(401).json({ error: 'Not authenticated' });
+  } catch (err) {
+    console.error('Erro em /home:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Middleware de tratamento de erros
 app.use((err, req, res, next) => {
   console.error('Erro no servidor:', err);

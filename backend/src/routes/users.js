@@ -75,6 +75,13 @@ router.post('/login', async (req, res) => {
       company_id: userWithoutPassword.company_id
     };
 
+    // Log session info for debugging (no password)
+    try {
+      console.log('Sessão criada:', req.sessionID, req.session.user);
+    } catch (e) {
+      console.warn('Não foi possível logar informações da sessão:', e && e.message);
+    }
+
     res.json({
       message: 'Login successful',
       user: userWithoutPassword
@@ -388,8 +395,6 @@ router.put('/me', upload.single('image'), async (req, res) => {
   }
 });
 
-export default router;
-
 // Rota para obter usuário logado a partir da sessão
 // GET /users/me
 router.get('/me', (req, res) => {
@@ -420,3 +425,18 @@ router.post('/logout', (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// GET /users/home -> small helper for testing that user is logged in
+router.get('/home', (req, res) => {
+  try {
+    if (req.session && req.session.user) {
+      return res.json({ message: 'You are logged in', user: req.session.user });
+    }
+    return res.status(401).json({ error: 'Not authenticated' });
+  } catch (err) {
+    console.error('Erro em /users/home:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+export default router;

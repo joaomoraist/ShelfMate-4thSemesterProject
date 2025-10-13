@@ -33,4 +33,6 @@ export const API_URLS = {
   ,
   ME: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.ME),
   LOGOUT: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.LOGOUT)
+  ,
+  HOME: buildApiUrl('/home')
 };
