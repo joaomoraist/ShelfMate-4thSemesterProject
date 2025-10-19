@@ -65,7 +65,7 @@ const Statistics: React.FC = () => {
     React.useEffect(() => {
         const load = async () => {
             try {
-                const res = await fetch(API_URLS.STATS_OVERVIEW, { credentials: 'include' });
+                const res = await fetch(API_URLS.STATS_OVERVIEW);
                 if (!res.ok) throw new Error('Falha ao buscar overview');
                 const data = await res.json();
                 setOverview(data);

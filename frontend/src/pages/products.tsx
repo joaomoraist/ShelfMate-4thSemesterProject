@@ -30,7 +30,7 @@ const Products: React.FC = () => {
     React.useEffect(() => {
         const load = async () => {
             try {
-                const res = await fetch(API_URLS.STATS_PRODUCTS, { credentials: 'include' });
+                const res = await fetch(API_URLS.STATS_PRODUCTS);
                 if (!res.ok) throw new Error('Falha ao buscar produtos');
                 const data = await res.json();
                 setProducts(data.rows || []);
@@ -48,7 +48,7 @@ const Products: React.FC = () => {
             const res = await fetch(API_URLS.STATS_PRODUCTS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
+                // no credentials to avoid third-party cookie issues in prod
                 body: JSON.stringify(newProduct)
             });
             if (!res.ok) throw new Error('Falha ao criar produto');

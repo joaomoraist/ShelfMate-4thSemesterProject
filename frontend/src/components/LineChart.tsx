@@ -41,9 +41,7 @@ const LineChart: React.FC<LineChartProps> = ({ className }) => {
       try {
         setLoading(true);
         // Buscar dados de vendas por produto
-        const response = await fetch(API_URLS.SALES_PER_PRODUCT, {
-          credentials: 'include'
-        });
+        const response = await fetch(API_URLS.SALES_PER_PRODUCT);
 
         if (!response.ok) {
           const errorData = await response.json();
