@@ -84,6 +84,92 @@ router.get('/overview', async (req, res) => {
   }
 });
 
+// GET /stats/activity-last-30-days
+// Retorna dados específicos dos últimos 30 dias para a seção "Acesso Rápido"
+router.get('/activity-last-30-days', async (req, res) => {
+  try {
+    const companyId = req.session?.user?.company_id;
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    // Últimos Acessos (baseado no campo accesses dos usuários)
+    const lastAccesses = companyId
+      ? await sql`
+        SELECT COALESCE(SUM(accesses),0) AS total_accesses
+        FROM users
+        WHERE company_id = ${companyId}
+      `
+      : await sql`
+        SELECT COALESCE(SUM(accesses),0) AS total_accesses
+        FROM users
+      `;
+
+    // Produtos Inseridos nos últimos 30 dias
+    const productsInserted = companyId
+      ? await sql`
+        SELECT COUNT(*)::int AS products_count
+        FROM products
+        WHERE company_id = ${companyId} 
+        AND created_at >= ${thirtyDaysAgo.toISOString()}
+      `
+      : await sql`
+        SELECT COUNT(*)::int AS products_count
+        FROM products
+        WHERE created_at >= ${thirtyDaysAgo.toISOString()}
+      `;
+
+    // Mudanças no Perfil (baseado no campo changes dos usuários)
+    const profileChanges = companyId
+      ? await sql`
+        SELECT COALESCE(SUM(changes),0) AS total_changes
+        FROM users
+        WHERE company_id = ${companyId}
+      `
+      : await sql`
+        SELECT COALESCE(SUM(changes),0) AS total_changes
+        FROM users
+      `;
+
+    // Relatórios Baixados (baseado no campo downloads dos usuários)
+    const reportsDownloaded = companyId
+      ? await sql`
+        SELECT COALESCE(SUM(downloads),0) AS total_downloads
+        FROM users
+        WHERE company_id = ${companyId}
+      `
+      : await sql`
+        SELECT COALESCE(SUM(downloads),0) AS total_downloads
+        FROM users
+      `;
+
+    // Alertas Emitidos nos últimos 30 dias
+    const alertsIssued = companyId
+      ? await sql`
+        SELECT COUNT(a.*)::int AS alerts_count
+        FROM alerts a
+        JOIN products p ON p.id = a.product_id
+        WHERE p.company_id = ${companyId}
+        AND a.created_at >= ${thirtyDaysAgo.toISOString()}
+      `
+      : await sql`
+        SELECT COUNT(a.*)::int AS alerts_count
+        FROM alerts a
+        WHERE a.created_at >= ${thirtyDaysAgo.toISOString()}
+      `;
+
+    return res.json({
+      last_accesses: lastAccesses[0].total_accesses,
+      products_inserted: productsInserted[0].products_count,
+      profile_changes: profileChanges[0].total_changes,
+      reports_downloaded: reportsDownloaded[0].total_downloads,
+      alerts_issued: alertsIssued[0].alerts_count
+    });
+  } catch (err) {
+    console.error('Erro em /stats/activity-last-30-days:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /stats/sales-per-product -> [{ product_id, name, total_qntd }]
 router.get('/sales-per-product', async (req, res) => {
   try {
@@ -150,6 +236,56 @@ router.get('/products', async (req, res) => {
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/products:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /stats/products-detailed -> produtos com informações detalhadas (vendas, alertas, etc.)
+router.get('/products-detailed', async (req, res) => {
+  try {
+    const companyId = req.session?.user?.company_id;
+    
+    const query = companyId
+      ? `
+        SELECT 
+          p.id,
+          p.name,
+          p.unit_price,
+          p.inventory,
+          p.status,
+          p.company_id,
+          COALESCE(SUM(s.qntd), 0) AS total_sales,
+          COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count,
+          COALESCE(MAX(s.created_at), p.created_at) AS last_sale_date
+        FROM products p
+        LEFT JOIN sales s ON s.product_id = p.id
+        LEFT JOIN alerts a ON a.product_id = p.id
+        WHERE p.company_id = ${companyId}
+        GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id, p.created_at
+        ORDER BY p.id
+      `
+      : `
+        SELECT 
+          p.id,
+          p.name,
+          p.unit_price,
+          p.inventory,
+          p.status,
+          p.company_id,
+          COALESCE(SUM(s.qntd), 0) AS total_sales,
+          COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count,
+          COALESCE(MAX(s.created_at), p.created_at) AS last_sale_date
+        FROM products p
+        LEFT JOIN sales s ON s.product_id = p.id
+        LEFT JOIN alerts a ON a.product_id = p.id
+        GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id, p.created_at
+        ORDER BY p.id
+      `;
+    
+    const rows = await sql.unsafe(query);
+    return res.json({ rows });
+  } catch (err) {
+    console.error('Erro em /stats/products-detailed:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

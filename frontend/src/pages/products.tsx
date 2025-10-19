@@ -26,11 +26,11 @@ const Products: React.FC = () => {
 
     if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
 
-    // Carregar produtos reais
+    // Carregar produtos reais com dados detalhados
     React.useEffect(() => {
         const load = async () => {
             try {
-                const res = await fetch(API_URLS.STATS_PRODUCTS);
+                const res = await fetch(API_URLS.PRODUCTS_DETAILED);
                 if (!res.ok) throw new Error('Falha ao buscar produtos');
                 const data = await res.json();
                 setProducts(data.rows || []);
@@ -53,7 +53,14 @@ const Products: React.FC = () => {
             });
             if (!res.ok) throw new Error('Falha ao criar produto');
             const data = await res.json();
-            setProducts((prev) => [...prev, data.product]);
+            
+            // Recarregar produtos com dados detalhados
+            const detailedRes = await fetch(API_URLS.PRODUCTS_DETAILED);
+            if (detailedRes.ok) {
+                const detailedData = await detailedRes.json();
+                setProducts(detailedData.rows || []);
+            }
+            
             setNewProduct({ name: '', unit_price: 0, inventory: 0, status: 'Disponível' });
             setAdding(false);
         } catch (e) {
@@ -158,11 +165,11 @@ const Products: React.FC = () => {
                     <div className={cssModule.productsTable}>
                         <div className={cssModule.tableHeader}>
                             <div className={cssModule.tableColumn}>Produto</div>
-                            <div className={cssModule.tableColumn}>Fornecedor</div>
+                            <div className={cssModule.tableColumn}>Preço Unitário</div>
                             <div className={cssModule.tableColumn}>Estoque Atual</div>
-                            <div className={cssModule.tableColumn}>Min/Máx</div>
-                            <div className={cssModule.tableColumn}>Vendas</div>
-                            <div className={cssModule.tableColumn}>Última Reposição</div>
+                            <div className={cssModule.tableColumn}>Nível Estoque</div>
+                            <div className={cssModule.tableColumn}>Total Vendas</div>
+                            <div className={cssModule.tableColumn}>Última Venda</div>
                             <div className={cssModule.tableColumn}>Status</div>
                             <div className={cssModule.tableColumn}>Alertas</div>
                         </div>
@@ -173,22 +180,28 @@ const Products: React.FC = () => {
                                     <span className={cssModule.productName}>{product.name}</span>
                                     <span className={cssModule.expandIcon}>▼</span>
                                 </div>
-                                <div className={cssModule.supplierCell}>{product.supplier || '-'}</div>
-                                <div className={cssModule.stockCell}>
-                                    <span className={cssModule.stockValue}>{product.inventory ?? product.stock ?? 0}</span>
+                                <div className={cssModule.supplierCell}>
+                                    {product.unit_price ? `R$ ${Number(product.unit_price).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '-'}
                                 </div>
-                                <div className={cssModule.minMaxCell}>{product.minMax || '-'}</div>
-                                <div className={cssModule.salesCell}>{product.sales ?? '-'}</div>
-                                <div className={cssModule.restockCell}>{product.lastRestock || '-'}</div>
+                                <div className={cssModule.stockCell}>
+                                    <span className={cssModule.stockValue}>{product.inventory ?? 0}</span>
+                                </div>
+                                <div className={cssModule.minMaxCell}>
+                                    {product.inventory < 10 ? 'Baixo' : product.inventory > 100 ? 'Alto' : 'Normal'}
+                                </div>
+                                <div className={cssModule.salesCell}>{product.total_sales ?? 0}</div>
+                                <div className={cssModule.restockCell}>
+                                    {product.last_sale_date ? new Date(product.last_sale_date).toLocaleDateString('pt-BR') : '-'}
+                                </div>
                                 <div className={cssModule.statusCell}>
-                                    <span className={`${cssModule.status} ${cssModule[(product.statusColor || 'green')]}`}>
+                                    <span className={`${cssModule.status} ${cssModule[product.inventory < 10 ? 'red' : 'green']}`}>
                                         {product.status || 'Disponível'}
                                     </span>
                                 </div>
                                 <div className={cssModule.alertsCell}>
                                     <span className={cssModule.alertIcon}>🔔</span>
-                                    <span className={cssModule.alertCount}>{product.alerts ?? 0}</span>
-                                    {(product.hasAlert ?? false) && <span className={cssModule.alertDot}>●</span>}
+                                    <span className={cssModule.alertCount}>{product.alerts_count ?? 0}</span>
+                                    {(product.alerts_count > 0) && <span className={cssModule.alertDot}>●</span>}
                                 </div>
                             </div>
                         ))}

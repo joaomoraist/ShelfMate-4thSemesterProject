@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Pie } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  ArcElement,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
   Tooltip,
   Legend,
   ChartData
@@ -11,17 +14,20 @@ import { API_URLS } from '../config/api';
 
 // Registrar componentes do Chart.js
 ChartJS.register(
-  ArcElement,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
   Tooltip,
   Legend
 );
 
-interface PieChartProps {
+interface BarChartProps {
   className?: string;
 }
 
-const PieChart: React.FC<PieChartProps> = ({ className }) => {
-  const [chartData, setChartData] = useState<ChartData<'pie'>>({
+const BarChart: React.FC<BarChartProps> = ({ className }) => {
+  const [chartData, setChartData] = useState<ChartData<'bar'>>({
     labels: [],
     datasets: []
   });
@@ -32,30 +38,21 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Buscar dados dos produtos mais vendidos
-        const response = await fetch(API_URLS.TOP_PRODUCTS);
+        // Buscar dados de vendas por produto
+        const response = await fetch(API_URLS.SALES_PER_PRODUCT);
 
         if (!response.ok) {
           const errorData = await response.json();
           console.error('Erro na resposta:', errorData);
-          throw new Error('Falha ao buscar dados de produtos mais vendidos');
+          throw new Error('Falha ao buscar dados de vendas');
         }
 
         const data = await response.json();
         
-        // Preparar dados para o gráfico - pegar os top 5 produtos mais vendidos
-        const topProducts = (data.rows || []).slice(0, 5);
+        // Preparar dados para o gráfico - mostrar os top 6 produtos
+        const topProducts = (data.rows || []).slice(0, 6);
         const labels = topProducts.map((item: any) => item.name);
         const values = topProducts.map((item: any) => item.total_qntd);
-
-        // Gerar cores para cada fatia
-        const backgroundColors = [
-          'rgba(255, 99, 132, 0.8)',
-          'rgba(54, 162, 235, 0.8)',
-          'rgba(255, 206, 86, 0.8)',
-          'rgba(75, 192, 192, 0.8)',
-          'rgba(153, 102, 255, 0.8)',
-        ];
 
         setChartData({
           labels,
@@ -63,9 +60,9 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
             {
               label: 'Quantidade Vendida',
               data: values,
-              backgroundColor: backgroundColors,
-              borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
-              borderWidth: 2,
+              backgroundColor: 'rgba(54, 162, 235, 0.8)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1,
             }
           ]
         });
@@ -85,12 +82,27 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'right' as const,
+        position: 'top' as const,
       },
       title: {
         display: true,
-        text: 'Top 5 Produtos Mais Vendidos',
+        text: 'Vendas por Produto',
       },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Quantidade Vendida'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Produtos'
+        }
+      }
     },
   };
 
@@ -99,9 +111,9 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
 
   return (
     <div className={className} style={{ height: '100%', width: '100%' }}>
-      <Pie options={options} data={chartData} />
+      <Bar options={options} data={chartData} />
     </div>
   );
 };
 
-export default PieChart;
+export default BarChart;

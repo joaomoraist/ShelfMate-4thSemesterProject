@@ -16,9 +16,11 @@ export const API_CONFIG = {
     },
     STATS: {
       OVERVIEW: '/stats/overview',
+      ACTIVITY_LAST_30_DAYS: '/stats/activity-last-30-days',
       SALES_PER_PRODUCT: '/stats/sales-per-product',
       TOP_PRODUCTS: '/stats/top-products',
-      PRODUCTS: '/stats/products'
+      PRODUCTS: '/stats/products',
+      PRODUCTS_DETAILED: '/stats/products-detailed'
     }
   }
 };
@@ -42,7 +44,9 @@ export const API_URLS = {
   
   // Stats endpoints
   STATS_OVERVIEW: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.OVERVIEW),
+  ACTIVITY_LAST_30_DAYS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.ACTIVITY_LAST_30_DAYS),
   SALES_PER_PRODUCT: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.SALES_PER_PRODUCT),
   TOP_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.TOP_PRODUCTS),
-  STATS_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS)
+  STATS_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS),
+  PRODUCTS_DETAILED: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS_DETAILED)
 };

@@ -37,6 +37,7 @@ const StatCard: React.FC<{ title: string; value: string; iconSrc: string; emoji:
 const Home: React.FC = () => {
     const [user, setUser] = useState<any>(null);
     const [overview, setOverview] = useState<any>(null);
+    const [activityData, setActivityData] = useState<any>(null);
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
@@ -67,6 +68,22 @@ const Home: React.FC = () => {
             }
         };
         loadOverview();
+    }, []);
+
+    // Carregar dados de atividade dos últimos 30 dias
+    React.useEffect(() => {
+        const loadActivityData = async () => {
+            try {
+                const res = await fetch(API_URLS.ACTIVITY_LAST_30_DAYS);
+                if (!res.ok) throw new Error('Falha ao buscar dados de atividade');
+                const data = await res.json();
+                setActivityData(data);
+            } catch (e) {
+                console.error(e);
+                setActivityData(null);
+            }
+        };
+        loadActivityData();
     }, []);
 
     if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
@@ -165,11 +182,11 @@ const Home: React.FC = () => {
                     </div>
 
                     <div className={cssModule.statGrid}>
-                        <StatCard title="Últimos Acessos" value={`${overview?.accesses ?? 0} LogIns`} iconSrc="/icons/clock.svg" emoji="🕒" />
-                        <StatCard title="Produtos Inseridos" value={`${overview?.products_count ?? 0} SKUs`} iconSrc="/icons/box.svg" emoji="📦" />
-                        <StatCard title="Mudanças no Perfil" value={`${overview?.changes ?? 0} Mudanças`} iconSrc="/icons/settings.svg" emoji="⚙️" />
-                        <StatCard title="Relatórios Baixados" value={`${overview?.downloads ?? 0} Emitidos`} iconSrc="/icons/report.svg" emoji="📄" />
-                        <StatCard title="Alertas Emitidos" value={`${overview?.alerts_count ?? 0} Enviados`} iconSrc="/icons/alert.svg" emoji="⚠️" />
+                        <StatCard title="Últimos Acessos" value={`${activityData?.last_accesses ?? 0} LogIns`} iconSrc="/icons/clock.svg" emoji="🕒" />
+                        <StatCard title="Produtos Inseridos" value={`${activityData?.products_inserted ?? 0} SKUs`} iconSrc="/icons/box.svg" emoji="📦" />
+                        <StatCard title="Mudanças no Perfil" value={`${activityData?.profile_changes ?? 0} Mudanças`} iconSrc="/icons/settings.svg" emoji="⚙️" />
+                        <StatCard title="Relatórios Baixados" value={`${activityData?.reports_downloaded ?? 0} Emitidos`} iconSrc="/icons/report.svg" emoji="📄" />
+                        <StatCard title="Alertas Emitidos" value={`${activityData?.alerts_issued ?? 0} Enviados`} iconSrc="/icons/alert.svg" emoji="⚠️" />
                     </div>
                 </section>
 

@@ -7,6 +7,7 @@ import cssModule from '../styles/statistics.module.css';
 import homeCssModule from '../styles/home.module.css';
 import LineChart from "../components/LineChart";
 import PieChart from "../components/PieChart";
+import BarChart from "../components/BarChart";
 import TopProductsTable from "../components/TopProductsTable";
 
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
@@ -231,10 +232,21 @@ const Statistics: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className={cssModule.fullWidthChart}>
+                    <div className={cssModule.chartsGrid}>
+                        <div className={cssModule.chartCard}>
+                            <h3 className={cssModule.chartTitle}>Vendas por Produto</h3>
+                            <div className={cssModule.chartContainer}>
+                                <div className={cssModule.barChart}>
+                                    <BarChart />
+                                </div>
+                            </div>
+                        </div>
+
                         <div className={cssModule.chartCard}>
                             <h3 className={cssModule.chartTitle}>Principais Produtos</h3>
-                            <TopProductsTable className={homeCssModule.productsTable} />
+                            <div className={cssModule.chartContainer}>
+                                <TopProductsTable className={homeCssModule.productsTable} />
+                            </div>
                         </div>
                     </div>
                 </section>
