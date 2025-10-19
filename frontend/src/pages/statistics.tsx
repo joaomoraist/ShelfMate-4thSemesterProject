@@ -4,6 +4,10 @@ import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/statistics.module.css';
+import homeCssModule from '../styles/home.module.css';
+import LineChart from "../components/LineChart";
+import PieChart from "../components/PieChart";
+import TopProductsTable from "../components/TopProductsTable";
 
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
 const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
@@ -181,8 +185,8 @@ const Statistics: React.FC = () => {
                         />
                         <MetricCard
                             title="Valor em Estoque"
-                            value="R$ 500.650,50"
-                            comparison="vs Mês Anterior 500 8.5%"
+                            value={`R$ ${(overview?.total_stock_value ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+                            comparison="vs Mês Anterior"
                             trend="up"
                             iconSrc="/icons/money.svg"
                             emoji="💰"
@@ -212,7 +216,7 @@ const Statistics: React.FC = () => {
                             <h3 className={cssModule.chartTitle}>Evolução do Estoque</h3>
                             <div className={cssModule.chartContainer}>
                                 <div className={cssModule.lineChart}>
-                                    <div className={cssModule.chartPlaceholder}>📈 Gráfico de Linha - Evolução do Estoque</div>
+                                    <LineChart />
                                 </div>
                             </div>
                         </div>
@@ -221,7 +225,7 @@ const Statistics: React.FC = () => {
                             <h3 className={cssModule.chartTitle}>Produtos Mais Vendidos</h3>
                             <div className={cssModule.chartContainer}>
                                 <div className={cssModule.barChart}>
-                                    <div className={cssModule.chartPlaceholder}>📊 Gráfico de Barras - Produtos Mais Vendidos</div>
+                                    <PieChart />
                                 </div>
                             </div>
                         </div>
@@ -229,12 +233,8 @@ const Statistics: React.FC = () => {
 
                     <div className={cssModule.fullWidthChart}>
                         <div className={cssModule.chartCard}>
-                            <h3 className={cssModule.chartTitle}>Valor em Estoque</h3>
-                            <div className={cssModule.chartContainer}>
-                                <div className={cssModule.areaChart}>
-                                    <div className={cssModule.chartPlaceholder}>📈 Gráfico de Área - Valor em Estoque</div>
-                                </div>
-                            </div>
+                            <h3 className={cssModule.chartTitle}>Principais Produtos</h3>
+                            <TopProductsTable className={homeCssModule.productsTable} />
                         </div>
                     </div>
                 </section>

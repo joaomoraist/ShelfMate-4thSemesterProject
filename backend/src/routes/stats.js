@@ -12,7 +12,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 // GET /stats/overview
-// Retorna: accesses (soma de accesses da empresa), products_count, changes (soma), downloads (soma), alerts_count, total_sold (soma qntd)
+// Retorna: accesses (soma de accesses da empresa), products_count, changes (soma), downloads (soma), alerts_count, total_sold (soma qntd), total_stock_value
 router.get('/overview', async (req, res) => {
   try {
     const companyId = req.session?.user?.company_id;
@@ -58,13 +58,25 @@ router.get('/overview', async (req, res) => {
         JOIN products p ON p.id = s.product_id
       `;
 
+    const totalStockValue = companyId
+      ? await sql`
+        SELECT COALESCE(SUM(p.inventory * p.unit_price),0) AS total_value
+        FROM products p
+        WHERE p.company_id = ${companyId}
+      `
+      : await sql`
+        SELECT COALESCE(SUM(p.inventory * p.unit_price),0) AS total_value
+        FROM products p
+      `;
+
     return res.json({
       accesses: userAgg[0].accesses_sum,
       products_count: productsCount[0].products_count,
       changes: userAgg[0].changes_sum,
       downloads: userAgg[0].downloads_sum,
       alerts_count: alertsCount[0].alerts_count,
-      total_sold_qntd: Number(totalSold[0].total_qntd)
+      total_sold_qntd: Number(totalSold[0].total_qntd),
+      total_stock_value: Number(totalStockValue[0].total_value)
     });
   } catch (err) {
     console.error('Erro em /stats/overview:', err);
