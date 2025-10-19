@@ -1,4 +1,5 @@
 import React from "react";
+import { API_URLS } from '../config/api';
 import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
@@ -9,6 +10,9 @@ const Products: React.FC = () => {
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
+    const [products, setProducts] = useState<any[]>([]);
+    const [adding, setAdding] = useState(false);
+    const [newProduct, setNewProduct] = useState({ name: '', unit_price: 0, inventory: 0, status: 'Disponível' });
     
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
@@ -21,87 +25,43 @@ const Products: React.FC = () => {
     };
 
     if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
-    if (!user) return (
-        <div style={{ padding: 40, textAlign: "center" }}>
-            <h2>📦 Produtos</h2>
-            <p>Você não está logado. Por favor, faça login para acessar seus produtos.</p>
-        </div>
-    );
 
-    const products = [
-        {
-            name: "Notebook Dell XPS",
-            supplier: "Dell Brasil",
-            stock: 45,
-            minMax: "30/100",
-            sales: 145,
-            lastRestock: "15/03/2024",
-            status: "Disponível",
-            statusColor: "green",
-            alerts: 2,
-            hasAlert: false
-        },
-        {
-            name: "Mouse Logitech MX",
-            supplier: "Logitech",
-            stock: 120,
-            minMax: "50/200",
-            sales: 128,
-            lastRestock: "20/03/2024",
-            status: "Disponível",
-            statusColor: "green",
-            alerts: 1,
-            hasAlert: false
-        },
-        {
-            name: "Teclado Mecânico",
-            supplier: "Keychron",
-            stock: 8,
-            minMax: "20/80",
-            sales: 112,
-            lastRestock: "05/03/2024",
-            status: "Baixo",
-            statusColor: "orange",
-            alerts: 3,
-            hasAlert: true
-        },
-        {
-            name: "Monitor LG 27\"",
-            supplier: "LG Electronics",
-            stock: 32,
-            minMax: "25/75",
-            sales: 98,
-            lastRestock: "18/03/2024",
-            status: "Disponível",
-            statusColor: "green",
-            alerts: 1,
-            hasAlert: false
-        },
-        {
-            name: "Webcam Full HD",
-            supplier: "Logitech",
-            stock: 0,
-            minMax: "15/60",
-            sales: 85,
-            lastRestock: "01/03/2024",
-            status: "Esgotado",
-            statusColor: "red",
-            alerts: 4,
-            hasAlert: true
-        },
-        {
-            name: "Fone Bluetooth",
-            supplier: "Sony",
-            stock: 65,
-            minMax: "40/150",
-            sales: 156,
-            lastRestock: "22/03/2024",
-            status: "Disponível",
-            statusColor: "green",
-            alerts: 1,
-            hasAlert: false
+    // Carregar produtos reais
+    React.useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await fetch(API_URLS.STATS_PRODUCTS, { credentials: 'include' });
+                if (!res.ok) throw new Error('Falha ao buscar produtos');
+                const data = await res.json();
+                setProducts(data.rows || []);
+            } catch (e) {
+                console.error(e);
+                setProducts([]);
+            }
+        };
+        load();
+    }, []);
+
+    const submitNewProduct = async () => {
+        try {
+            setAdding(true);
+            const res = await fetch(API_URLS.STATS_PRODUCTS, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(newProduct)
+            });
+            if (!res.ok) throw new Error('Falha ao criar produto');
+            const data = await res.json();
+            setProducts((prev) => [...prev, data.product]);
+            setNewProduct({ name: '', unit_price: 0, inventory: 0, status: 'Disponível' });
+            setAdding(false);
+        } catch (e) {
+            console.error(e);
+            setAdding(false);
+            alert('Erro ao criar produto');
         }
-    ];
+    };
 
     return (
         <div style={{ minHeight: "100vh", background: "transparent" }}>
@@ -177,15 +137,22 @@ const Products: React.FC = () => {
                             </div>
                         </div>
                         <div className={cssModule.actionButtons}>
-                            <button className={cssModule.addButton}>
+                            <button className={cssModule.addButton} onClick={submitNewProduct} disabled={adding}>
                                 <span className={cssModule.buttonIcon}>+</span>
-                                Adicionar um Produto
+                                {adding ? 'Salvando...' : 'Adicionar um Produto'}
                             </button>
                             <button className={cssModule.addMultipleButton}>
                                 <span className={cssModule.buttonIcon}>📄</span>
                                 Adicionar vários Produtos
                             </button>
                         </div>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: 12, padding: '8px 0' }}>
+                        <input className={cssModule.searchField} placeholder="Nome do produto" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
+                        <input className={cssModule.searchField} placeholder="Preço unitário" type="number" value={newProduct.unit_price} onChange={(e) => setNewProduct({ ...newProduct, unit_price: Number(e.target.value) })} />
+                        <input className={cssModule.searchField} placeholder="Estoque" type="number" value={newProduct.inventory} onChange={(e) => setNewProduct({ ...newProduct, inventory: Number(e.target.value) })} />
+                        <input className={cssModule.searchField} placeholder="Status" value={newProduct.status} onChange={(e) => setNewProduct({ ...newProduct, status: e.target.value })} />
                     </div>
 
                     <div className={cssModule.productsTable}>
@@ -200,28 +167,28 @@ const Products: React.FC = () => {
                             <div className={cssModule.tableColumn}>Alertas</div>
                         </div>
                         
-                        {products.map((product, index) => (
-                            <div key={index} className={cssModule.tableRow}>
+                        {products.map((product: any, index) => (
+                            <div key={product.id ?? index} className={cssModule.tableRow}>
                                 <div className={cssModule.productCell}>
                                     <span className={cssModule.productName}>{product.name}</span>
                                     <span className={cssModule.expandIcon}>▼</span>
                                 </div>
-                                <div className={cssModule.supplierCell}>{product.supplier}</div>
+                                <div className={cssModule.supplierCell}>{product.supplier || '-'}</div>
                                 <div className={cssModule.stockCell}>
-                                    <span className={cssModule.stockValue}>{product.stock}</span>
+                                    <span className={cssModule.stockValue}>{product.inventory ?? product.stock ?? 0}</span>
                                 </div>
-                                <div className={cssModule.minMaxCell}>{product.minMax}</div>
-                                <div className={cssModule.salesCell}>{product.sales}</div>
-                                <div className={cssModule.restockCell}>{product.lastRestock}</div>
+                                <div className={cssModule.minMaxCell}>{product.minMax || '-'}</div>
+                                <div className={cssModule.salesCell}>{product.sales ?? '-'}</div>
+                                <div className={cssModule.restockCell}>{product.lastRestock || '-'}</div>
                                 <div className={cssModule.statusCell}>
-                                    <span className={`${cssModule.status} ${cssModule[product.statusColor]}`}>
-                                        {product.status}
+                                    <span className={`${cssModule.status} ${cssModule[(product.statusColor || 'green')]}`}>
+                                        {product.status || 'Disponível'}
                                     </span>
                                 </div>
                                 <div className={cssModule.alertsCell}>
                                     <span className={cssModule.alertIcon}>🔔</span>
-                                    <span className={cssModule.alertCount}>{product.alerts}</span>
-                                    {product.hasAlert && <span className={cssModule.alertDot}>●</span>}
+                                    <span className={cssModule.alertCount}>{product.alerts ?? 0}</span>
+                                    {(product.hasAlert ?? false) && <span className={cssModule.alertDot}>●</span>}
                                 </div>
                             </div>
                         ))}

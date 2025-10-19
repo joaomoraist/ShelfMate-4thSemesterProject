@@ -22,7 +22,7 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({ className }) => {
       try {
         setLoading(true);
         // Buscar os 10 produtos mais vendidos
-        const response = await fetch(API_URLS.TOP_PRODUCTS);
+        const response = await fetch(API_URLS.TOP_PRODUCTS, { credentials: 'include' });
 
         if (!response.ok) {
           const errorData = await response.json();

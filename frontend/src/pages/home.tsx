@@ -36,6 +36,7 @@ const StatCard: React.FC<{ title: string; value: string; iconSrc: string; emoji:
 
 const Home: React.FC = () => {
     const [user, setUser] = useState<any>(null);
+    const [overview, setOverview] = useState<any>(null);
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
@@ -52,13 +53,23 @@ const Home: React.FC = () => {
         });
     };
 
+    // Carregar métricas da home
+    React.useEffect(() => {
+        const loadOverview = async () => {
+            try {
+                const res = await fetch(API_URLS.STATS_OVERVIEW, { credentials: 'include' });
+                if (!res.ok) throw new Error('Falha ao buscar overview');
+                const data = await res.json();
+                setOverview(data);
+            } catch (e) {
+                console.error(e);
+                setOverview(null);
+            }
+        };
+        loadOverview();
+    }, []);
+
     if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
-    if (!user) return (
-        <div style={{ padding: 40, textAlign: "center" }}>
-            <h2>🏠 Home</h2>
-            <p>Você não está logado. Por favor, faça login para acessar seu perfil.</p>
-        </div>
-    );
 
     return (
         <div style={{ minHeight: "100vh", background: "transparent" }}>
@@ -154,11 +165,11 @@ const Home: React.FC = () => {
                     </div>
 
                     <div className={cssModule.statGrid}>
-                        <StatCard title="Últimos Acessos" value="30 LogIns" iconSrc="/icons/clock.svg" emoji="🕒" />
-                        <StatCard title="Produtos Inseridos" value="40 SKUs" iconSrc="/icons/box.svg" emoji="📦" />
-                        <StatCard title="Mudanças no Perfil" value="2 Mudanças" iconSrc="/icons/settings.svg" emoji="⚙️" />
-                        <StatCard title="Relatórios Baixados" value="30 Emitidos" iconSrc="/icons/report.svg" emoji="📄" />
-                        <StatCard title="Alertas Emitidos" value="50 Enviados" iconSrc="/icons/alert.svg" emoji="⚠️" />
+                        <StatCard title="Últimos Acessos" value={`${overview?.accesses ?? 0} LogIns`} iconSrc="/icons/clock.svg" emoji="🕒" />
+                        <StatCard title="Produtos Inseridos" value={`${overview?.products_count ?? 0} SKUs`} iconSrc="/icons/box.svg" emoji="📦" />
+                        <StatCard title="Mudanças no Perfil" value={`${overview?.changes ?? 0} Mudanças`} iconSrc="/icons/settings.svg" emoji="⚙️" />
+                        <StatCard title="Relatórios Baixados" value={`${overview?.downloads ?? 0} Emitidos`} iconSrc="/icons/report.svg" emoji="📄" />
+                        <StatCard title="Alertas Emitidos" value={`${overview?.alerts_count ?? 0} Enviados`} iconSrc="/icons/alert.svg" emoji="⚠️" />
                     </div>
                 </section>
 

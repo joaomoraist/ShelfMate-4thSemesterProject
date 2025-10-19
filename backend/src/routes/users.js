@@ -399,8 +399,12 @@ router.put('/me', upload.single('image'), async (req, res) => {
 // GET /users/me
 router.get('/me', (req, res) => {
   try {
+    // Em desenvolvimento, permita prosseguir mesmo sem sessão, retornando usuário fake
     if (req.session && req.session.user) {
       return res.json({ user: req.session.user });
+    }
+    if (process.env.NODE_ENV !== 'production') {
+      return res.json({ user: null });
     }
     return res.status(401).json({ error: 'Not authenticated' });
   } catch (err) {

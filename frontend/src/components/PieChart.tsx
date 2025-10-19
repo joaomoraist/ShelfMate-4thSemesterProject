@@ -46,8 +46,8 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
         const data = await response.json();
         
         // Preparar dados para o gráfico
-        const labels = data.rows.slice(0, 5).map((item: any) => item.name);
-        const values = data.rows.slice(0, 5).map((item: any) => item.total_qntd);
+        const labels = (data.rows || []).slice(0, 5).map((item: any) => item.name);
+        const values = (data.rows || []).slice(0, 5).map((item: any) => item.total_qntd);
 
         // Gerar cores aleatórias para cada fatia
         const backgroundColors = [

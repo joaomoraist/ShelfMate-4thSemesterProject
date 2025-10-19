@@ -54,8 +54,8 @@ const LineChart: React.FC<LineChartProps> = ({ className }) => {
         const data = await response.json();
         
         // Preparar dados para o gráfico
-        const labels = data.rows.slice(0, 6).map((item: any) => item.name);
-        const values = data.rows.slice(0, 6).map((item: any) => item.total_qntd);
+        const labels = (data.rows || []).slice(0, 6).map((item: any) => item.name);
+        const values = (data.rows || []).slice(0, 6).map((item: any) => item.total_qntd);
 
         setChartData({
           labels,

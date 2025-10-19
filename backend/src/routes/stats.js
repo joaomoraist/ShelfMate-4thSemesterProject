@@ -142,6 +142,32 @@ router.get('/products', async (req, res) => {
   }
 });
 
+// POST /stats/products -> criar novo produto
+// body: { name, unit_price, inventory, status }
+router.post('/products', async (req, res) => {
+  try {
+    const { name, unit_price, inventory, status } = req.body || {};
+
+    if (!name) return res.status(400).json({ error: 'name é obrigatório' });
+
+    const unitPrice = unit_price != null ? Number(unit_price) : 0;
+    const inventoryQty = inventory != null ? Number(inventory) : 0;
+    const productStatus = status || 'Disponível';
+    const companyId = req.session?.user?.company_id || null;
+
+    const rows = await sql`
+      INSERT INTO products (name, unit_price, inventory, status, company_id)
+      VALUES (${name}, ${unitPrice}, ${inventoryQty}, ${productStatus}, ${companyId})
+      RETURNING *
+    `;
+
+    return res.status(201).json({ product: rows[0] });
+  } catch (err) {
+    console.error('Erro em POST /stats/products:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /stats/product/:id/sales -> vendas do produto (qntd, value, total qntd)
 router.get('/product/:id/sales', async (req, res) => {
   try {

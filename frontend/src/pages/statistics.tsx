@@ -1,4 +1,5 @@
 import React from "react";
+import { API_URLS } from '../config/api';
 import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
@@ -48,6 +49,7 @@ const Statistics: React.FC = () => {
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
+    const [overview, setOverview] = useState<any>(null);
     
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
@@ -58,6 +60,22 @@ const Statistics: React.FC = () => {
         alert("👋 Logout realizado com sucesso!");
         navigateTo("login");
     };
+
+    // carregar métricas
+    React.useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await fetch(API_URLS.STATS_OVERVIEW, { credentials: 'include' });
+                if (!res.ok) throw new Error('Falha ao buscar overview');
+                const data = await res.json();
+                setOverview(data);
+            } catch (e) {
+                console.error(e);
+                setOverview(null);
+            }
+        };
+        load();
+    }, []);
 
     if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
     if (!user) return (
@@ -155,8 +173,8 @@ const Statistics: React.FC = () => {
                     <div className={cssModule.metricsGrid}>
                         <MetricCard
                             title="Total de Produtos"
-                            value="540"
-                            comparison="vs Mês Anterior 500 8.5%"
+                            value={`${overview?.products_count ?? 0}`}
+                            comparison="vs Mês Anterior"
                             trend="up"
                             iconSrc="/icons/box.svg"
                             emoji="📦"
@@ -171,7 +189,7 @@ const Statistics: React.FC = () => {
                         />
                         <MetricCard
                             title="Produtos com Estoque Baixo"
-                            value="250"
+                            value={`${overview?.alerts_count ?? 0}`}
                             comparison="vs Mês Anterior 500 8.5%"
                             trend="down"
                             iconSrc="/icons/alert.svg"
@@ -179,7 +197,7 @@ const Statistics: React.FC = () => {
                         />
                         <MetricCard
                             title="Vendas no Período"
-                            value="250 Pedidos"
+                            value={`${overview?.total_sold_qntd ?? 0} Itens"
                             comparison="vs Mês Anterior 500 Pedidos 8.5%"
                             trend="up"
                             iconSrc="/icons/sales.svg"
