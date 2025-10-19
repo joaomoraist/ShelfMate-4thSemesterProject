@@ -4,6 +4,9 @@ import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/home.module.css';
+import LineChart from "../components/LineChart";
+import PieChart from "../components/PieChart";
+import TopProductsTable from "../components/TopProductsTable";
 
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
 const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
@@ -173,7 +176,7 @@ const Home: React.FC = () => {
                             </div>
                             <div className={cssModule.chartContainer}>
                                 <div className={cssModule.lineChart}>
-                                    <div className={cssModule.chartPlaceholder}>📈 Gráfico de Linha</div>
+                                    <LineChart />
                                 </div>
                             </div>
                         </div>
@@ -185,7 +188,7 @@ const Home: React.FC = () => {
                             </div>
                             <div className={cssModule.chartContainer}>
                                 <div className={cssModule.pieChart}>
-                                    <div className={cssModule.chartPlaceholder}>🥧 Gráfico de Pizza</div>
+                                    <PieChart />
                                 </div>
                             </div>
                         </div>
@@ -195,18 +198,7 @@ const Home: React.FC = () => {
                                 <h4 className={cssModule.cardTitle}>Principais Produtos</h4>
                                 <p className={cssModule.cardSubtitle}>Considerando Vendas dos Últimos 3 meses</p>
                             </div>
-                            <div className={cssModule.productsTable}>
-                                <div className={cssModule.tableHeader}>
-                                    <span className={cssModule.tableColumn}>SKU</span>
-                                    <span className={cssModule.tableColumn}>Descrição</span>
-                                    <span className={cssModule.tableColumn}>Qntd</span>
-                                </div>
-                                <div className={cssModule.tableRow}>
-                                    <span className={cssModule.tableCell}>10056</span>
-                                    <span className={cssModule.tableCell}>Monster de Laranja</span>
-                                    <span className={cssModule.tableCell}>100</span>
-                                </div>
-                            </div>
+                            <TopProductsTable className={cssModule.productsTable} />
                         </div>
                     </div>
                 </section>

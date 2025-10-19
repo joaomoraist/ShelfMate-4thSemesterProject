@@ -13,6 +13,12 @@ export const API_CONFIG = {
       RESET_PASSWORD: '/users/reset-password',
       ME: '/users/me',
       LOGOUT: '/users/logout'
+    },
+    STATS: {
+      OVERVIEW: '/stats/overview',
+      SALES_PER_PRODUCT: '/stats/sales-per-product',
+      TOP_PRODUCTS: '/stats/top-products',
+      PRODUCTS: '/stats/products'
     }
   }
 };
@@ -29,10 +35,14 @@ export const API_URLS = {
   REGISTER: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.REGISTER),
   SEND_RESET_CODE: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.SEND_RESET_CODE),
   VERIFY_RESET_CODE: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.VERIFY_RESET_CODE),
-  RESET_PASSWORD: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.RESET_PASSWORD)
-  ,
+  RESET_PASSWORD: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.RESET_PASSWORD),
   ME: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.ME),
-  LOGOUT: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.LOGOUT)
-  ,
-  HOME: buildApiUrl('/home')
+  LOGOUT: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.LOGOUT),
+  HOME: buildApiUrl('/home'),
+  
+  // Stats endpoints
+  STATS_OVERVIEW: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.OVERVIEW),
+  SALES_PER_PRODUCT: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.SALES_PER_PRODUCT),
+  TOP_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.TOP_PRODUCTS),
+  STATS_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS)
 };
