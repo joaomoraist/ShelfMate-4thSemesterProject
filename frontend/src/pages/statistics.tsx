@@ -197,7 +197,7 @@ const Statistics: React.FC = () => {
                         />
                         <MetricCard
                             title="Vendas no Período"
-                            value={`${overview?.total_sold_qntd ?? 0} Itens"
+                            value={`${overview?.total_sold_qntd ?? 0} Itens`}
                             comparison="vs Mês Anterior 500 Pedidos 8.5%"
                             trend="up"
                             iconSrc="/icons/sales.svg"
