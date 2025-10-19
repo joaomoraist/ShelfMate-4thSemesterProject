@@ -15,6 +15,7 @@ function ensureAuthenticated(req, res, next) {
 // Retorna: accesses (soma de accesses da empresa), products_count, changes (soma), downloads (soma), alerts_count, total_sold (soma qntd)
 router.get('/overview', ensureAuthenticated, async (req, res) => {
   try {
+    console.log('req.session.user:', req.session.user);
     const companyId = req.session.user.company_id;
 
     // accesses, changes, downloads (sum across users in company)
@@ -62,6 +63,7 @@ router.get('/overview', ensureAuthenticated, async (req, res) => {
 // GET /stats/sales-per-product -> [{ product_id, name, total_qntd }]
 router.get('/sales-per-product', ensureAuthenticated, async (req, res) => {
   try {
+    console.log('req.session.user:', req.session.user);
     const companyId = req.session.user.company_id;
     const rows = await sql`
       SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
@@ -81,6 +83,7 @@ router.get('/sales-per-product', ensureAuthenticated, async (req, res) => {
 // GET /stats/top-products -> top 10 produtos mais vendidos (por qntd)
 router.get('/top-products', ensureAuthenticated, async (req, res) => {
   try {
+    console.log('req.session.user:', req.session.user);
     const companyId = req.session.user.company_id;
     const rows = await sql`
       SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
@@ -101,6 +104,7 @@ router.get('/top-products', ensureAuthenticated, async (req, res) => {
 // GET /stats/products -> todos os produtos e colunas da tabela products para a empresa
 router.get('/products', ensureAuthenticated, async (req, res) => {
   try {
+    console.log('req.session.user:', req.session.user);
     const companyId = req.session.user.company_id;
     const rows = await sql`
       SELECT * FROM products WHERE company_id = ${companyId} ORDER BY id
@@ -115,6 +119,7 @@ router.get('/products', ensureAuthenticated, async (req, res) => {
 // GET /stats/product/:id/sales -> vendas do produto (qntd, value, total qntd)
 router.get('/product/:id/sales', ensureAuthenticated, async (req, res) => {
   try {
+    console.log('req.session.user:', req.session.user);
     const companyId = req.session.user.company_id;
     const productId = Number(req.params.id);
 
