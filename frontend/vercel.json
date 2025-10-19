@@ -1,7 +1,8 @@
 {
   "version": 2,
+  "framework": "vite",
   "buildCommand": "npm run build",
-  "outputDirectory": "frontend/dist",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/$1" }
   ]
