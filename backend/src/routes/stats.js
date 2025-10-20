@@ -212,7 +212,7 @@ router.get('/products', async (req, res) => {
   }
 });
 
-// ✅ CORRIGIDO: GET /stats/products-detailed
+// ✅ CORRIGIDO: GET /stats/products-detailed (sem usar s.created_at)
 router.get('/products-detailed', async (req, res) => {
   try {
     const companyId = req.session?.user?.company_id;
@@ -228,13 +228,12 @@ router.get('/products-detailed', async (req, res) => {
           p.status,
           p.company_id,
           COALESCE(SUM(s.qntd), 0) AS total_sales,
-          COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count,
-          COALESCE(MAX(s.created_at), p.created_at) AS last_sale_date
+          COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count
         FROM products p
         LEFT JOIN sales s ON s.product_id = p.id
         LEFT JOIN alerts a ON a.product_id = p.id
         WHERE p.company_id = ${companyId}
-        GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id, p.created_at
+        GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id
         ORDER BY p.id
       `;
     } else {
@@ -247,12 +246,11 @@ router.get('/products-detailed', async (req, res) => {
           p.status,
           p.company_id,
           COALESCE(SUM(s.qntd), 0) AS total_sales,
-          COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count,
-          COALESCE(MAX(s.created_at), p.created_at) AS last_sale_date
+          COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count
         FROM products p
         LEFT JOIN sales s ON s.product_id = p.id
         LEFT JOIN alerts a ON a.product_id = p.id
-        GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id, p.created_at
+        GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id
         ORDER BY p.id
       `;
     }
@@ -263,6 +261,7 @@ router.get('/products-detailed', async (req, res) => {
     return res.status(500).json({ error: err.message || 'Internal server error' });
   }
 });
+
 
 // POST /stats/products
 router.post('/products', async (req, res) => {
