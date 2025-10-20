@@ -12,7 +12,6 @@ function ensureAuthenticated(req, res, next) {
 }
 
 // GET /stats/overview
-// Retorna: accesses (soma de accesses da empresa), products_count, changes (soma), downloads (soma), alerts_count, total_sold (soma qntd), total_stock_value
 router.get('/overview', async (req, res) => {
   try {
     const companyId = req.session?.user?.company_id;
@@ -85,26 +84,16 @@ router.get('/overview', async (req, res) => {
 });
 
 // GET /stats/activity-last-30-days
-// Retorna dados específicos dos últimos 30 dias para a seção "Acesso Rápido"
 router.get('/activity-last-30-days', async (req, res) => {
   try {
     const companyId = req.session?.user?.company_id;
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // Últimos Acessos (baseado no campo accesses dos usuários)
     const lastAccesses = companyId
-      ? await sql`
-        SELECT COALESCE(SUM(accesses),0) AS total_accesses
-        FROM users
-        WHERE company_id = ${companyId}
-      `
-      : await sql`
-        SELECT COALESCE(SUM(accesses),0) AS total_accesses
-        FROM users
-      `;
+      ? await sql`SELECT COALESCE(SUM(accesses),0) AS total_accesses FROM users WHERE company_id = ${companyId}`
+      : await sql`SELECT COALESCE(SUM(accesses),0) AS total_accesses FROM users`;
 
-    // Produtos Inseridos nos últimos 30 dias
     const productsInserted = companyId
       ? await sql`
         SELECT COUNT(*)::int AS products_count
@@ -118,31 +107,14 @@ router.get('/activity-last-30-days', async (req, res) => {
         WHERE created_at >= ${thirtyDaysAgo.toISOString()}
       `;
 
-    // Mudanças no Perfil (baseado no campo changes dos usuários)
     const profileChanges = companyId
-      ? await sql`
-        SELECT COALESCE(SUM(changes),0) AS total_changes
-        FROM users
-        WHERE company_id = ${companyId}
-      `
-      : await sql`
-        SELECT COALESCE(SUM(changes),0) AS total_changes
-        FROM users
-      `;
+      ? await sql`SELECT COALESCE(SUM(changes),0) AS total_changes FROM users WHERE company_id = ${companyId}`
+      : await sql`SELECT COALESCE(SUM(changes),0) AS total_changes FROM users`;
 
-    // Relatórios Baixados (baseado no campo downloads dos usuários)
     const reportsDownloaded = companyId
-      ? await sql`
-        SELECT COALESCE(SUM(downloads),0) AS total_downloads
-        FROM users
-        WHERE company_id = ${companyId}
-      `
-      : await sql`
-        SELECT COALESCE(SUM(downloads),0) AS total_downloads
-        FROM users
-      `;
+      ? await sql`SELECT COALESCE(SUM(downloads),0) AS total_downloads FROM users WHERE company_id = ${companyId}`
+      : await sql`SELECT COALESCE(SUM(downloads),0) AS total_downloads FROM users`;
 
-    // Alertas Emitidos nos últimos 30 dias
     const alertsIssued = companyId
       ? await sql`
         SELECT COUNT(a.*)::int AS alerts_count
@@ -170,7 +142,7 @@ router.get('/activity-last-30-days', async (req, res) => {
   }
 });
 
-// GET /stats/sales-per-product -> [{ product_id, name, total_qntd }]
+// GET /stats/sales-per-product
 router.get('/sales-per-product', async (req, res) => {
   try {
     const companyId = req.session?.user?.company_id;
@@ -197,7 +169,7 @@ router.get('/sales-per-product', async (req, res) => {
   }
 });
 
-// GET /stats/top-products -> top 10 produtos mais vendidos (por qntd)
+// GET /stats/top-products
 router.get('/top-products', async (req, res) => {
   try {
     const companyId = req.session?.user?.company_id;
@@ -226,7 +198,7 @@ router.get('/top-products', async (req, res) => {
   }
 });
 
-// GET /stats/products -> todos os produtos e colunas da tabela products para a empresa
+// GET /stats/products
 router.get('/products', async (req, res) => {
   try {
     const companyId = req.session?.user?.company_id;
@@ -240,13 +212,14 @@ router.get('/products', async (req, res) => {
   }
 });
 
-// GET /stats/products-detailed -> produtos com informações detalhadas (vendas, alertas, etc.)
+// ✅ CORRIGIDO: GET /stats/products-detailed
 router.get('/products-detailed', async (req, res) => {
   try {
     const companyId = req.session?.user?.company_id;
-    
-    const query = companyId
-      ? `
+
+    let rows;
+    if (companyId) {
+      rows = await sql`
         SELECT 
           p.id,
           p.name,
@@ -263,8 +236,9 @@ router.get('/products-detailed', async (req, res) => {
         WHERE p.company_id = ${companyId}
         GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id, p.created_at
         ORDER BY p.id
-      `
-      : `
+      `;
+    } else {
+      rows = await sql`
         SELECT 
           p.id,
           p.name,
@@ -281,17 +255,16 @@ router.get('/products-detailed', async (req, res) => {
         GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id, p.created_at
         ORDER BY p.id
       `;
-    
-    const rows = await sql.unsafe(query);
+    }
+
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/products-detailed:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: err.message || 'Internal server error' });
   }
 });
 
-// POST /stats/products -> criar novo produto
-// body: { name, unit_price, inventory, status }
+// POST /stats/products
 router.post('/products', async (req, res) => {
   try {
     const { name, unit_price, inventory, status } = req.body || {};
@@ -316,7 +289,7 @@ router.post('/products', async (req, res) => {
   }
 });
 
-// GET /stats/product/:id/sales -> vendas do produto (qntd, value, total qntd)
+// GET /stats/product/:id/sales
 router.get('/product/:id/sales', async (req, res) => {
   try {
     const productId = Number(req.params.id);
