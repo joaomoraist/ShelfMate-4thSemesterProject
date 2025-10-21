@@ -38,31 +38,28 @@ const BarChart: React.FC<BarChartProps> = ({ className }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Buscar dados de vendas por produto
-        const response = await fetch(API_URLS.SALES_PER_PRODUCT);
-
+        const stored = localStorage.getItem('user');
+        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+        const url = companyId ? `${API_URLS.SALES_PER_PRODUCT}?companyId=${companyId}` : API_URLS.SALES_PER_PRODUCT;
+        const response = await fetch(url);
+        
         if (!response.ok) {
           const errorData = await response.json();
           console.error('Erro na resposta:', errorData);
-          throw new Error('Falha ao buscar dados de vendas');
+          throw new Error('Falha ao buscar dados de vendas por produto');
         }
-
-        const data = await response.json();
         
-        // Preparar dados para o gráfico - mostrar os top 6 produtos
-        const topProducts = (data.rows || []).slice(0, 6);
-        const labels = topProducts.map((item: any) => item.name);
-        const values = topProducts.map((item: any) => item.total_qntd);
-
+        const data = await response.json();
+        const labels = (data.rows || []).map((item: any) => item.product_name);
+        const quantities = (data.rows || []).map((item: any) => item.total_quantity);
+        
         setChartData({
           labels,
           datasets: [
             {
               label: 'Quantidade Vendida',
-              data: values,
-              backgroundColor: 'rgba(54, 162, 235, 0.8)',
-              borderColor: 'rgba(54, 162, 235, 1)',
-              borderWidth: 1,
+              data: quantities,
+              backgroundColor: 'rgba(53, 162, 235, 0.5)'
             }
           ]
         });

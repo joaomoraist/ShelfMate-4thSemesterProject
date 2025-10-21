@@ -18,29 +18,24 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({ className }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const load = async () => {
       try {
         setLoading(true);
-        // Buscar os 10 produtos mais vendidos
-        const response = await fetch(API_URLS.TOP_PRODUCTS);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('Erro na resposta:', errorData);
-          throw new Error('Falha ao buscar produtos mais vendidos');
-        }
-
-        const data = await response.json();
-        setProducts(data.rows);
-      } catch (err) {
-        console.error('Erro ao buscar dados:', err);
-        setError(err instanceof Error ? err.message : 'Erro desconhecido');
+        const stored = localStorage.getItem('user');
+        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+        const url = companyId ? `${API_URLS.TOP_PRODUCTS}?companyId=${companyId}` : API_URLS.TOP_PRODUCTS;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Falha ao buscar top produtos');
+        const data = await res.json();
+        setProducts(data.rows || []);
+      } catch (e) {
+        console.error(e);
+        setError(e instanceof Error ? e.message : 'Erro ao carregar top produtos');
       } finally {
         setLoading(false);
       }
     };
-
-    fetchData();
+    load();
   }, []);
 
   if (loading) return <div>Carregando dados...</div>;

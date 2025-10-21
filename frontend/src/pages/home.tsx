@@ -58,7 +58,10 @@ const Home: React.FC = () => {
     React.useEffect(() => {
         const loadOverview = async () => {
             try {
-                const res = await fetch(API_URLS.STATS_OVERVIEW);
+                const stored = localStorage.getItem('user');
+                const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+                const url = companyId ? `${API_URLS.STATS_OVERVIEW}?companyId=${companyId}` : API_URLS.STATS_OVERVIEW;
+                const res = await fetch(url);
                 if (!res.ok) throw new Error('Falha ao buscar overview');
                 const data = await res.json();
                 setOverview(data);
@@ -74,7 +77,10 @@ const Home: React.FC = () => {
     React.useEffect(() => {
         const loadActivityData = async () => {
             try {
-                const res = await fetch(API_URLS.ACTIVITY_LAST_30_DAYS);
+                const stored = localStorage.getItem('user');
+                const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+                const url = companyId ? `${API_URLS.ACTIVITY_LAST_30_DAYS}?companyId=${companyId}` : API_URLS.ACTIVITY_LAST_30_DAYS;
+                const res = await fetch(url);
                 if (!res.ok) throw new Error('Falha ao buscar dados de atividade');
                 const data = await res.json();
                 setActivityData(data);

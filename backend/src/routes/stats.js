@@ -3,6 +3,16 @@ import sql from '../db.js';
 
 const router = express.Router();
 
+// Helper para resolver companyId (query/header/body/sessão)
+const resolveCompanyId = (req) => {
+  const q = req.query && (req.query.companyId ?? req.query.company_id);
+  const h = req.headers && (req.headers['x-company-id'] ?? req.headers['x_company_id']);
+  const b = req.body && (req.body.companyId ?? req.body.company_id);
+  const s = req.session && req.session.user && req.session.user.company_id;
+  const val = q ?? h ?? b ?? s;
+  return val !== undefined && val !== null && val !== '' ? Number(val) : undefined;
+};
+
 // Middleware simples para garantir autenticação via sessão
 function ensureAuthenticated(req, res, next) {
   if (req.session && req.session.user && req.session.user.company_id) {
@@ -14,7 +24,7 @@ function ensureAuthenticated(req, res, next) {
 // GET /stats/overview
 router.get('/overview', async (req, res) => {
   try {
-    const companyId = req.session?.user?.company_id;
+    const companyId = resolveCompanyId(req);
 
     const userAgg = companyId
       ? await sql`
@@ -86,13 +96,22 @@ router.get('/overview', async (req, res) => {
 // GET /stats/activity-last-30-days
 router.get('/activity-last-30-days', async (req, res) => {
   try {
-    const companyId = req.session?.user?.company_id;
+    const companyId = resolveCompanyId(req);
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const lastAccesses = companyId
-      ? await sql`SELECT COALESCE(SUM(accesses),0) AS total_accesses FROM users WHERE company_id = ${companyId}`
-      : await sql`SELECT COALESCE(SUM(accesses),0) AS total_accesses FROM users`;
+      ? await sql`
+        SELECT COALESCE(SUM(accesses),0) AS total_accesses
+        FROM users
+        WHERE company_id = ${companyId}
+        AND created_at >= ${thirtyDaysAgo.toISOString()}
+      `
+      : await sql`
+        SELECT COALESCE(SUM(accesses),0) AS total_accesses
+        FROM users
+        WHERE created_at >= ${thirtyDaysAgo.toISOString()}
+      `;
 
     const productsInserted = companyId
       ? await sql`
@@ -145,7 +164,7 @@ router.get('/activity-last-30-days', async (req, res) => {
 // GET /stats/sales-per-product
 router.get('/sales-per-product', async (req, res) => {
   try {
-    const companyId = req.session?.user?.company_id;
+    const companyId = resolveCompanyId(req);
     const rows = companyId
       ? await sql`
         SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
@@ -172,7 +191,7 @@ router.get('/sales-per-product', async (req, res) => {
 // GET /stats/top-products
 router.get('/top-products', async (req, res) => {
   try {
-    const companyId = req.session?.user?.company_id;
+    const companyId = resolveCompanyId(req);
     const rows = companyId
       ? await sql`
         SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
@@ -201,7 +220,7 @@ router.get('/top-products', async (req, res) => {
 // GET /stats/products
 router.get('/products', async (req, res) => {
   try {
-    const companyId = req.session?.user?.company_id;
+    const companyId = resolveCompanyId(req);
     const rows = companyId
       ? await sql`SELECT * FROM products WHERE company_id = ${companyId} ORDER BY id`
       : await sql`SELECT * FROM products ORDER BY id`;
@@ -215,11 +234,10 @@ router.get('/products', async (req, res) => {
 // ✅ CORRIGIDO: GET /stats/products-detailed (sem usar s.created_at)
 router.get('/products-detailed', async (req, res) => {
   try {
-    const companyId = req.session?.user?.company_id;
+    const companyId = resolveCompanyId(req);
 
-    let rows;
-    if (companyId) {
-      rows = await sql`
+    const rows = companyId
+      ? await sql`
         SELECT 
           p.id,
           p.name,
@@ -234,10 +252,9 @@ router.get('/products-detailed', async (req, res) => {
         LEFT JOIN alerts a ON a.product_id = p.id
         WHERE p.company_id = ${companyId}
         GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id
-        ORDER BY p.id
-      `;
-    } else {
-      rows = await sql`
+        ORDER BY total_sales DESC
+      `
+      : await sql`
         SELECT 
           p.id,
           p.name,
@@ -251,9 +268,8 @@ router.get('/products-detailed', async (req, res) => {
         LEFT JOIN sales s ON s.product_id = p.id
         LEFT JOIN alerts a ON a.product_id = p.id
         GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id
-        ORDER BY p.id
+        ORDER BY total_sales DESC
       `;
-    }
 
     return res.json({ rows });
   } catch (err) {
@@ -266,14 +282,14 @@ router.get('/products-detailed', async (req, res) => {
 // POST /stats/products
 router.post('/products', async (req, res) => {
   try {
-    const { name, unit_price, inventory, status } = req.body || {};
+    const { name, unit_price, inventory, status, companyId: companyIdBody } = req.body || {};
 
     if (!name) return res.status(400).json({ error: 'name é obrigatório' });
 
     const unitPrice = unit_price != null ? Number(unit_price) : 0;
     const inventoryQty = inventory != null ? Number(inventory) : 0;
     const productStatus = status || 'Disponível';
-    const companyId = req.session?.user?.company_id || null;
+    const companyId = companyIdBody ?? (req.session?.user?.company_id ?? null);
 
     const rows = await sql`
       INSERT INTO products (name, unit_price, inventory, status, company_id)

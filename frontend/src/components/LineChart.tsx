@@ -41,7 +41,10 @@ const LineChart: React.FC<LineChartProps> = ({ className }) => {
       try {
         setLoading(true);
         // Buscar dados de produtos para mostrar evolução do estoque
-        const response = await fetch(API_URLS.STATS_PRODUCTS);
+        const stored = localStorage.getItem('user');
+        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+        const url = companyId ? `${API_URLS.STATS_PRODUCTS}?companyId=${companyId}` : API_URLS.STATS_PRODUCTS;
+        const response = await fetch(url);
 
         if (!response.ok) {
           const errorData = await response.json();

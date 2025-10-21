@@ -30,7 +30,10 @@ const Products: React.FC = () => {
     React.useEffect(() => {
         const load = async () => {
             try {
-                const res = await fetch(API_URLS.PRODUCTS_DETAILED);
+                const stored = localStorage.getItem('user');
+                const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+                const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
+                const res = await fetch(url);
                 if (!res.ok) throw new Error('Falha ao buscar produtos');
                 const data = await res.json();
                 setProducts(data.rows || []);
@@ -45,17 +48,20 @@ const Products: React.FC = () => {
     const submitNewProduct = async () => {
         try {
             setAdding(true);
+            const stored = localStorage.getItem('user');
+            const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
             const res = await fetch(API_URLS.STATS_PRODUCTS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 // no credentials to avoid third-party cookie issues in prod
-                body: JSON.stringify(newProduct)
+                body: JSON.stringify({ ...newProduct, companyId })
             });
             if (!res.ok) throw new Error('Falha ao criar produto');
-            const data = await res.json();
+            await res.json();
             
             // Recarregar produtos com dados detalhados
-            const detailedRes = await fetch(API_URLS.PRODUCTS_DETAILED);
+            const detailedUrl = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
+            const detailedRes = await fetch(detailedUrl);
             if (detailedRes.ok) {
                 const detailedData = await detailedRes.json();
                 setProducts(detailedData.rows || []);
