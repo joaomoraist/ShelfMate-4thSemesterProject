@@ -105,8 +105,8 @@ const Home: React.FC = () => {
                 </div>
 
                 <nav className={cssModule.topbarCenter}>
-                    <button className={cssModule.navButton} onClick={() => navigateTo("home")} data-active="true">
-                        <img src="/home-white.png" alt="Home" className={cssModule.iconImg} />
+                    <button className={cssModule.navButton} onClick={() => navigateTo("home")}>
+                        <img src="/home_white.png" alt="Home" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Home</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>

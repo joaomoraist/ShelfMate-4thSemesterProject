@@ -46,6 +46,78 @@ const Products: React.FC = () => {
 
 
 
+    // Handlers CSV declarados antes do JSX para evitar TDZ
+    function handleBulkButtonClick() {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+            fileInputRef.current.click();
+        }
+    }
+
+    async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+        try {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const text = await file.text();
+
+            const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+            if (lines.length < 2) { alert("CSV vazio ou sem dados."); return; }
+            const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+            const idxName = headers.indexOf("name");
+            const idxPrice = headers.indexOf("unit_price");
+            const idxInventory = headers.indexOf("inventory");
+            const idxStatus = headers.indexOf("status");
+            if (idxName === -1 || idxPrice === -1 || idxInventory === -1 || idxStatus === -1) {
+                alert("CSV deve conter cabeçalhos: name, unit_price, inventory, status.");
+                return;
+            }
+
+            const records = lines.slice(1).map(line => {
+                const cols = line.split(",").map(c => c.trim());
+                return {
+                    name: cols[idxName],
+                    unit_price: Number(cols[idxPrice]),
+                    inventory: Number(cols[idxInventory]),
+                    status: cols[idxStatus]
+                };
+            }).filter(r => r.name && !Number.isNaN(r.unit_price) && !Number.isNaN(r.inventory) && r.status);
+
+            if (records.length === 0) {
+                alert("Nenhuma linha válida encontrada no CSV.");
+                return;
+            }
+
+            const stored = localStorage.getItem('user');
+            const parsed = stored ? JSON.parse(stored) : null;
+            const companyId = parsed?.company_id;
+
+            const res = await fetch(API_URLS.STATS_PRODUCTS_BULK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rows: records, companyId })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Falha no upload CSV');
+
+            const summary = data?.summary || {};
+            setBulkSummary({ created: summary.createdCount ?? 0, skipped: summary.skippedCount ?? 0, errors: summary.errorCount ?? 0 });
+            alert(`Importação concluída. Criados: ${summary.createdCount ?? 0}, Ignorados: ${summary.skippedCount ?? 0}, Erros: ${summary.errorCount ?? 0}`);
+
+            // Recarregar produtos após importação
+            try {
+                const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
+                const r = await fetch(url);
+                const j = await r.json();
+                setProducts(j.rows || []);
+            } catch (err) {
+                console.error(err);
+            }
+        } catch (err) {
+            console.error(err);
+            alert(err instanceof Error ? err.message : 'Erro ao processar CSV');
+        }
+    }
+
     return (
         <div style={{ minHeight: "100vh", background: "transparent" }}>
             <header className={cssModule.topbar}>
@@ -58,7 +130,7 @@ const Products: React.FC = () => {
 
                 <nav className={cssModule.topbarCenter}>
                     <button className={cssModule.navButton} onClick={() => navigateTo("home")}>
-                        <img src="/home-white.png" alt="Home" className={cssModule.iconImg} />
+                        <img src="/home_white.png" alt="Home" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Home</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>
@@ -208,81 +280,6 @@ const Products: React.FC = () => {
         </div>
     );
 
-    // Abrir seletor de arquivo para CSV
-    const handleBulkButtonClick = () => {
-        if (fileInputRef.current) {
-            fileInputRef.current.value = ""; // permite re-selecionar o mesmo arquivo
-            fileInputRef.current.click();
-        }
-    };
-
-    // Parse simples de CSV e upload em lote
-    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        try {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            const text = await file.text();
-
-            // Parse CSV: espera cabeçalhos: name, unit_price, inventory, status
-            const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
-            if (lines.length < 2) {
-                alert("CSV vazio ou sem dados.");
-                return;
-            }
-            const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
-            const idxName = headers.indexOf("name");
-            const idxPrice = headers.indexOf("unit_price");
-            const idxInventory = headers.indexOf("inventory");
-            const idxStatus = headers.indexOf("status");
-            if (idxName === -1 || idxPrice === -1 || idxInventory === -1 || idxStatus === -1) {
-                alert("CSV deve conter cabeçalhos: name, unit_price, inventory, status.");
-                return;
-            }
-
-            const records = lines.slice(1).map(line => {
-                const cols = line.split(",").map(c => c.trim());
-                return {
-                    name: cols[idxName],
-                    unit_price: Number(cols[idxPrice]),
-                    inventory: Number(cols[idxInventory]),
-                    status: cols[idxStatus]
-                };
-            }).filter(r => r.name && !Number.isNaN(r.unit_price) && !Number.isNaN(r.inventory) && r.status);
-
-            if (records.length === 0) {
-                alert("Nenhuma linha válida encontrada no CSV.");
-                return;
-            }
-
-            const stored = localStorage.getItem('user');
-            const parsed = stored ? JSON.parse(stored) : null;
-            const companyId = parsed?.company_id;
-
-            const res = await fetch(API_URLS.STATS_PRODUCTS_BULK, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ products: records, companyId })
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data?.error || 'Falha no upload CSV');
-
-            setBulkSummary({ created: data?.created ?? 0, skipped: data?.skipped ?? 0, errors: data?.errors ?? 0 });
-            alert(`Importação concluída. Criados: ${data?.created ?? 0}, Ignorados: ${data?.skipped ?? 0}, Erros: ${data?.errors ?? 0}`);
-
-            // Recarregar produtos após importação
-            try {
-                const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
-                const r = await fetch(url);
-                const j = await r.json();
-                setProducts(j.rows || []);
-            } catch (err) {
-                console.error(err);
-            }
-        } catch (err) {
-            console.error(err);
-            alert(err instanceof Error ? err.message : 'Erro ao processar CSV');
-        }
-    };
 
 };
 

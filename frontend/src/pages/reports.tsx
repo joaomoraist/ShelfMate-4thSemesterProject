@@ -40,7 +40,8 @@ const Reports: React.FC = () => {
 
                 <nav className={cssModule.topbarCenter}>
                     <button className={cssModule.navButton} onClick={() => navigateTo("home")}>
-                        <img src="/home-white.png" alt="Home" className={cssModule.iconImg} />
+-                        <img src="/home-white.png" alt="Home" className={cssModule.iconImg} />
++                        <img src="/home_white.png" alt="Home" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Home</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>
