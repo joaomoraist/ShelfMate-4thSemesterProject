@@ -113,18 +113,10 @@ router.get('/activity-last-30-days', async (req, res) => {
         WHERE created_at >= ${thirtyDaysAgo.toISOString()}
       `;
 
+    // Removido filtro por created_at em products pois a coluna não existe no schema atual
     const productsInserted = companyId
-      ? await sql`
-        SELECT COUNT(*)::int AS products_count
-        FROM products
-        WHERE company_id = ${companyId} 
-        AND created_at >= ${thirtyDaysAgo.toISOString()}
-      `
-      : await sql`
-        SELECT COUNT(*)::int AS products_count
-        FROM products
-        WHERE created_at >= ${thirtyDaysAgo.toISOString()}
-      `;
+      ? await sql`SELECT COUNT(*)::int AS products_count FROM products WHERE company_id = ${companyId}`
+      : await sql`SELECT COUNT(*)::int AS products_count FROM products`;
 
     const profileChanges = companyId
       ? await sql`SELECT COALESCE(SUM(changes),0) AS total_changes FROM users WHERE company_id = ${companyId}`
@@ -134,18 +126,17 @@ router.get('/activity-last-30-days', async (req, res) => {
       ? await sql`SELECT COALESCE(SUM(downloads),0) AS total_downloads FROM users WHERE company_id = ${companyId}`
       : await sql`SELECT COALESCE(SUM(downloads),0) AS total_downloads FROM users`;
 
+    // Removido filtro por created_at em alerts pois a coluna não existe no schema atual
     const alertsIssued = companyId
       ? await sql`
         SELECT COUNT(a.*)::int AS alerts_count
         FROM alerts a
         JOIN products p ON p.id = a.product_id
         WHERE p.company_id = ${companyId}
-        AND a.created_at >= ${thirtyDaysAgo.toISOString()}
       `
       : await sql`
         SELECT COUNT(a.*)::int AS alerts_count
         FROM alerts a
-        WHERE a.created_at >= ${thirtyDaysAgo.toISOString()}
       `;
 
     return res.json({

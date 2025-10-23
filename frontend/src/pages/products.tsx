@@ -180,6 +180,12 @@ const Products: React.FC = () => {
                             <div className={cssModule.tableColumn}>Alertas</div>
                         </div>
                         
+                        {products.length === 0 && (
+                            <div style={{ padding: '16px 0', color: '#6b7280' }}>
+                                Nenhum produto encontrado para sua empresa. Adicione um produto acima.
+                            </div>
+                        )}
+                        
                         {products.map((product: any, index) => (
                             <div key={product.id ?? index} className={cssModule.tableRow}>
                                 <div className={cssModule.productCell}>

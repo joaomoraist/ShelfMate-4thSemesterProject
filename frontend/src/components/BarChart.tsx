@@ -50,8 +50,8 @@ const BarChart: React.FC<BarChartProps> = ({ className }) => {
         }
         
         const data = await response.json();
-        const labels = (data.rows || []).map((item: any) => item.product_name);
-        const quantities = (data.rows || []).map((item: any) => item.total_quantity);
+        const labels = (data.rows || []).map((item: any) => item.name);
+        const quantities = (data.rows || []).map((item: any) => item.total_qntd);
         
         setChartData({
           labels,
