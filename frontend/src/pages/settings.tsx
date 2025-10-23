@@ -37,33 +37,33 @@ const Settings: React.FC = () => {
             <header className={cssModule.topbar}>
                 <div className={cssModule.topbarLeft}>
                     <div className={cssModule.logoContainer}>
-                        <div className={cssModule.logoIcon}>📦</div>
+                        <img src="/logo-removebg.png" alt="ShelfMate" className={cssModule.logoImg} />
                         <div className={cssModule.logoText}>Shelf Mate</div>
                     </div>
                 </div>
 
                 <nav className={cssModule.topbarCenter}>
                     <button className={cssModule.navButton} onClick={() => navigateTo("home")}>
-                        <span className={cssModule.navIcon}>🏠</span>
+                        <img src="/home-white.png" alt="Home" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Home</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>
-                        <span className={cssModule.navIcon}>📊</span>
+                        <img src="/statistcs.png" alt="Estatísticas" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Estatísticas</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("products")}>
-                        <span className={cssModule.navIcon}>📦</span>
+                        <img src="/products.png" alt="Produtos" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Produtos</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("reports")}>
-                        <span className={cssModule.navIcon}>📄</span>
+                        <img src="/reports.png" alt="Relatórios" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Relatórios</span>
                     </button>
                 </nav>
 
                 <div className={cssModule.topbarRight}>
                     <div className={cssModule.searchContainer}>
-                        <span className={cssModule.searchIcon}>🔍</span>
+                        <img src="/search.png" alt="Buscar" className={cssModule.iconImg} />
                         <input className={cssModule.searchInput} placeholder="Pesquisar" />
                     </div>
                     <div className={cssModule.userContainer}>

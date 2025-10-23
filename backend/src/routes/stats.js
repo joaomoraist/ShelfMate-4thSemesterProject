@@ -361,6 +361,69 @@ router.post('/products', async (req, res) => {
   }
 });
 
+// POST /stats/products/bulk - Adicionar vários produtos de uma vez
+router.post('/products/bulk', async (req, res) => {
+  try {
+    const { rows, companyId: companyIdBody } = req.body || {};
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).json({ error: 'Lista de produtos (rows) é obrigatória' });
+    }
+
+    const companyId = companyIdBody ?? (req.session?.user?.company_id ?? null);
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID é obrigatório' });
+    }
+
+    const results = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const item = rows[i] || {};
+      const name = (item.name || '').trim();
+      const unit_price = item.unit_price != null ? Number(item.unit_price) : 0;
+      const inventory = item.inventory != null ? Number(item.inventory) : 0;
+      const status = item.status || 'Disponível';
+
+      if (!name) {
+        results.push({ index: i, status: 'error', name, reason: 'Nome é obrigatório' });
+        continue;
+      }
+
+      try {
+        // Checar duplicidade por nome dentro da empresa
+        const existing = await sql`SELECT id FROM products WHERE LOWER(name) = LOWER(${name}) AND company_id = ${companyId}`;
+        if (existing.length > 0) {
+          results.push({ index: i, status: 'skipped', name, reason: 'Já existe produto com este nome' });
+          continue;
+        }
+
+        const inserted = await sql`
+          INSERT INTO products (name, unit_price, inventory, status, company_id)
+          VALUES (${name}, ${unit_price}, ${inventory}, ${status}, ${companyId})
+          RETURNING *
+        `;
+        results.push({ index: i, status: 'created', name, product: inserted[0] });
+      } catch (err) {
+        console.error('Erro ao inserir item bulk:', err);
+        results.push({ index: i, status: 'error', name, reason: err.message || 'Erro ao inserir' });
+      }
+    }
+
+    const createdCount = results.filter(r => r.status === 'created').length;
+    const skippedCount = results.filter(r => r.status === 'skipped').length;
+    const errorCount = results.filter(r => r.status === 'error').length;
+
+    return res.status(201).json({
+      success: true,
+      summary: { createdCount, skippedCount, errorCount, total: rows.length },
+      results
+    });
+  } catch (err) {
+    console.error('Erro em POST /stats/products/bulk:', err);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 // GET /stats/top-products-by-user/:userId - Produtos mais vendidos de um usuário específico
 router.get('/top-products-by-user/:userId', async (req, res) => {
   try {

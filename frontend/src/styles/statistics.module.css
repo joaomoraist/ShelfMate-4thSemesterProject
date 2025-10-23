@@ -74,6 +74,8 @@
 .lineChart { width: 100%; height: 100%; }
 .barChart { width: 100%; height: 100%; }
 .areaChart { width: 100%; height: 100%; }
+.logoImg { width: 28px; height: 28px; object-fit: contain; display: inline-block; }
+.iconImg { width: 18px; height: 18px; object-fit: contain; display: inline-block; }
 
 /* Footer styles */
 .siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }

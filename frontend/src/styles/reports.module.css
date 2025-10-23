@@ -54,6 +54,8 @@
 .exportButton:hover { background: #1d4ed8; }
 .exportButtonAlert { background: #dc2626; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: background 0.2s; }
 .exportButtonAlert:hover { background: #b91c1c; }
+.logoImg { width: 28px; height: 28px; object-fit: contain; display: inline-block; }
+.iconImg { width: 18px; height: 18px; object-fit: contain; display: inline-block; }
 
 /* Footer styles */
 .siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }

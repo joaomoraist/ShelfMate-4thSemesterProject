@@ -11,7 +11,9 @@ const Products: React.FC = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
     const [products, setProducts] = useState<any[]>([]);
-    
+    const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+    const [bulkSummary, setBulkSummary] = useState<{created?: number; skipped?: number; errors?: number} | null>(null);
+
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
 
@@ -49,33 +51,33 @@ const Products: React.FC = () => {
             <header className={cssModule.topbar}>
                 <div className={cssModule.topbarLeft}>
                     <div className={cssModule.logoContainer}>
-                        <div className={cssModule.logoIcon}>📦</div>
+                        <img src="/logo-removebg.png" alt="ShelfMate" className={cssModule.logoImg} />
                         <div className={cssModule.logoText}>Shelf Mate</div>
                     </div>
                 </div>
 
                 <nav className={cssModule.topbarCenter}>
                     <button className={cssModule.navButton} onClick={() => navigateTo("home")}>
-                        <span className={cssModule.navIcon}>🏠</span>
+                        <img src="/home-white.png" alt="Home" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Home</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("statistics")}>
-                        <span className={cssModule.navIcon}>📊</span>
+                        <img src="/statistcs.png" alt="Estatísticas" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Estatísticas</span>
                     </button>
                     <button className={cssModule.navButton} data-active="true">
-                        <span className={cssModule.navIcon}>📦</span>
+                        <img src="/products.png" alt="Produtos" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Produtos</span>
                     </button>
                     <button className={cssModule.navButton} onClick={() => navigateTo("reports")}>
-                        <span className={cssModule.navIcon}>📄</span>
+                        <img src="/reports.png" alt="Relatórios" className={cssModule.iconImg} />
                         <span className={cssModule.navLabel}>Relatórios</span>
                     </button>
                 </nav>
 
                 <div className={cssModule.topbarRight}>
                     <div className={cssModule.searchContainer}>
-                        <span className={cssModule.searchIcon}>🔍</span>
+                        <img src="/search.png" alt="Buscar" className={cssModule.iconImg} />
                         <input className={cssModule.searchInput} placeholder="Pesquisar" />
                     </div>
                     <div className={cssModule.userContainer}>
@@ -125,10 +127,17 @@ const Products: React.FC = () => {
                                 <span className={cssModule.buttonIcon}>+</span>
                                 Adicionar Produto
                             </button>
-                            <button className={cssModule.addMultipleButton}>
-                                <span className={cssModule.buttonIcon}>📄</span>
-                                Adicionar vários Produtos
+                            <button className={cssModule.addMultipleButton} onClick={handleBulkButtonClick}>
+                                <img src="/products.png" alt="CSV" className={cssModule.iconImg} />
+                                Adicionar vários Produtos (CSV)
                             </button>
+                            <input
+                                type="file"
+                                accept=".csv,text/csv"
+                                ref={fileInputRef}
+                                style={{ display: 'none' }}
+                                onChange={handleFileSelected}
+                            />
                         </div>
                     </div>
 
@@ -198,6 +207,83 @@ const Products: React.FC = () => {
             </main>
         </div>
     );
+
+    // Abrir seletor de arquivo para CSV
+    const handleBulkButtonClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ""; // permite re-selecionar o mesmo arquivo
+            fileInputRef.current.click();
+        }
+    };
+
+    // Parse simples de CSV e upload em lote
+    const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        try {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            const text = await file.text();
+
+            // Parse CSV: espera cabeçalhos: name, unit_price, inventory, status
+            const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+            if (lines.length < 2) {
+                alert("CSV vazio ou sem dados.");
+                return;
+            }
+            const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
+            const idxName = headers.indexOf("name");
+            const idxPrice = headers.indexOf("unit_price");
+            const idxInventory = headers.indexOf("inventory");
+            const idxStatus = headers.indexOf("status");
+            if (idxName === -1 || idxPrice === -1 || idxInventory === -1 || idxStatus === -1) {
+                alert("CSV deve conter cabeçalhos: name, unit_price, inventory, status.");
+                return;
+            }
+
+            const records = lines.slice(1).map(line => {
+                const cols = line.split(",").map(c => c.trim());
+                return {
+                    name: cols[idxName],
+                    unit_price: Number(cols[idxPrice]),
+                    inventory: Number(cols[idxInventory]),
+                    status: cols[idxStatus]
+                };
+            }).filter(r => r.name && !Number.isNaN(r.unit_price) && !Number.isNaN(r.inventory) && r.status);
+
+            if (records.length === 0) {
+                alert("Nenhuma linha válida encontrada no CSV.");
+                return;
+            }
+
+            const stored = localStorage.getItem('user');
+            const parsed = stored ? JSON.parse(stored) : null;
+            const companyId = parsed?.company_id;
+
+            const res = await fetch(API_URLS.STATS_PRODUCTS_BULK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ products: records, companyId })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data?.error || 'Falha no upload CSV');
+
+            setBulkSummary({ created: data?.created ?? 0, skipped: data?.skipped ?? 0, errors: data?.errors ?? 0 });
+            alert(`Importação concluída. Criados: ${data?.created ?? 0}, Ignorados: ${data?.skipped ?? 0}, Erros: ${data?.errors ?? 0}`);
+
+            // Recarregar produtos após importação
+            try {
+                const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
+                const r = await fetch(url);
+                const j = await r.json();
+                setProducts(j.rows || []);
+            } catch (err) {
+                console.error(err);
+            }
+        } catch (err) {
+            console.error(err);
+            alert(err instanceof Error ? err.message : 'Erro ao processar CSV');
+        }
+    };
+
 };
 
 export default Products;

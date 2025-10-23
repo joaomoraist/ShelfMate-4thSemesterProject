@@ -20,6 +20,7 @@ export const API_CONFIG = {
       SALES_PER_PRODUCT: '/stats/sales-per-product',
       TOP_PRODUCTS: '/stats/top-products',
       PRODUCTS: '/stats/products',
+      PRODUCTS_BULK: '/stats/products/bulk',
       PRODUCTS_DETAILED: '/stats/products-detailed'
     }
   }
@@ -48,5 +49,6 @@ export const API_URLS = {
   SALES_PER_PRODUCT: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.SALES_PER_PRODUCT),
   TOP_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.TOP_PRODUCTS),
   STATS_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS),
+  STATS_PRODUCTS_BULK: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS_BULK),
   PRODUCTS_DETAILED: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS_DETAILED)
 };

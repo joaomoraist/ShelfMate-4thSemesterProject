@@ -9,6 +9,7 @@
 .logoContainer { display: flex; align-items: center; gap: 8px; }
 .logoIcon { font-size: 24px; }
 .logoText { font-weight: 700; font-size: 18px; }
+.logoImg { width: 28px; height: 28px; object-fit: contain; display: inline-block; }
 
 /* Navigation styles */
 .navButton { background: transparent; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: background 0.2s; }
@@ -16,9 +17,11 @@
 .navButton[data-active="true"] { background: rgba(255,255,255,0.15); }
 .navIcon { font-size: 18px; }
 .navLabel { font-size: 12px; font-weight: 500; }
+.iconImg { width: 18px; height: 18px; object-fit: contain; display: inline-block; }
 
 /* Search styles */
 .searchContainer { position: relative; display: flex; align-items: center; }
+.searchContainer img.iconImg { position: absolute; left: 12px; }
 .searchIcon { position: absolute; left: 12px; color: #9ca3af; font-size: 16px; }
 .searchInput { padding: 8px 12px 8px 36px; border-radius: 8px; border: none; width: 220px; background: rgba(255,255,255,0.1); color: #fff; }
 .searchInput::placeholder { color: #9ca3af; }
