@@ -11,8 +11,6 @@ const Products: React.FC = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
     const [products, setProducts] = useState<any[]>([]);
-    const [adding, setAdding] = useState(false);
-    const [newProduct, setNewProduct] = useState({ name: '', unit_price: 0, inventory: 0, status: 'Disponível' });
     
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
@@ -44,37 +42,7 @@ const Products: React.FC = () => {
         load();
     }, []);
 
-    const submitNewProduct = async () => {
-        try {
-            setAdding(true);
-            const stored = localStorage.getItem('user');
-            const parsed = stored ? JSON.parse(stored) : null;
-            const companyId = parsed?.company_id;
-            const res = await fetch(API_URLS.STATS_PRODUCTS, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                // no credentials to avoid third-party cookie issues in prod
-                body: JSON.stringify({ ...newProduct, companyId })
-            });
-            if (!res.ok) throw new Error('Falha ao criar produto');
-            await res.json();
-            
-            // Recarregar produtos com dados detalhados
-            const detailedUrl = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
-            const detailedRes = await fetch(detailedUrl);
-            if (detailedRes.ok) {
-                const detailedData = await detailedRes.json();
-                setProducts(detailedData.rows || []);
-            }
-            
-            setNewProduct({ name: '', unit_price: 0, inventory: 0, status: 'Disponível' });
-            setAdding(false);
-        } catch (e) {
-            console.error(e);
-            setAdding(false);
-            alert('Erro ao criar produto');
-        }
-    };
+
 
     return (
         <div style={{ minHeight: "100vh", background: "transparent" }}>
@@ -153,9 +121,9 @@ const Products: React.FC = () => {
                             </div>
                         </div>
                         <div className={cssModule.actionButtons}>
-                            <button className={cssModule.addButton} onClick={submitNewProduct} disabled={adding}>
+                            <button className={cssModule.addButton} onClick={() => navigateTo("add-product")}>
                                 <span className={cssModule.buttonIcon}>+</span>
-                                {adding ? 'Salvando...' : 'Adicionar um Produto'}
+                                Adicionar Produto
                             </button>
                             <button className={cssModule.addMultipleButton}>
                                 <span className={cssModule.buttonIcon}>📄</span>
@@ -164,12 +132,7 @@ const Products: React.FC = () => {
                         </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: 12, padding: '8px 0' }}>
-                        <input className={cssModule.searchField} placeholder="Nome do produto" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
-                        <input className={cssModule.searchField} placeholder="Preço unitário" type="number" value={newProduct.unit_price} onChange={(e) => setNewProduct({ ...newProduct, unit_price: Number(e.target.value) })} />
-                        <input className={cssModule.searchField} placeholder="Estoque" type="number" value={newProduct.inventory} onChange={(e) => setNewProduct({ ...newProduct, inventory: Number(e.target.value) })} />
-                        <input className={cssModule.searchField} placeholder="Status" value={newProduct.status} onChange={(e) => setNewProduct({ ...newProduct, status: e.target.value })} />
-                    </div>
+
 
                     <div className={cssModule.productsTable}>
                         <div className={cssModule.tableHeader}>

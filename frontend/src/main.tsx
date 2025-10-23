@@ -8,11 +8,12 @@ import ForgotPassword from "./pages/forgot-password";
 import Home from "./pages/home";
 import Statistics from "./pages/statistics";
 import Products from "./pages/products";
+import AddProduct from "./pages/add-product";
 import Reports from "./pages/reports";
 import Settings from "./pages/settings";
 import SiteFooter from "./components/SiteFooter";
 
-type Page = "login" | "signup" | "forgot-password" | "home" | "statistics" | "products" | "reports" | "settings";
+type Page = "login" | "signup" | "forgot-password" | "home" | "statistics" | "products" | "add-product" | "reports" | "settings";
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>("login");
@@ -44,6 +45,8 @@ function App() {
         return <Statistics />;
       case "products":
         return <Products />;
+      case "add-product":
+        return <AddProduct />;
       case "reports":
         return <Reports />;
       case "settings":

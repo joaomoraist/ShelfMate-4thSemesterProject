@@ -183,23 +183,45 @@ router.get('/sales-per-product', async (req, res) => {
 router.get('/top-products', async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    
     const rows = companyId
       ? await sql`
-        SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
+        SELECT 
+          p.id AS product_id, 
+          p.name, 
+          p.price,
+          p.current_stock,
+          COALESCE(SUM(s.qntd),0) AS total_sold,
+          COALESCE(SUM(s.qntd * p.price),0) AS total_revenue,
+          COUNT(s.id) AS total_sales_count,
+          COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale,
+          MAX(s.sale_date) AS last_sale_date,
+          MIN(s.sale_date) AS first_sale_date
         FROM products p
         LEFT JOIN sales s ON s.product_id = p.id
         WHERE p.company_id = ${companyId}
-        GROUP BY p.id, p.name
-        ORDER BY total_qntd DESC
-        LIMIT 10
+        GROUP BY p.id, p.name, p.price, p.current_stock
+        ORDER BY total_sold DESC
+        LIMIT ${limit}
       `
       : await sql`
-        SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
+        SELECT 
+          p.id AS product_id, 
+          p.name, 
+          p.price,
+          p.current_stock,
+          COALESCE(SUM(s.qntd),0) AS total_sold,
+          COALESCE(SUM(s.qntd * p.price),0) AS total_revenue,
+          COUNT(s.id) AS total_sales_count,
+          COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale,
+          MAX(s.sale_date) AS last_sale_date,
+          MIN(s.sale_date) AS first_sale_date
         FROM products p
         LEFT JOIN sales s ON s.product_id = p.id
-        GROUP BY p.id, p.name
-        ORDER BY total_qntd DESC
-        LIMIT 10
+        GROUP BY p.id, p.name, p.price, p.current_stock
+        ORDER BY total_sold DESC
+        LIMIT ${limit}
       `;
     return res.json({ rows });
   } catch (err) {
@@ -270,27 +292,127 @@ router.get('/products-detailed', async (req, res) => {
 });
 
 
-// POST /stats/products
+// POST /stats/products - Adicionar novo produto
 router.post('/products', async (req, res) => {
   try {
-    const { name, unit_price, inventory, status, companyId: companyIdBody } = req.body || {};
+    const { 
+      name, 
+      price, 
+      unit_price, 
+      current_stock, 
+      inventory, 
+      category, 
+      description, 
+      status, 
+      companyId: companyIdBody 
+    } = req.body || {};
 
-    if (!name) return res.status(400).json({ error: 'name é obrigatório' });
+    // Validações
+    if (!name || name.trim() === '') {
+      return res.status(400).json({ error: 'Nome do produto é obrigatório' });
+    }
 
-    const unitPrice = unit_price != null ? Number(unit_price) : 0;
-    const inventoryQty = inventory != null ? Number(inventory) : 0;
+    // Usar price ou unit_price (compatibilidade)
+    const productPrice = price != null ? Number(price) : (unit_price != null ? Number(unit_price) : 0);
+    
+    // Usar current_stock ou inventory (compatibilidade)
+    const stockQty = current_stock != null ? Number(current_stock) : (inventory != null ? Number(inventory) : 0);
+    
     const productStatus = status || 'Disponível';
+    const productCategory = category || 'Geral';
+    const productDescription = description || '';
     const companyId = companyIdBody ?? (req.session?.user?.company_id ?? null);
 
+    if (!companyId) {
+      return res.status(400).json({ error: 'Company ID é obrigatório' });
+    }
+
+    // Verificar se produto já existe
+    const existingProduct = await sql`
+      SELECT id FROM products 
+      WHERE LOWER(name) = LOWER(${name}) AND company_id = ${companyId}
+    `;
+
+    if (existingProduct.length > 0) {
+      return res.status(409).json({ error: 'Produto com este nome já existe' });
+    }
+
+    // Inserir produto
     const rows = await sql`
       INSERT INTO products (name, unit_price, inventory, status, company_id)
-      VALUES (${name}, ${unitPrice}, ${inventoryQty}, ${productStatus}, ${companyId})
+      VALUES (${name.trim()}, ${productPrice}, ${stockQty}, ${productStatus}, ${companyId})
       RETURNING *
     `;
 
-    return res.status(201).json({ product: rows[0] });
+    return res.status(201).json({ 
+      success: true,
+      message: 'Produto adicionado com sucesso',
+      product: rows[0] 
+    });
   } catch (err) {
     console.error('Erro em POST /stats/products:', err);
+    
+    // Tratar erros específicos do banco
+    if (err.code === '23505') { // Unique constraint violation
+      return res.status(409).json({ error: 'Produto com este nome já existe' });
+    }
+    
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
+// GET /stats/top-products-by-user/:userId - Produtos mais vendidos de um usuário específico
+router.get('/top-products-by-user/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const days = req.query.days ? parseInt(req.query.days) : null; // Filtro por período
+    
+    let dateFilter = '';
+    if (days) {
+      dateFilter = `AND s.sale_date >= NOW() - INTERVAL '${days} days'`;
+    }
+    
+    const rows = await sql`
+      SELECT 
+        p.id AS product_id, 
+        p.name AS product_name, 
+        p.price,
+        p.current_stock,
+        p.category,
+        COALESCE(SUM(s.qntd),0) AS total_sold,
+        COALESCE(SUM(s.qntd * p.price),0) AS total_revenue,
+        COUNT(s.id) AS total_sales_count,
+        COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale,
+        COALESCE(STDDEV(s.qntd),0) AS std_quantity,
+        MAX(s.sale_date) AS last_sale_date,
+        MIN(s.sale_date) AS first_sale_date,
+        CASE 
+          WHEN MAX(s.sale_date) IS NOT NULL THEN 
+            EXTRACT(DAYS FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1
+          ELSE 0 
+        END AS days_selling,
+        CASE 
+          WHEN MAX(s.sale_date) IS NOT NULL AND EXTRACT(DAYS FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1 > 0 THEN 
+            COALESCE(SUM(s.qntd),0) / (EXTRACT(DAYS FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1)
+          ELSE 0 
+        END AS sales_rate_per_day
+      FROM products p
+      LEFT JOIN sales s ON s.product_id = p.id ${days ? sql`AND s.sale_date >= NOW() - INTERVAL '${days} days'` : sql``}
+      JOIN users u ON u.company_id = p.company_id
+      WHERE u.id = ${userId}
+      GROUP BY p.id, p.name, p.price, p.current_stock, p.category
+      ORDER BY total_sold DESC
+      LIMIT ${limit}
+    `;
+    
+    return res.json({ 
+      user_id: userId,
+      period_days: days || 'all_time',
+      products: rows 
+    });
+  } catch (err) {
+    console.error('Erro em /stats/top-products-by-user:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
