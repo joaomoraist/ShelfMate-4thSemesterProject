@@ -24,14 +24,13 @@ const Products: React.FC = () => {
         navigateTo("login");
     };
 
-    if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
-
     // Carregar produtos reais com dados detalhados
     React.useEffect(() => {
         const load = async () => {
             try {
                 const stored = localStorage.getItem('user');
-                const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+                const parsed = stored ? JSON.parse(stored) : null;
+                const companyId = parsed?.company_id;
                 const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
                 const res = await fetch(url);
                 if (!res.ok) throw new Error('Falha ao buscar produtos');
@@ -49,7 +48,8 @@ const Products: React.FC = () => {
         try {
             setAdding(true);
             const stored = localStorage.getItem('user');
-            const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+            const parsed = stored ? JSON.parse(stored) : null;
+            const companyId = parsed?.company_id;
             const res = await fetch(API_URLS.STATS_PRODUCTS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -111,7 +111,7 @@ const Products: React.FC = () => {
                         <input className={cssModule.searchInput} placeholder="Pesquisar" />
                     </div>
                     <div className={cssModule.userContainer}>
-                        <span className={cssModule.welcomeText}>Bem vindo William</span>
+                        <span className={cssModule.welcomeText}>Bem vindo {user?.name || 'Usuário'}</span>
                         <div className={cssModule.userDropdown}>
                             <div className={cssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
                                 <span className={cssModule.userIcon}>👤</span>
@@ -137,6 +137,9 @@ const Products: React.FC = () => {
             <main className={cssModule.pageWrap}>
                 <section className={cssModule.productsSection}>
                     <h1 className={cssModule.sectionTitle}>Seus Produtos</h1>
+                    {loading && (
+                        <div style={{ padding: '8px 0', color: '#6b7280' }}>Carregando dados de usuário...</div>
+                    )}
                     
                     <div className={cssModule.actionBar}>
                         <div className={cssModule.searchGroup}>
