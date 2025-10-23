@@ -1,6 +1,6 @@
 /* Module styles for settings page */
 .pageWrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; background: #fff; min-height: 100vh; }
-.topbar { background: #1e3a8a; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(21,55,200,0.12); position: sticky; top: 0; z-index: 10; }
+.topbar { background: #1B31BA; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(27,49,186,0.12); position: sticky; top: 0; z-index: 10; }
 .topbarLeft { display: flex; align-items: center; gap: 12px; }
 .topbarCenter { display: flex; gap: 18px; align-items: center; }
 .topbarRight { display: flex; gap: 16px; align-items: center; }
@@ -40,32 +40,32 @@
 .settingsSection { background: #fff; border-radius: 16px; padding: 40px; margin: 28px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
 .settingsContainer { display: grid; grid-template-columns: 1fr 2fr; gap: 40px; align-items: start; }
 .profileSection { display: flex; flex-direction: column; align-items: center; gap: 24px; }
-.userAvatarLarge { width: 120px; height: 120px; background: #1e3a8a; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.userAvatarLarge { width: 120px; height: 120px; background: #1B31BA; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .avatarIcon { font-size: 48px; color: #fff; }
 .profileFields { width: 100%; }
 .fieldGroup { margin-bottom: 20px; }
 .fieldLabel { display: block; font-weight: 600; color: #374151; margin-bottom: 8px; font-size: 14px; }
 .fieldInput { width: 100%; padding: 12px 16px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
-.fieldInput:focus { outline: none; border-color: #1e3a8a; }
+.fieldInput:focus { outline: none; border-color: #1B31BA; }
 .fieldHelp { font-size: 12px; color: #6b7280; margin-top: 4px; }
 
 /* Forms section styles */
 .formsSection { display: flex; flex-direction: column; gap: 32px; }
-.sectionTitle { color: #1e3a8a; font-size: 20px; font-weight: 700; margin: 0 0 20px; }
+.sectionTitle { color: #1B31BA; font-size: 20px; font-weight: 700; margin: 0 0 20px; }
 .passwordSection, .companySection { border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; }
 .saveSection { display: flex; justify-content: flex-end; margin-top: 32px; }
-.saveButton { background: #1e3a8a; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 16px; transition: background 0.2s; }
+.saveButton { background: #1B31BA; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 16px; transition: background 0.2s; }
 .saveButton:hover { background: #1d4ed8; }
 .saveIcon { font-size: 18px; }
 
 /* Footer styles */
-.siteFooter { margin-top: 40px; background: #1e3a8a; color: #fff; padding: 32px; border-radius: 12px; }
+.siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }
 .footerInner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; align-items: start; }
 .footerSection { display: flex; flex-direction: column; gap: 12px; }
 .footerTitle { font-weight: 700; font-size: 16px; color: #fff; }
 .footerDescription { font-size: 14px; color: #9ca3af; line-height: 1.5; }
 .footerLinks { font-size: 14px; color: #9ca3af; }
-.githubLink { font-size: 12px; color: #60a5fa; word-break: break-all; }
+.githubLink { font-size: 12px; color: #1B31BA; word-break: break-all; }
 .contactInfo { font-size: 14px; color: #9ca3af; }
 .developerList { display: flex; flex-direction: column; gap: 4px; }
 .developerList div { font-size: 12px; color: #9ca3af; }

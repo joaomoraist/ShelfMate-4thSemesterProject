@@ -1,6 +1,6 @@
 /* Module styles for statistics page */
 .pageWrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; background: #fff; min-height: 100vh; }
-.topbar { background: #1e3a8a; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(21,55,200,0.12); position: sticky; top: 0; z-index: 10; }
+.topbar { background: #1B31BA; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(27,49,186,0.12); position: sticky; top: 0; z-index: 10; }
 .topbarLeft { display: flex; align-items: center; gap: 12px; }
 .topbarCenter { display: flex; gap: 18px; align-items: center; }
 .topbarRight { display: flex; gap: 16px; align-items: center; }
@@ -38,14 +38,14 @@
 
 /* Page header styles */
 .pageHeader { text-align: center; margin: 40px 0; }
-.pageTitle { color: #1e3a8a; font-size: 36px; font-weight: 700; margin: 0 0 12px; }
+.pageTitle { color: #1B31BA; font-weight: 700; font-size: 22px; margin: 0; }
 .pageSubtitle { color: #6b7280; font-size: 18px; margin: 0; }
 
 /* Filters section styles */
 .filtersSection { margin: 32px 0; }
 .filterGroup { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
 .filterItem { display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.filterItem:hover { border-color: #1e3a8a; box-shadow: 0 4px 8px rgba(30,58,138,0.1); }
+.filterItem:hover { border-color: #1B31BA; box-shadow: 0 8px 20px rgba(27,49,186,0.10); }
 .filterIcon { font-size: 16px; }
 .filterLabel { font-weight: 500; color: #374151; }
 
@@ -56,7 +56,7 @@
 .metricHeader { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .metricIcon { display: flex; align-items: center; }
 .metricTitle { font-weight: 600; color: #374151; font-size: 14px; }
-.metricValue { font-size: 28px; font-weight: 700; color: #1e3a8a; margin-bottom: 8px; }
+.metricValue { font-size: 28px; font-weight: 700; color: #1B31BA; margin-bottom: 8px; }
 .metricComparison { display: flex; align-items: center; gap: 8px; }
 .comparisonText { font-size: 12px; color: #6b7280; }
 .trendIcon { font-size: 16px; font-weight: bold; }
@@ -68,7 +68,7 @@
 .chartsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
 .fullWidthChart { width: 100%; }
 .chartCard { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
-.chartTitle { color: #1e3a8a; font-weight: 700; font-size: 18px; margin: 0 0 20px; }
+.chartTitle { color: #1B31BA; font-weight: 700; font-size: 18px; margin: 0 0 20px; }
 .chartContainer { height: 350px; display: flex; align-items: center; justify-content: center; }
 .chartPlaceholder { color: #9ca3af; font-size: 16px; text-align: center; padding: 40px; background: #f8fafc; border-radius: 8px; border: 2px dashed #d1d5db; }
 .lineChart { width: 100%; height: 100%; }
@@ -76,13 +76,13 @@
 .areaChart { width: 100%; height: 100%; }
 
 /* Footer styles */
-.siteFooter { margin-top: 40px; background: #1e3a8a; color: #fff; padding: 32px; border-radius: 12px; }
+.siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }
 .footerInner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; align-items: start; }
 .footerSection { display: flex; flex-direction: column; gap: 12px; }
 .footerTitle { font-weight: 700; font-size: 16px; color: #fff; }
 .footerDescription { font-size: 14px; color: #9ca3af; line-height: 1.5; }
 .footerLinks { font-size: 14px; color: #9ca3af; }
-.githubLink { font-size: 12px; color: #60a5fa; word-break: break-all; }
+.githubLink { font-size: 12px; color: #1B31BA; word-break: break-all; }
 .contactInfo { font-size: 14px; color: #9ca3af; }
 .developerList { display: flex; flex-direction: column; gap: 4px; }
 .developerList div { font-size: 12px; color: #9ca3af; }

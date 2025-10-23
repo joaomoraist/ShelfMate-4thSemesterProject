@@ -1,6 +1,6 @@
 /* Module styles for products page */
 .pageWrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; background: #fff; min-height: 100vh; }
-.topbar { background: #1e3a8a; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(21,55,200,0.12); position: sticky; top: 0; z-index: 10; }
+.topbar { background: #1B31BA; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(27,49,186,0.12); position: sticky; top: 0; z-index: 10; }
 .topbarLeft { display: flex; align-items: center; gap: 12px; }
 .topbarCenter { display: flex; gap: 18px; align-items: center; }
 .topbarRight { display: flex; gap: 16px; align-items: center; }
@@ -38,19 +38,19 @@
 
 /* Products section styles */
 .productsSection { background: #fff; border-radius: 12px; padding: 32px; margin: 28px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.sectionTitle { color: #1e3a8a; font-size: 32px; font-weight: 700; margin: 0 0 24px; }
+.sectionTitle { color: #1B31BA; font-size: 32px; font-weight: 700; margin: 0 0 24px; }
 
 /* Action bar styles */
 .actionBar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
 .searchGroup { display: flex; gap: 16px; align-items: center; }
 .searchInputContainer { position: relative; display: flex; align-items: center; }
 .searchField { padding: 12px 16px 12px 40px; border: 1px solid #e5e7eb; border-radius: 8px; width: 300px; font-size: 14px; }
-.searchField:focus { outline: none; border-color: #1e3a8a; }
+.searchField:focus { outline: none; border-color: #1B31BA; }
 .categoryFilter { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; background: #fff; }
 .filterLabel { font-size: 14px; color: #374151; }
 .filterArrow { font-size: 12px; color: #6b7280; }
 .actionButtons { display: flex; gap: 12px; }
-.addButton { background: #1e3a8a; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+.addButton { background: #1B31BA; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: background 0.2s; font-size: 14px; }
 .addButton:hover { background: #1d4ed8; }
 .addMultipleButton { background: #6b7280; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
 .addMultipleButton:hover { background: #4b5563; }
@@ -62,10 +62,10 @@
 .tableRow { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f3f4f6; align-items: center; }
 .tableColumn { font-weight: 700; color: #374151; }
 .productCell { display: flex; align-items: center; gap: 8px; }
-.productName { font-weight: 600; color: #1e3a8a; }
+.productName { font-weight: 600; color: #1B31BA; }
 .expandIcon { font-size: 12px; color: #6b7280; cursor: pointer; }
 .supplierCell { color: #6b7280; }
-.stockCell { font-weight: 700; color: #1e3a8a; }
+.stockCell { font-weight: 700; color: #1B31BA; }
 .stockValue { font-size: 18px; }
 .minMaxCell { color: #6b7280; }
 .salesCell { color: #6b7280; }
@@ -82,19 +82,19 @@
 
 /* Bottom action styles */
 .bottomAction { display: flex; justify-content: center; margin-top: 32px; }
-.salesButton { background: #1e3a8a; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 12px; font-size: 16px; transition: background 0.2s; }
+.salesButton { background: #1B31BA; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 12px; font-size: 16px; transition: background 0.2s; }
 .salesButton:hover { background: #1d4ed8; }
 .salesIcon { font-size: 20px; }
 .clockIcon { font-size: 16px; }
 
 /* Footer styles */
-.siteFooter { margin-top: 40px; background: #1e3a8a; color: #fff; padding: 32px; border-radius: 12px; }
+.siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }
 .footerInner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; align-items: start; }
 .footerSection { display: flex; flex-direction: column; gap: 12px; }
 .footerTitle { font-weight: 700; font-size: 16px; color: #fff; }
 .footerDescription { font-size: 14px; color: #9ca3af; line-height: 1.5; }
 .footerLinks { font-size: 14px; color: #9ca3af; }
-.githubLink { font-size: 12px; color: #60a5fa; word-break: break-all; }
+.githubLink { font-size: 12px; color: #1B31BA; word-break: break-all; }
 .contactInfo { font-size: 14px; color: #9ca3af; }
 .developerList { display: flex; flex-direction: column; gap: 4px; }
 .developerList div { font-size: 12px; color: #9ca3af; }

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
++import "../styles/auth.css";
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -81,18 +82,24 @@ export default function ResetPassword() {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <h2>🔑 Redefinir Senha</h2>
+-      <h2>🔑 Redefinir Senha</h2>
++      <div style={{ textAlign: "center" }}>
++        <img src="/forget-password.png" alt="Redefinir senha" className="auth-icon" />
++        <h2>Redefinir Senha</h2>
++      </div>
       
       {step === 1 && (
         <form onSubmit={handleSendCode} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
           <input
             type="email"
-            placeholder="📧 Email"
+-            placeholder="📧 Email"
++            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <button type="submit">➡️ Enviar Código de Recuperação</button>
+-          <button type="submit">➡️ Enviar Código de Recuperação</button>
++          <button type="submit">Enviar Código de Recuperação</button>
         </form>
       )}
 
@@ -100,20 +107,24 @@ export default function ResetPassword() {
         <form onSubmit={handleVerifyCode} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
           <input
             type="email"
-            placeholder="📧 Email"
+-            placeholder="📧 Email"
++            placeholder="Email"
             value={email}
             disabled
           />
           <input
             type="text"
-            placeholder="🔢 Código de Recuperação"
+-            placeholder="🔢 Código de Recuperação"
++            placeholder="Código de Recuperação"
             value={recoveryCode}
             onChange={(e) => setRecoveryCode(e.target.value)}
             required
           />
-          <button type="submit">➡️ Verificar Código</button>
+-          <button type="submit">➡️ Verificar Código</button>
++          <button type="submit">Verificar Código</button>
           <button type="button" onClick={() => setStep(1)} style={{ marginTop: "10px" }}>
-            🔄 Voltar
+-            🔄 Voltar
++            Voltar
           </button>
         </form>
       )}
@@ -122,26 +133,31 @@ export default function ResetPassword() {
         <form onSubmit={handleResetPassword} style={{ display: "flex", flexDirection: "column", width: "250px" }}>
           <input
             type="email"
-            placeholder="📧 Email"
+-            placeholder="📧 Email"
++            placeholder="Email"
             value={email}
             disabled
           />
           <input
             type="text"
-            placeholder="🔢 Código de Recuperação"
+-            placeholder="🔢 Código de Recuperação"
++            placeholder="Código de Recuperação"
             value={recoveryCode}
             disabled
           />
           <input
             type="password"
-            placeholder="🔑 Nova Senha"
+-            placeholder="🔑 Nova Senha"
++            placeholder="Nova Senha"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             required
           />
-          <button type="submit">➡️ Redefinir Senha</button>
+-          <button type="submit">➡️ Redefinir Senha</button>
++          <button type="submit">Redefinir Senha</button>
           <button type="button" onClick={() => setStep(2)} style={{ marginTop: "10px" }}>
-            🔄 Voltar
+-            🔄 Voltar
++            Voltar
           </button>
         </form>
       )}
@@ -149,10 +165,12 @@ export default function ResetPassword() {
       {/* Botões de navegação para teste */}
       <div style={{ marginTop: "20px", display: "flex", gap: "10px" }}>
         <button onClick={() => navigateTo("login")} style={{ padding: "5px 10px" }}>
-          🔐 Voltar ao Login
+-          🔐 Voltar ao Login
++          Voltar ao Login
         </button>
         <button onClick={() => navigateTo("forgot-password")} style={{ padding: "5px 10px" }}>
-          🔑 Esqueci a Senha
+-          🔑 Esqueci a Senha
++          Esqueci a Senha
         </button>
       </div>
     </div>

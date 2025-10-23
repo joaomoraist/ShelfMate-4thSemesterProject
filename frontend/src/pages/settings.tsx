@@ -212,52 +212,9 @@ const Settings: React.FC = () => {
                     </div>
                 </section>
 
-                <footer className={cssModule.siteFooter}>
-                    <div className={cssModule.footerInner}>
-                        <div className={cssModule.footerSection}>
-                            <div className={cssModule.footerTitle}>Shelf Mate</div>
-                            <div className={cssModule.footerDescription}>
-                                Gerencie seu estoque, acompanhe métricas e tome decisões baseadas em dados.
-                            </div>
-                        </div>
 
-                        <div className={cssModule.footerSection}>
-                            <div className={cssModule.footerTitle}>Recursos</div>
-                            <div className={cssModule.footerLinks}>
-                                Dashboard • Produtos • Configurações
-                            </div>
-                        </div>
 
-                        <div className={cssModule.footerSection}>
-                            <div className={cssModule.footerTitle}>Código Fonte</div>
-                            <div className={cssModule.footerDescription}>
-                                Acesse nosso Github e Conheça toda nossa infraestrutura
-                            </div>
-                            <div className={cssModule.githubLink}>
-                                https://github.com/will-csc/ShelfMate-4thSemesterProject
-                            </div>
-                        </div>
 
-                        <div className={cssModule.footerSection}>
-                            <div className={cssModule.footerTitle}>Suporte</div>
-                            <div className={cssModule.contactInfo}>
-                                william.carvalho.105637@a.fecaf.com.br
-                            </div>
-                            <div className={cssModule.contactInfo}>
-                                +55 11 98432-5997
-                            </div>
-                        </div>
-
-                        <div className={cssModule.footerSection}>
-                            <div className={cssModule.footerTitle}>Desenvolvedores</div>
-                            <div className={cssModule.developerList}>
-                                <div>william.carvalho.105637@a.fecaf.com.br</div>
-                                <div>eduardo.silva.100462@a.fecaf.com.br</div>
-                                <div>joao.timotio.103916@a.fecaf.com.br</div>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
             </main>
         </div>
     );

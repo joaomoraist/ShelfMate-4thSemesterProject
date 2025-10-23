@@ -53,7 +53,7 @@ export default function Signup() {
       <div className="auth-shell">
         <div className="auth-content">
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 28 }}>📇</div>
+            <img src="/singup.png" alt="Cadastro" className="auth-icon" />
             <h1 className="auth-title">Cadastre-se</h1>
             <p className="auth-sub">Digite as suas informações</p>
           </div>
@@ -82,7 +82,7 @@ export default function Signup() {
             <button className="secondary" onClick={() => navigateTo("login")}>Login</button>
           </div>
 
-          <p className="muted">Apoie nossos desenvolvedores visitando-nos, no linkedin e github</p>
+          <p className="muted">Apoie nossos desenvolvedores visitando-nos no <a href="https://github.com/will-csc/ShelfMate-4thSemesterProject" target="_blank" rel="noopener noreferrer">GitHub</a></p>
         </div>
 
         <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={3500} />

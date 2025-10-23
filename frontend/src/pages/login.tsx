@@ -12,8 +12,8 @@ export default function Login() {
 
   const handleForgotFromLogin = async () => {
     if (!email) {
-      // If no email filled, just navigate to forgot-password page where user can type email
-      navigateTo("forgot-password");
+      // Não navegar; exigir email para enviar código
+      showToast("Informe seu email para enviar o código.");
       return;
     }
 
@@ -79,7 +79,7 @@ export default function Login() {
         <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={3500} />
         <div className="auth-content">
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 28 }}>🏠</div>
+            <img src="/home_login.png" alt="Login" className="auth-icon" />
             <h1 className="auth-title">Bem vindo de Volta</h1>
             <p className="auth-sub">Digite as suas informações</p>
           </div>
@@ -107,7 +107,7 @@ export default function Login() {
             <button className="secondary" onClick={() => navigateTo("signup")}>Cadastrar-se</button>
           </div>
 
-          <p className="muted">Apoie nossos desenvolvedores visitando-nos, no linkedin e github</p>
+          <p className="muted">Apoie nossos desenvolvedores visitando-nos no <a href="https://github.com/will-csc/ShelfMate-4thSemesterProject" target="_blank" rel="noopener noreferrer">GitHub</a></p>
         </div>
       </div>
       {toast && <div className="toast show" id="toast">{toast}</div>}

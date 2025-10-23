@@ -18,11 +18,13 @@ body {
 }
 
 /* Auth pages keep blue background */
-body.auth-page {
-  background: #1337d8;
-}
+body.auth-page { background: #1B31BA; }
 
 /* Logged-in pages have white background */
 body.logged-in {
   background: #fff;
 }
+
+/* Layout root to keep footer at bottom */
+.appRoot { min-height: 100vh; display: flex; flex-direction: column; }
+.appMain { flex: 1; display: flex; flex-direction: column; }

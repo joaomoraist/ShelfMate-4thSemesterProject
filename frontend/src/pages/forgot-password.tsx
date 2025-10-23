@@ -17,11 +17,34 @@ export default function ForgotPassword() {
   useEffect(() => {
     const allowedEmail = localStorage.getItem("resetFlowEmail");
     if (!allowedEmail) {
-      showToast("Solicite o código na página de login.");
-      setTimeout(() => navigateTo("login"), 1200);
+      // Não redireciona; apenas informa que o email deve ser preenchido no login
+      showToast("Informe seu email na página de login para enviar o código.");
       return;
     }
     setEmail(allowedEmail);
+
+    // Ao montar, já enviar o código e ativar o campo de digitar o código
+    (async () => {
+      try {
+        const response = await fetch(API_URLS.SEND_RESET_CODE, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: allowedEmail }),
+        });
+
+        if (response.ok) {
+          showToast("Código enviado automaticamente. Verifique seu email.");
+          setStep(2);
+        } else {
+          const errorData = await response.json();
+          const details = (errorData && (errorData.details || errorData.error)) ? (errorData.details || errorData.error) : null;
+          showToast("Falha ao enviar código: " + (errorData.error || "Erro desconhecido") + (details ? " - " + details : ""));
+        }
+      } catch (err) {
+        console.error(err);
+        showToast("Erro ao conectar com o servidor.");
+      }
+    })();
   }, []);
 
   const handleSendCode = async (e?: React.FormEvent) => {
@@ -105,7 +128,7 @@ export default function ForgotPassword() {
       <div className="auth-shell">
         <div className="auth-content">
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 28 }}>🔑</div>
+            <img src="/forget-password.png" alt="Redefinir senha" className="auth-icon" />
             <h1 className="auth-title">Redefinir a Senha</h1>
             <p className="auth-sub">Digite as suas informações</p>
           </div>
@@ -154,7 +177,7 @@ export default function ForgotPassword() {
             <button className="secondary" onClick={() => navigateTo("login")}>Login</button>
           </div>
 
-          <p className="muted">Apoie nossos desenvolvedores visitando-nos, no linkedin e github</p>
+          <p className="muted">Apoie nossos desenvolvedores visitando-nos no <a href="https://github.com/will-csc/ShelfMate-4thSemesterProject" target="_blank" rel="noopener noreferrer">GitHub</a></p>
         </div>
 
         <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={3500} />

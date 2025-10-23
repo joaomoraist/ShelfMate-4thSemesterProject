@@ -1,0 +1,25 @@
+.siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }
+.footerInner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; align-items: start; }
+.footerSection { display: flex; flex-direction: column; gap: 12px; }
+.footerTitle { font-weight: 700; font-size: 16px; color: #fff; }
+.footerDescription { font-size: 14px; color: #9ca3af; line-height: 1.5; }
+.footerLinks { font-size: 14px; color: #9ca3af; }
+.githubLink { font-size: 12px; color: #1B31BA; word-break: break-all; }
+.contactInfo { font-size: 14px; color: #9ca3af; }
+.developerList { display: flex; flex-direction: column; gap: 4px; }
+.developerList div { font-size: 12px; color: #9ca3af; }
+
+@media (max-width: 1200px) {
+	.footerInner { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 960px) {
+	.footerInner { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+	.footerInner { grid-template-columns: 1fr; gap: 24px; }
+}
+
+/* Prevent horizontal overflow on extreme viewports */
+html, body { overflow-x: hidden; }

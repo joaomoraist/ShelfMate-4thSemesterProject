@@ -10,6 +10,7 @@ import Statistics from "./pages/statistics";
 import Products from "./pages/products";
 import Reports from "./pages/reports";
 import Settings from "./pages/settings";
+import SiteFooter from "./components/SiteFooter";
 
 type Page = "login" | "signup" | "forgot-password" | "home" | "statistics" | "products" | "reports" | "settings";
 
@@ -53,10 +54,14 @@ function App() {
   };
 
   return (
-    <NavigationProvider navigateTo={navigateTo}>
-      {/* Current Page */}
-      {renderPage()}
-    </NavigationProvider>
+    <div className="appRoot">
+      <NavigationProvider navigateTo={navigateTo}>
+        <main className="appMain">
+          {renderPage()}
+        </main>
+        <SiteFooter />
+      </NavigationProvider>
+    </div>
   );
 }
 

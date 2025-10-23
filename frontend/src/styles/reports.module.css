@@ -1,6 +1,6 @@
 /* Module styles for reports page */
 .pageWrap { max-width: 1200px; margin: 0 auto; padding: 0 20px; box-sizing: border-box; background: #fff; min-height: 100vh; }
-.topbar { background: #1e3a8a; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(21,55,200,0.12); position: sticky; top: 0; z-index: 10; }
+.topbar { background: #1B31BA; color: #fff; padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(27,49,186,0.12); position: sticky; top: 0; z-index: 10; }
 .topbarLeft { display: flex; align-items: center; gap: 12px; }
 .topbarCenter { display: flex; gap: 18px; align-items: center; }
 .topbarRight { display: flex; gap: 16px; align-items: center; }
@@ -38,7 +38,7 @@
 
 /* Page header styles */
 .pageHeader { text-align: center; margin: 40px 0; }
-.pageTitle { color: #1e3a8a; font-size: 36px; font-weight: 700; margin: 0; }
+.pageTitle { color: #1B31BA; font-weight: 700; font-size: 22px; margin: 0; }
 
 /* Reports section styles */
 .reportsSection { margin: 40px 0; }
@@ -48,21 +48,21 @@
 .reportIcon { margin-bottom: 24px; }
 .iconBox { font-size: 48px; display: inline-block; }
 .iconAlert { font-size: 48px; display: inline-block; }
-.reportTitle { color: #1e3a8a; font-size: 24px; font-weight: 700; margin: 0 0 16px; }
+.reportTitle { color: #1B31BA; font-size: 24px; font-weight: 700; margin: 0 0 16px; }
 .reportDescription { color: #6b7280; font-size: 16px; line-height: 1.5; margin: 0 0 32px; }
-.exportButton { background: #1e3a8a; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: background 0.2s; }
+.exportButton { background: #1B31BA; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: background 0.2s; }
 .exportButton:hover { background: #1d4ed8; }
 .exportButtonAlert { background: #dc2626; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: background 0.2s; }
 .exportButtonAlert:hover { background: #b91c1c; }
 
 /* Footer styles */
-.siteFooter { margin-top: 40px; background: #1e3a8a; color: #fff; padding: 32px; border-radius: 12px; }
+.siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }
 .footerInner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; align-items: start; }
 .footerSection { display: flex; flex-direction: column; gap: 12px; }
 .footerTitle { font-weight: 700; font-size: 16px; color: #fff; }
 .footerDescription { font-size: 14px; color: #9ca3af; line-height: 1.5; }
 .footerLinks { font-size: 14px; color: #9ca3af; }
-.githubLink { font-size: 12px; color: #60a5fa; word-break: break-all; }
+.githubLink { font-size: 12px; color: #1B31BA; word-break: break-all; }
 .contactInfo { font-size: 14px; color: #9ca3af; }
 .developerList { display: flex; flex-direction: column; gap: 4px; }
 .developerList div { font-size: 12px; color: #9ca3af; }
