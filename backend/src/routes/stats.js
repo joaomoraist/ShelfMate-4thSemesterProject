@@ -190,18 +190,16 @@ router.get('/top-products', async (req, res) => {
         SELECT 
           p.id AS product_id, 
           p.name, 
-          p.price,
-          p.current_stock,
+          p.unit_price,
+          p.inventory,
           COALESCE(SUM(s.qntd),0) AS total_sold,
-          COALESCE(SUM(s.qntd * p.price),0) AS total_revenue,
+          COALESCE(SUM(s.value),0) AS total_revenue,
           COUNT(s.id) AS total_sales_count,
-          COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale,
-          MAX(s.sale_date) AS last_sale_date,
-          MIN(s.sale_date) AS first_sale_date
+          COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale
         FROM products p
         LEFT JOIN sales s ON s.product_id = p.id
         WHERE p.company_id = ${companyId}
-        GROUP BY p.id, p.name, p.price, p.current_stock
+        GROUP BY p.id, p.name, p.unit_price, p.inventory
         ORDER BY total_sold DESC
         LIMIT ${limit}
       `
@@ -209,17 +207,15 @@ router.get('/top-products', async (req, res) => {
         SELECT 
           p.id AS product_id, 
           p.name, 
-          p.price,
-          p.current_stock,
+          p.unit_price,
+          p.inventory,
           COALESCE(SUM(s.qntd),0) AS total_sold,
-          COALESCE(SUM(s.qntd * p.price),0) AS total_revenue,
+          COALESCE(SUM(s.value),0) AS total_revenue,
           COUNT(s.id) AS total_sales_count,
-          COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale,
-          MAX(s.sale_date) AS last_sale_date,
-          MIN(s.sale_date) AS first_sale_date
+          COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale
         FROM products p
         LEFT JOIN sales s ON s.product_id = p.id
-        GROUP BY p.id, p.name, p.price, p.current_stock
+        GROUP BY p.id, p.name, p.unit_price, p.inventory
         ORDER BY total_sold DESC
         LIMIT ${limit}
       `;
