@@ -25,6 +25,11 @@ body.logged-in {
   background: #fff;
 }
 
+/* Default zoom for desktop (approx ≥ 992px) */
+@media (min-width: 992px) {
+  html { zoom: 1.2; }
+}
+
 /* Layout root to keep footer at bottom */
 .appRoot { min-height: 100vh; display: flex; flex-direction: column; }
 .appMain { flex: 1; display: flex; flex-direction: column; }

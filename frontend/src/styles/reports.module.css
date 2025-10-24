@@ -19,6 +19,7 @@
 
 /* Search styles */
 .searchContainer { position: relative; display: flex; align-items: center; }
+.searchContainer img.iconImg { position: absolute; left: 12px; }
 .searchIcon { position: absolute; left: 12px; color: #9ca3af; font-size: 16px; }
 .searchInput { padding: 8px 12px 8px 36px; border-radius: 8px; border: none; width: 220px; background: rgba(255,255,255,0.1); color: #fff; }
 .searchInput::placeholder { color: #9ca3af; }
@@ -43,40 +44,19 @@
 /* Reports section styles */
 .reportsSection { margin: 40px 0; }
 .reportsGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 32px; max-width: 800px; margin: 0 auto; }
-.reportCard { background: #fff; border-radius: 16px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); text-align: center; border: 1px solid #e5e7eb; transition: transform 0.2s, box-shadow 0.2s; }
-.reportCard:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-.reportIcon { margin-bottom: 24px; }
-.iconBox { font-size: 48px; display: inline-block; }
-.iconAlert { font-size: 48px; display: inline-block; }
-.reportTitle { color: #1B31BA; font-size: 24px; font-weight: 700; margin: 0 0 16px; }
-.reportDescription { color: #6b7280; font-size: 16px; line-height: 1.5; margin: 0 0 32px; }
-.exportButton { background: #1B31BA; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: background 0.2s; }
+.reportCard { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+.reportIcon { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 9999px; background: #f8fafc; }
+.iconBox { font-size: 24px; }
+.iconAlert { font-size: 24px; }
+.reportTitle { color: #1B31BA; font-weight: 700; font-size: 18px; margin: 0; }
+.reportDescription { color: #6b7280; font-size: 14px; margin: 0; }
+.exportButton { background: #1B31BA; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
 .exportButton:hover { background: #1d4ed8; }
-.exportButtonAlert { background: #dc2626; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 16px; transition: background 0.2s; }
-.exportButtonAlert:hover { background: #b91c1c; }
-.logoImg { width: 28px; height: 28px; object-fit: contain; display: inline-block; }
-.iconImg { width: 18px; height: 18px; object-fit: contain; display: inline-block; }
-
-/* Footer styles */
-.siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }
-.footerInner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; align-items: start; }
-.footerSection { display: flex; flex-direction: column; gap: 12px; }
-.footerTitle { font-weight: 700; font-size: 16px; color: #fff; }
-.footerDescription { font-size: 14px; color: #9ca3af; line-height: 1.5; }
-.footerLinks { font-size: 14px; color: #9ca3af; }
-.githubLink { font-size: 12px; color: #1B31BA; word-break: break-all; }
-.contactInfo { font-size: 14px; color: #9ca3af; }
-.developerList { display: flex; flex-direction: column; gap: 4px; }
-.developerList div { font-size: 12px; color: #9ca3af; }
+.exportButtonAlert { background: #ef4444; color: #fff; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+.exportButtonAlert:hover { background: #dc2626; }
 
 /* Responsive design */
-@media (max-width: 1200px) {
-	.footerInner { grid-template-columns: repeat(3, 1fr); }
-}
-
 @media (max-width: 960px) {
-	.reportsGrid { grid-template-columns: 1fr; }
-	.footerInner { grid-template-columns: repeat(2, 1fr); }
 	.topbarCenter { gap: 12px; }
 	.navButton { padding: 6px 8px; }
 }
@@ -86,17 +66,12 @@
 	.topbarCenter { order: 2; }
 	.topbarRight { order: 3; }
 	.pageTitle { font-size: 28px; }
-	.footerInner { grid-template-columns: 1fr; gap: 24px; }
-	.reportCard { padding: 32px; }
 }
 
 @media (max-width: 480px) {
 	.pageTitle { font-size: 24px; }
 	.searchInput { width: 180px; }
 	.pageWrap { padding: 0 16px; }
-	.reportCard { padding: 24px; }
-	.reportTitle { font-size: 20px; }
-	.exportButton, .exportButtonAlert { padding: 12px 24px; font-size: 14px; }
 }
 
 /* Prevent horizontal overflow on extreme viewports */

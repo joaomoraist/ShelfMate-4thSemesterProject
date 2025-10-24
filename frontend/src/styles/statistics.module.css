@@ -19,6 +19,7 @@
 
 /* Search styles */
 .searchContainer { position: relative; display: flex; align-items: center; }
+.searchContainer img.iconImg { position: absolute; left: 12px; }
 .searchIcon { position: absolute; left: 12px; color: #9ca3af; font-size: 16px; }
 .searchInput { padding: 8px 12px 8px 36px; border-radius: 8px; border: none; width: 220px; background: rgba(255,255,255,0.1); color: #fff; }
 .searchInput::placeholder { color: #9ca3af; }
