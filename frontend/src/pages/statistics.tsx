@@ -95,53 +95,53 @@ const Statistics: React.FC = () => {
 
     return (
         <div style={{ minHeight: "100vh", background: "transparent" }}>
-            <header className={cssModule.topbar}>
-                <div className={cssModule.topbarLeft}>
-                    <div className={cssModule.logoContainer}>
-                        <div className={cssModule.logoIcon}>📦</div>
-                        <div className={cssModule.logoText}>Shelf Mate</div>
+            <header className={homeCssModule.topbar}>
+                <div className={homeCssModule.topbarLeft}>
+                    <div className={homeCssModule.logoContainer}>
+                        <img src="/logo-removebg.png" alt="ShelfMate" className={homeCssModule.logoImg} />
+                        <div className={homeCssModule.logoText}>Shelf Mate</div>
                     </div>
                 </div>
 
-                <nav className={cssModule.topbarCenter}>
-                    <button className={cssModule.topbarButton} onClick={() => navigateTo("home")}>
+                <nav className={homeCssModule.topbarCenter}>
+                    <button className={homeCssModule.navButton} onClick={() => navigateTo("home")}>
                         <img src="/home_white.png" alt="Home" className={homeCssModule.iconImg} />
                         <span className={homeCssModule.navLabel}>Home</span>
                     </button>
-                    <button className={cssModule.navButton} data-active="true">
-                        <img src="/statistcs.png" alt="Estatísticas" className={cssModule.iconImg} />
-                        <span className={cssModule.navLabel}>Estatísticas</span>
+                    <button className={homeCssModule.navButton} data-active="true">
+                        <img src="/statistcs.png" alt="Estatísticas" className={homeCssModule.iconImg} />
+                        <span className={homeCssModule.navLabel}>Estatísticas</span>
                     </button>
-                    <button className={cssModule.navButton} onClick={() => navigateTo("products")}>
-                        <img src="/products.png" alt="Produtos" className={cssModule.iconImg} />
-                        <span className={cssModule.navLabel}>Produtos</span>
+                    <button className={homeCssModule.navButton} onClick={() => navigateTo("products")}>
+                        <img src="/products.png" alt="Produtos" className={homeCssModule.iconImg} />
+                        <span className={homeCssModule.navLabel}>Produtos</span>
                     </button>
-                    <button className={cssModule.navButton} onClick={() => navigateTo("reports")}>
-                        <img src="/reports.png" alt="Relatórios" className={cssModule.iconImg} />
-                        <span className={cssModule.navLabel}>Relatórios</span>
+                    <button className={homeCssModule.navButton} onClick={() => navigateTo("reports")}>
+                        <img src="/reports.png" alt="Relatórios" className={homeCssModule.iconImg} />
+                        <span className={homeCssModule.navLabel}>Relatórios</span>
                     </button>
                 </nav>
 
-                <div className={cssModule.topbarRight}>
-                    <div className={cssModule.searchContainer}>
-                        <img src="/search.png" alt="Buscar" className={cssModule.iconImg} />
-                        <input className={cssModule.searchInput} placeholder="Pesquisar" />
+                <div className={homeCssModule.topbarRight}>
+                    <div className={homeCssModule.searchContainer}>
+                        <img src="/search.png" alt="Buscar" className={homeCssModule.iconImg} />
+                        <input className={homeCssModule.searchInput} placeholder="Pesquisar" />
                     </div>
-                    <div className={cssModule.userContainer}>
-                        <span className={cssModule.welcomeText}>Bem vindo William</span>
-                        <div className={cssModule.userDropdown}>
-                            <div className={cssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
-                                <span className={cssModule.userIcon}>👤</span>
-                                <span className={cssModule.dropdownArrow}>▼</span>
+                    <div className={homeCssModule.userContainer}>
+                        <span className={homeCssModule.welcomeText}>Bem vindo William</span>
+                        <div className={homeCssModule.userDropdown}>
+                            <div className={homeCssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
+                                <span className={homeCssModule.userIcon}>👤</span>
+                                <span className={homeCssModule.dropdownArrow}>▼</span>
                             </div>
                             {showUserMenu && (
-                                <div className={cssModule.userMenu}>
-                                    <button className={cssModule.menuItem} onClick={() => navigateTo("settings")}>
-                                        <span className={cssModule.menuIcon}>⚙️</span>
+                                <div className={homeCssModule.userMenu}>
+                                    <button className={homeCssModule.menuItem} onClick={() => navigateTo("settings")}>
+                                        <span className={homeCssModule.menuIcon}>⚙️</span>
                                         Configurações
                                     </button>
-                                    <button className={cssModule.menuItem} onClick={handleLogout}>
-                                        <span className={cssModule.menuIcon}>→</span>
+                                    <button className={homeCssModule.menuItem} onClick={handleLogout}>
+                                        <span className={homeCssModule.menuIcon}>→</span>
                                         Sair
                                     </button>
                                 </div>
@@ -159,23 +159,7 @@ const Statistics: React.FC = () => {
                     </p>
                 </section>
 
-                <section className={cssModule.filtersSection}>
-                    <div className={cssModule.filterGroup}>
-                        <div className={cssModule.filterItem}>
-                            <span className={cssModule.filterIcon}>🔽</span>
-                            <span className={cssModule.filterIcon}>📦</span>
-                            <span className={cssModule.filterLabel}>Produto</span>
-                        </div>
-                        <div className={cssModule.filterItem}>
-                            <span className={cssModule.filterIcon}>📄</span>
-                            <span className={cssModule.filterLabel}>Categoria</span>
-                        </div>
-                        <div className={cssModule.filterItem}>
-                            <span className={cssModule.filterIcon}>📅</span>
-                            <span className={cssModule.filterLabel}>Período</span>
-                        </div>
-                    </div>
-                </section>
+
 
                 <section className={cssModule.metricsSection}>
                     <div className={cssModule.metricsGrid}>

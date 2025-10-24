@@ -84,7 +84,7 @@
 .alertDot { position: absolute; top: -2px; right: -2px; color: #ef4444; font-size: 8px; }
 
 /* Bottom action styles */
-.bottomAction { display: flex; justify-content: center; margin-top: 32px; }
+.bottomAction { display: none; }
 .salesButton { background: #1B31BA; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 12px; font-size: 16px; transition: background 0.2s; }
 .salesButton:hover { background: #1d4ed8; }
 .salesIcon { font-size: 20px; }
