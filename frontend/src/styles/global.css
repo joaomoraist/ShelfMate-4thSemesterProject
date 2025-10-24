@@ -18,7 +18,7 @@ body {
 }
 
 /* Auth pages keep blue background */
-body.auth-page { background: #1B31BA; }
+body.auth-page { background: #1B31BA; overflow: hidden; }
 
 /* Logged-in pages have white background */
 body.logged-in {
@@ -27,7 +27,7 @@ body.logged-in {
 
 /* Default zoom for desktop (approx ≥ 992px) */
 @media (min-width: 992px) {
-  html { zoom: 1.2; }
+  body.logged-in { zoom: 1.2; }
 }
 
 /* Layout root to keep footer at bottom */

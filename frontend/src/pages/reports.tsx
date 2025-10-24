@@ -3,6 +3,9 @@ import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/reports.module.css';
+import { API_URLS } from '../config/api';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const Reports: React.FC = () => {
     const [user, setUser] = useState<any>(null);
@@ -102,7 +105,7 @@ const Reports: React.FC = () => {
                             <p className={cssModule.reportDescription}>
                                 Visualize todos os produtos disponíveis em estoque com suas quantidades e valores
                             </p>
-                            <button className={cssModule.exportButton}>
+                            <button className={cssModule.exportButton} onClick={exportProductsPdf}>
                                 Exportar Relatório
                             </button>
                         </div>
@@ -115,7 +118,7 @@ const Reports: React.FC = () => {
                             <p className={cssModule.reportDescription}>
                                 Produtos com estoque baixo ou crítico que necessitam de reposição urgente
                             </p>
-                            <button className={cssModule.exportButtonAlert}>
+                            <button className={cssModule.exportButtonAlert} onClick={exportAlertsPdf}>
                                 Exportar Relatório
                             </button>
                         </div>
@@ -131,3 +134,74 @@ const Reports: React.FC = () => {
 };
 
 export default Reports;
+
+
+// Exportar PDF: Produtos (usa /stats/products-detailed)
+const exportProductsPdf = async () => {
+    try {
+        const res = await fetch(API_URLS.PRODUCTS_DETAILED);
+        if (!res.ok) throw new Error(`Falha ao buscar dados (${res.status})`);
+        const data = await res.json();
+        const rows = (data?.rows ?? []) as Array<any>;
+
+        const doc = new jsPDF();
+        const title = 'Relatório de Produtos';
+        doc.setFontSize(16);
+        doc.text(title, 14, 18);
+        doc.setFontSize(11);
+        doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 26);
+
+        autoTable(doc, {
+            startY: 32,
+            head: [[
+                'ID', 'Produto', 'Preço Unitário (R$)', 'Estoque', 'Status', 'Alertas'
+            ]],
+            body: rows.map(r => [
+                r.id, r.name, (r.unit_price ?? 0).toFixed(2), r.inventory ?? 0, r.status ?? '-', r.alerts_count ?? 0
+            ]),
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [27, 49, 186] }
+        });
+
+        doc.save('relatorio_produtos.pdf');
+    } catch (err: any) {
+        alert(`Erro ao exportar PDF de produtos: ${err.message || err}`);
+    }
+};
+
+// Exportar PDF: Alertas (filtra produtos com alerts_count>0 ou estoque baixo)
+const exportAlertsPdf = async () => {
+    try {
+        const res = await fetch(API_URLS.PRODUCTS_DETAILED);
+        if (!res.ok) throw new Error(`Falha ao buscar dados (${res.status})`);
+        const data = await res.json();
+        const rows = (data?.rows ?? []) as Array<any>;
+
+        const LOW_STOCK_THRESHOLD = 10;
+        const alertRows = rows.filter(r => (r.alerts_count ?? 0) > 0 || (r.inventory ?? 0) <= LOW_STOCK_THRESHOLD);
+
+        const doc = new jsPDF();
+        const title = 'Relatório de Alertas de Estoque';
+        doc.setFontSize(16);
+        doc.text(title, 14, 18);
+        doc.setFontSize(11);
+        doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, 14, 26);
+        doc.text(`Critério: alerts_count>0 ou estoque <= ${LOW_STOCK_THRESHOLD}`, 14, 32);
+
+        autoTable(doc, {
+            startY: 38,
+            head: [[
+                'ID', 'Produto', 'Estoque', 'Preço (R$)', 'Status', 'Qtd. Alertas'
+            ]],
+            body: alertRows.map(r => [
+                r.id, r.name, r.inventory ?? 0, (r.unit_price ?? 0).toFixed(2), r.status ?? '-', r.alerts_count ?? 0
+            ]),
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [220, 53, 69] }
+        });
+
+        doc.save('relatorio_alertas.pdf');
+    } catch (err: any) {
+        alert(`Erro ao exportar PDF de alertas: ${err.message || err}`);
+    }
+};

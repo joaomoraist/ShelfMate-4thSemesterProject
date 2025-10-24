@@ -165,10 +165,10 @@ const Home: React.FC = () => {
                         </p>
 
                         <div className={cssModule.heroActions}>
-                            <button className={cssModule.ctaPrimary}>
+                            <button className={cssModule.ctaPrimary} onClick={() => navigateTo("products")}>
                                 Meus Produtos ➜
                             </button>
-                            <button className={cssModule.ctaSecondary}>
+                            <button className={cssModule.ctaSecondary} onClick={() => navigateTo("reports")}>
                                 Ver Relatórios
                             </button>
                         </div>

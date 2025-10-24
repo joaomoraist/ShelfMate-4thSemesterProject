@@ -23,13 +23,14 @@ function App() {
     setCurrentPage(page);
   };
 
+  // Determinar páginas de autenticação e estado atual
+  const authPages = ["login", "signup", "forgot-password"];
+  const isAuthPage = authPages.includes(currentPage);
+
   // Aplicar classe no body baseada na página atual
   React.useEffect(() => {
-    const authPages = ["login", "signup", "forgot-password"];
-    const isAuthPage = authPages.includes(currentPage);
-    
     document.body.className = isAuthPage ? "auth-page" : "logged-in";
-  }, [currentPage]);
+  }, [currentPage, isAuthPage]);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -62,7 +63,7 @@ function App() {
         <main className="appMain">
           {renderPage()}
         </main>
-        <SiteFooter />
+        {!isAuthPage && <SiteFooter />}
       </NavigationProvider>
     </div>
   );

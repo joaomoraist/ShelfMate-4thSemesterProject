@@ -16,6 +16,7 @@
 .navButton[data-active="true"] { background: rgba(255,255,255,0.15); }
 .navIcon { font-size: 18px; }
 .navLabel { font-size: 12px; font-weight: 500; }
+.navButton img.iconImg { width: 24px; height: 24px; object-fit: contain; display: block; }
 
 /* Search styles */
 .searchContainer { position: relative; display: flex; align-items: center; }
@@ -45,59 +46,23 @@
 /* Filters section styles */
 .filtersSection { margin: 32px 0; }
 .filterGroup { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
-.filterItem { display: flex; align-items: center; gap: 8px; padding: 12px 20px; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-.filterItem:hover { border-color: #1B31BA; box-shadow: 0 8px 20px rgba(27,49,186,0.10); }
-.filterIcon { font-size: 16px; }
-.filterLabel { font-weight: 500; color: #374151; }
+.filterItem { padding: 10px 18px; background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; cursor: pointer; color: #374151; }
+.filterItem[data-active="true"] { background: #1B31BA; color: #fff; border-color: #1B31BA; }
 
-/* Metrics section styles */
-.metricsSection { margin: 32px 0; }
-.metricsGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-.metricCard { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
-.metricHeader { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-.metricIcon { display: flex; align-items: center; }
-.metricTitle { font-weight: 600; color: #374151; font-size: 14px; }
-.metricValue { font-size: 28px; font-weight: 700; color: #1B31BA; margin-bottom: 8px; }
-.metricComparison { display: flex; align-items: center; gap: 8px; }
-.comparisonText { font-size: 12px; color: #6b7280; }
-.trendIcon { font-size: 16px; font-weight: bold; }
-.trendIcon.up { color: #10b981; }
-.trendIcon.down { color: #ef4444; }
-
-/* Charts section styles */
-.chartsSection { margin: 32px 0; }
-.chartsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-.fullWidthChart { width: 100%; }
-.chartCard { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
-.chartTitle { color: #1B31BA; font-weight: 700; font-size: 18px; margin: 0 0 20px; }
-.chartContainer { height: 350px; display: flex; align-items: center; justify-content: center; }
-.chartPlaceholder { color: #9ca3af; font-size: 16px; text-align: center; padding: 40px; background: #f8fafc; border-radius: 8px; border: 2px dashed #d1d5db; }
-.lineChart { width: 100%; height: 100%; }
-.barChart { width: 100%; height: 100%; }
-.areaChart { width: 100%; height: 100%; }
-.logoImg { width: 28px; height: 28px; object-fit: contain; display: inline-block; }
-.iconImg { width: 18px; height: 18px; object-fit: contain; display: inline-block; }
+/* Metrics grid styles */
+.metricsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.metricCard { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.chartCard { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.chartContainer { height: 300px; display: flex; align-items: center; justify-content: center; }
 
 /* Footer styles */
-.siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }
-.footerInner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; align-items: start; }
-.footerSection { display: flex; flex-direction: column; gap: 12px; }
-.footerTitle { font-weight: 700; font-size: 16px; color: #fff; }
-.footerDescription { font-size: 14px; color: #9ca3af; line-height: 1.5; }
-.footerLinks { font-size: 14px; color: #9ca3af; }
-.githubLink { font-size: 12px; color: #1B31BA; word-break: break-all; }
-.contactInfo { font-size: 14px; color: #9ca3af; }
-.developerList { display: flex; flex-direction: column; gap: 4px; }
-.developerList div { font-size: 12px; color: #9ca3af; }
-
-/* Responsive design */
-@media (max-width: 1200px) {
-	.footerInner { grid-template-columns: repeat(3, 1fr); }
-	.chartsGrid { grid-template-columns: 1fr; }
-}
+.footer { background: #f8fafc; margin-top: 40px; border-top: 1px solid #e5e7eb; }
+.footerInner { max-width: 1200px; margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+.footerSectionTitle { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+.footerLink { color: #374151; font-size: 14px; text-decoration: none; display: block; margin-bottom: 6px; }
+.footerLink:hover { text-decoration: underline; }
 
 @media (max-width: 960px) {
-	.metricsGrid { grid-template-columns: repeat(2, 1fr); }
 	.footerInner { grid-template-columns: repeat(2, 1fr); }
 	.topbarCenter { gap: 12px; }
 	.navButton { padding: 6px 8px; }
@@ -133,3 +98,24 @@
 
 /* Prevent horizontal overflow on extreme viewports */
 html, body { overflow-x: hidden; }
+
+/* Metrics card details */
+.metricHeader { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.metricIcon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: #f3f4f6; }
+.metricTitle { font-size: 14px; color: #374151; font-weight: 600; }
+.metricValue { font-size: 28px; font-weight: 700; color: #1B31BA; margin-top: 8px; }
+.metricComparison { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.comparisonText { font-size: 12px; color: #6b7280; }
+.trendIcon { font-size: 14px; }
+.up { color: #16a34a; }
+.down { color: #dc2626; }
+
+/* Charts grids */
+.chartsSection { margin: 40px 0; }
+.chartsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.chartTitle { font-size: 16px; font-weight: 600; color: #374151; margin-bottom: 12px; }
+.lineChart { width: 100%; height: 100%; }
+.barChart { width: 100%; height: 100%; }
+
+/* Metrics section wrapper */
+.metricsSection { margin: 40px 0; }

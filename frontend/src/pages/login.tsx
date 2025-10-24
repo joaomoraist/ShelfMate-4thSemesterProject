@@ -107,7 +107,6 @@ export default function Login() {
             <button className="secondary" onClick={() => navigateTo("signup")}>Cadastrar-se</button>
           </div>
 
-          <p className="muted">Apoie nossos desenvolvedores visitando-nos no <a href="https://github.com/will-csc/ShelfMate-4thSemesterProject" target="_blank" rel="noopener noreferrer">GitHub</a></p>
         </div>
       </div>
       {toast && <div className="toast show" id="toast">{toast}</div>}

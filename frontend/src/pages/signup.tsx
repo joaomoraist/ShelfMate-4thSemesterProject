@@ -82,7 +82,6 @@ export default function Signup() {
             <button className="secondary" onClick={() => navigateTo("login")}>Login</button>
           </div>
 
-          <p className="muted">Apoie nossos desenvolvedores visitando-nos no <a href="https://github.com/will-csc/ShelfMate-4thSemesterProject" target="_blank" rel="noopener noreferrer">GitHub</a></p>
         </div>
 
         <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={3500} />

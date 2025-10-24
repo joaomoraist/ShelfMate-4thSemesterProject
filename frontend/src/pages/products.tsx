@@ -184,16 +184,6 @@ const Products: React.FC = () => {
                     )}
                     
                     <div className={cssModule.actionBar}>
-                        <div className={cssModule.searchGroup}>
-                            <div className={cssModule.searchInputContainer}>
-                                <span className={cssModule.searchIcon}>🔍</span>
-                                <input className={cssModule.searchField} placeholder="Buscar produto..." />
-                            </div>
-                            <div className={cssModule.categoryFilter}>
-                                <span className={cssModule.filterLabel}>Todas Categorias</span>
-                                <span className={cssModule.filterArrow}>▼</span>
-                            </div>
-                        </div>
                         <div className={cssModule.actionButtons}>
                             <button className={cssModule.addButton} onClick={() => navigateTo("add-product")}>
                                 <span className={cssModule.buttonIcon}>+</span>
@@ -266,13 +256,7 @@ const Products: React.FC = () => {
                         ))}
                     </div>
 
-                    <div className={cssModule.bottomAction}>
-                        <button className={cssModule.salesButton}>
-                            <span className={cssModule.salesIcon}>💰</span>
-                            <span className={cssModule.clockIcon}>🕒</span>
-                            Adicionar últimas Vendas
-                        </button>
-                    </div>
+
                 </section>
 
 
