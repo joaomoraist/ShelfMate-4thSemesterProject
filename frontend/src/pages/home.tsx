@@ -220,7 +220,7 @@ const Home: React.FC = () => {
                         />
 
 
-                                            </div>
+                    </div>
                                         </section>
 
                 <section className={cssModule.analyticsSection}>
@@ -269,3 +269,4 @@ const Home: React.FC = () => {
 };
 
 export default Home;
+
