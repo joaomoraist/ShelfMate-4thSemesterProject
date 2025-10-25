@@ -188,13 +188,40 @@ const Home: React.FC = () => {
                     </div>
 
                     <div className={cssModule.statGrid}>
-                        <StatCard title="Últimos Acessos" value={`${activityData?.last_accesses ?? 0} LogIns`} iconSrc="/last-access.png" emoji="" />
-                        <StatCard title="Produtos Inseridos" value={`${activityData?.products_inserted ?? 0} SKUs`} iconSrc="/products-blue.png" emoji="" />
-                        <StatCard title="Mudanças no Perfil" value={`${activityData?.profile_changes ?? 0} Mudanças`} iconSrc="/changes.png" emoji="" />
-                        <StatCard title="Relatórios Baixados" value={`${activityData?.reports_downloaded ?? 0} Emitidos`} iconSrc="/report-blue.png" emoji="" />
-                        <StatCard title="Alertas Emitidos" value={`${activityData?.alerts_issued ?? 0} Enviados`} iconSrc="/alert-blue.png" emoji="" />
-                    </div>
-                </section>
+                        <StatCard
+                            title="Últimos Acessos"
+                            value={`${activityData?.last_accesses ?? 0} Logins`}
+                            iconSrc="/last-access.png"
+                            emoji="🕒"
+                        />
+                        <StatCard
+                            title="Produtos Inseridos"
+                            value={`${activityData?.products_inserted ?? 0} SKUs`}
+                            iconSrc="/products-blue.png"
+                            emoji="📦"
+                        />
+                        <StatCard
+                            title="Mudanças no Perfil"
+                            value={`${activityData?.profile_changes ?? 0} Mudanças`}
+                            iconSrc="/changes.png"
+                            emoji="⚙️"
+                        />
+                        <StatCard
+                            title="Relatórios Baixados"
+                            value={`${activityData?.reports_downloaded ?? 0} Relatórios emitidos`}
+                            iconSrc="/report-blue.png"
+                            emoji="📄"
+                        />
+                        <StatCard
+                            title="Alertas Emitidos"
+                            value={`${activityData?.alerts_issued ?? 0} Alertas enviados`}
+                            iconSrc="/alert-blue.png"
+                            emoji="⚠️"
+                        />
+
+
+                                            </div>
+                                        </section>
 
                 <section className={cssModule.analyticsSection}>
                     <div className={cssModule.analyticsHeader}>
@@ -236,9 +263,6 @@ const Home: React.FC = () => {
                         </div>
                     </div>
                 </section>
-
-
-
             </main>
         </div>
     );
