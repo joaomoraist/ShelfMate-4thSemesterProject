@@ -8,6 +8,7 @@ import LineChart from "../components/LineChart";
 import PieChart from "../components/PieChart";
 import TopProductsTable from "../components/TopProductsTable";
 
+
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
 const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
     const [error, setError] = React.useState(false);
@@ -187,40 +188,38 @@ const Home: React.FC = () => {
                         <p className={cssModule.accessSub}>Sua movimentação nos últimos 30 dias</p>
                     </div>
 
-                    <div className={cssModule.statGrid}>
-                        <StatCard
-                            title="Últimos Acessos"
-                            value={`${activityData?.last_accesses ?? 0} Logins`}
-                            iconSrc="/last-access.png"
-                            emoji="🕒"
-                        />
-                        <StatCard
-                            title="Produtos Inseridos"
-                            value={`${activityData?.products_inserted ?? 0} SKUs`}
-                            iconSrc="/products-blue.png"
-                            emoji="📦"
-                        />
-                        <StatCard
-                            title="Mudanças no Perfil"
-                            value={`${activityData?.profile_changes ?? 0} Mudanças`}
-                            iconSrc="/changes.png"
-                            emoji="⚙️"
-                        />
-                        <StatCard
-                            title="Relatórios Baixados"
-                            value={`${activityData?.reports_downloaded ?? 0} Relatórios emitidos`}
-                            iconSrc="/report-blue.png"
-                            emoji="📄"
-                        />
-                        <StatCard
-                            title="Alertas Emitidos"
-                            value={`${activityData?.alerts_issued ?? 0} Alertas enviados`}
-                            iconSrc="/alert-blue.png"
-                            emoji="⚠️"
-                        />
-
-
-                    </div>
+                  <div className="grid grid-cols-5 gap-6">
+                    <StatCard
+                        title="Últimos Acessos"
+                        value={`${activityData?.last_accesses ?? 0} Logins`}
+                        iconSrc="/last-access.png"
+                        emoji="🕒"
+                    />
+                    <StatCard
+                        title="Produtos Inseridos"
+                        value={`${activityData?.products_inserted ?? 0} SKUs`}
+                        iconSrc="/products-blue.png"
+                        emoji="📦"
+                    />
+                    <StatCard
+                        title="Mudanças no Perfil"
+                        value={`${activityData?.profile_changes ?? 0} Mudanças`}
+                        iconSrc="/changes.png"
+                        emoji="⚙️"
+                    />
+                    <StatCard
+                        title="Relatórios Baixados"
+                        value={`${activityData?.reports_downloaded ?? 0} Relatórios emitidos`}
+                        iconSrc="/report-blue.png"
+                        emoji="📄"
+                    />
+                    <StatCard
+                        title="Alertas Emitidos"
+                        value={`${activityData?.alerts_issued ?? 0} Alertas enviados`}
+                        iconSrc="/alert-blue.png"
+                        emoji="⚠️"
+                    />
+                </div>
                                         </section>
 
                 <section className={cssModule.analyticsSection}>
@@ -269,4 +268,3 @@ const Home: React.FC = () => {
 };
 
 export default Home;
-
