@@ -12,10 +12,21 @@ const Settings: React.FC = () => {
     const [emailInput, setEmailInput] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [imageFile, setImageFile] = useState<File | null>(null);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
     const { navigateTo } = useNavigation();
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
+
+    React.useEffect(() => {
+        if (imageFile) {
+            const url = URL.createObjectURL(imageFile);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        }
+        setPreviewUrl(null);
+    }, [imageFile]);
 
     const handleLogout = () => {
         localStorage.removeItem("user");
@@ -100,7 +111,22 @@ const Settings: React.FC = () => {
                     <div className={cssModule.settingsContainer}>
                         <div className={cssModule.profileSection}>
                             <div className={cssModule.userAvatarLarge}>
-                                <span className={cssModule.avatarIcon}>👤</span>
+                                <img
+                                    src={
+                                        previewUrl || (user?.image ? `${API_CONFIG.BASE_URL}${user.image}` : '/user_profile.png')
+                                    }
+                                    alt={user?.name || 'Usuário'}
+                                    className={cssModule.userPhotoLarge}
+                                    onClick={() => fileInputRef.current?.click()}
+                                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/user_profile.png'; }}
+                                />
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    style={{ display: 'none' }}
+                                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                                />
                             </div>
                             <div className={cssModule.profileFields}>
                                 <div className={cssModule.fieldGroup}>
@@ -185,10 +211,6 @@ const Settings: React.FC = () => {
                     </div>
 
                     <div className={cssModule.saveSection}>
-                        <div style={{ marginBottom: 12 }}>
-                            <label className={cssModule.fieldLabel}>Foto de Perfil</label>
-                            <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} />
-                        </div>
                         <button className={cssModule.saveButton} onClick={async () => {
                             try {
                                 const form = new FormData();
@@ -210,12 +232,12 @@ const Settings: React.FC = () => {
                                 console.error(err);
                                 alert('Erro ao salvar');
                             }
-                        }}>
-                            <span className={cssModule.saveIcon}>📄</span>
-                            Salvar
-                        </button>
-                    </div>
-                </section>
+                            }}>
+                                <img src="/save.png" alt="Salvar" className={cssModule.saveIconImg} />
+                                Salvar
+                         </button>
+                     </div>
+                 </section>
 
 
 

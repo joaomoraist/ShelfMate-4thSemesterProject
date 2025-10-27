@@ -8,16 +8,18 @@ export default function useCurrentUser() {
   const fetchUser = useCallback(async () => {
     setLoading(true);
     try {
-  const res = await fetch(API_URLS.ME, { credentials: 'include' });
+      const res = await fetch(API_URLS.ME, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
       } else {
-        setUser(null);
+        const stored = localStorage.getItem('user');
+        setUser(stored ? JSON.parse(stored) : null);
       }
     } catch (err) {
       console.error('Erro ao buscar usuário:', err);
-      setUser(null);
+      const stored = localStorage.getItem('user');
+      setUser(stored ? JSON.parse(stored) : null);
     } finally {
       setLoading(false);
     }

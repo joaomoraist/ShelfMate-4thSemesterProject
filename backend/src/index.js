@@ -11,10 +11,11 @@ import session from 'express-session';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 // When running behind a proxy (Render, Heroku, etc.) Express needs
 // to trust the first proxy for secure cookies to work correctly.
-if (process.env.NODE_ENV === 'production') {
+if (IS_PROD) {
   app.set('trust proxy', 1);
 }
 
@@ -24,8 +25,11 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    sameSite: 'lax',
-    secure: false,
+    // Para permitir cookies em requisições cross-site (frontend em localhost/Vercel -> backend Render),
+    // usamos SameSite: 'none' e Secure: true em produção (https).
+    // Em desenvolvimento local, mantemos 'lax' e secure false.
+    sameSite: IS_PROD ? 'none' : 'lax',
+    secure: IS_PROD ? true : false,
     maxAge: 1000 * 60 * 60 * 24
   }
 }));
