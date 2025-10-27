@@ -51,10 +51,15 @@ const AddProduct: React.FC = () => {
         throw new Error('Estoque não pode ser negativo');
       }
 
+      const stored = localStorage.getItem('user');
+      const user = stored ? JSON.parse(stored) : null;
+      const companyId = user?.company_id;
+
       const response = await fetch(API_URLS.STATS_PRODUCTS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(companyId ? { 'x-company-id': String(companyId) } : {})
         },
         credentials: 'include',
         body: JSON.stringify({ ...formData })
