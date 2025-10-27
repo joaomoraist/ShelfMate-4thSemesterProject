@@ -28,11 +28,7 @@ const Products: React.FC = () => {
     React.useEffect(() => {
         const load = async () => {
             try {
-                const stored = localStorage.getItem('user');
-                const parsed = stored ? JSON.parse(stored) : null;
-                const companyId = parsed?.company_id;
-                const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
-                const res = await fetch(url);
+                const res = await fetch(API_URLS.PRODUCTS_DETAILED, { credentials: 'include' });
                 if (!res.ok) throw new Error('Falha ao buscar produtos');
                 const data = await res.json();
                 setProducts(data.rows || []);
@@ -87,14 +83,11 @@ const Products: React.FC = () => {
                 return;
             }
 
-            const stored = localStorage.getItem('user');
-            const parsed = stored ? JSON.parse(stored) : null;
-            const companyId = parsed?.company_id;
-
             const res = await fetch(API_URLS.STATS_PRODUCTS_BULK, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rows: records, companyId })
+                credentials: 'include',
+                body: JSON.stringify({ rows: records })
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data?.error || 'Falha no upload CSV');
@@ -105,8 +98,7 @@ const Products: React.FC = () => {
 
             // Recarregar produtos após importação
             try {
-                const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
-                const r = await fetch(url);
+                const r = await fetch(API_URLS.PRODUCTS_DETAILED, { credentials: 'include' });
                 const j = await r.json();
                 setProducts(j.rows || []);
             } catch (err) {

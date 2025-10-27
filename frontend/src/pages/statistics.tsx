@@ -176,7 +176,7 @@ const Statistics: React.FC = () => {
                             value={`R$ ${(overview?.total_stock_value ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                             comparison="vs Mês Anterior"
                             trend="up"
-                            iconSrc="/monet.png"
+                            iconSrc="/money.png"
                             emoji="💰"
                         />
                         <MetricCard
