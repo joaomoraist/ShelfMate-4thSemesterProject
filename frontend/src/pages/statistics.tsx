@@ -140,7 +140,7 @@ const Statistics: React.FC = () => {
                         />
                     </div>
                     <div className={homeCssModule.userContainer}>
-                        <span className={homeCssModule.welcomeText}>Bem vindo William</span>
+                        <span className={homeCssModule.welcomeText}>Bem vindo {user?.name || 'Usuário'}</span>
                         <div className={homeCssModule.userDropdown}>
                             <div className={homeCssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
                                 <img

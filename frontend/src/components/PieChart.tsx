@@ -27,6 +27,7 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [hasData, setHasData] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,9 +46,16 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
         }
 
         const data = await response.json();
-        
-        // Preparar dados para o gráfico - pegar os top 5 produtos mais vendidos
-        const topProducts = (data.rows || []).slice(0, 5);
+
+        // Preparar dados para o gráfico:
+        // - considerar somente produtos com vendas (> 0)
+        // - ordenar por quantidade vendida desc
+        // - limitar ao Top 5
+        const rows = (data.rows || []) as any[];
+        const filtered = rows.filter((item) => (item?.total_qntd ?? 0) > 0);
+        const sorted = filtered.sort((a, b) => (b.total_qntd ?? 0) - (a.total_qntd ?? 0));
+        const topProducts = sorted.slice(0, 5);
+
         const labels = topProducts.map((item: any) => item.name);
         const values = topProducts.map((item: any) => item.total_qntd);
 
@@ -60,18 +68,25 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
           'rgba(153, 102, 255, 0.8)',
         ];
 
-        setChartData({
-          labels,
-          datasets: [
-            {
-              label: 'Quantidade Vendida',
-              data: values,
-              backgroundColor: backgroundColors,
-              borderColor: backgroundColors.map(color => color.replace('0.8', '1')),
-              borderWidth: 2,
-            }
-          ]
-        });
+        if (topProducts.length === 0) {
+          setHasData(false);
+          setChartData({ labels: [], datasets: [] });
+        } else {
+          setHasData(true);
+          const bg = backgroundColors.slice(0, topProducts.length);
+          setChartData({
+            labels,
+            datasets: [
+              {
+                label: 'Quantidade Vendida',
+                data: values,
+                backgroundColor: bg,
+                borderColor: bg.map(color => color.replace('0.8', '1')),
+                borderWidth: 2,
+              }
+            ]
+          });
+        }
       } catch (err) {
         console.error('Erro ao buscar dados:', err);
         setError(err instanceof Error ? err.message : 'Erro desconhecido');
@@ -99,6 +114,7 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
 
   if (loading) return <div>Carregando dados...</div>;
   if (error) return <div>Erro ao carregar dados: {error}</div>;
+  if (!hasData) return <div>Sem vendas registradas no período para montar o gráfico.</div>;
 
   return (
     <div className={className} style={{ height: '100%', width: '100%' }}>

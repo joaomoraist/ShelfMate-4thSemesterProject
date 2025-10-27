@@ -24,6 +24,8 @@ const PAGE_KEYWORDS: Record<Page, string[]> = {
     "esqueci minha senha",
   ],
   home: ["home", "inicio", "início", "dashboard", "principal"],
+  // Add common variants like "inicial" and phrases users may type
+  home: ["home", "inicio", "início", "dashboard", "principal", "inicial", "pagina inicial", "página inicial", "home page"],
   statistics: [
     "estatistica",
     "estatisticas",

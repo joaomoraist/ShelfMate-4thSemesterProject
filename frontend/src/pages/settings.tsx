@@ -86,7 +86,7 @@ const Settings: React.FC = () => {
                         <input className={cssModule.searchInput} placeholder="Pesquisar" />
                     </div>
                     <div className={cssModule.userContainer}>
-                        <span className={cssModule.welcomeText}>Bem vindo William</span>
+                        <span className={cssModule.welcomeText}>Bem vindo {user?.name || 'Usuário'}</span>
                         <div className={cssModule.userDropdown}>
                             <div className={cssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
                                 <img
