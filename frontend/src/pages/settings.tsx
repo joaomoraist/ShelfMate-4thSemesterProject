@@ -19,6 +19,14 @@ const Settings: React.FC = () => {
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
 
+    // inicializa campos editáveis com os dados do usuário
+    React.useEffect(() => {
+        if (user) {
+            setNameInput(user.name || '');
+            setEmailInput(user.email || '');
+        }
+    }, [user]);
+
     React.useEffect(() => {
         if (imageFile) {
             const url = URL.createObjectURL(imageFile);
@@ -157,15 +165,6 @@ const Settings: React.FC = () => {
                             <div className={cssModule.passwordSection}>
                                 <h3 className={cssModule.sectionTitle}>Alterar Senha</h3>
                                 <div className={cssModule.fieldGroup}>
-                                    <label className={cssModule.fieldLabel}>Senha atual</label>
-                                    <input 
-                                        type="password" 
-                                        className={cssModule.fieldInput} 
-                                        disabled
-                                        placeholder="(não aplicável)"
-                                    />
-                                </div>
-                                <div className={cssModule.fieldGroup}>
                                     <label className={cssModule.fieldLabel}>Nova senha</label>
                                     <input 
                                         type="password" 
@@ -176,35 +175,6 @@ const Settings: React.FC = () => {
                                     <p className={cssModule.fieldHelp}>
                                         Mínimo de 6 caracteres
                                     </p>
-                                </div>
-                                <div className={cssModule.fieldGroup}>
-                                    <label className={cssModule.fieldLabel}>Confirmar nova senha</label>
-                                    <input 
-                                        type="password" 
-                                        className={cssModule.fieldInput} 
-                                        placeholder="Digite novamente se desejar alterar"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className={cssModule.companySection}>
-                                <h3 className={cssModule.sectionTitle}>Informações da Empresa</h3>
-                                <div className={cssModule.fieldGroup}>
-                                    <label className={cssModule.fieldLabel}>Nome da empresa</label>
-                                    <input 
-                                        type="text" 
-                                        className={cssModule.fieldInput} 
-                                        defaultValue="Minha Empresa LTDA"
-                                        disabled
-                                    />
-                                </div>
-                                <div className={cssModule.fieldGroup}>
-                                    <label className={cssModule.fieldLabel}>Email corporativo</label>
-                                    <input 
-                                        type="email" 
-                                        className={cssModule.fieldInput} 
-                                        defaultValue="contato@empresa.com"
-                                    />
                                 </div>
                             </div>
                         </div>
