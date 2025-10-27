@@ -168,7 +168,7 @@ const Statistics: React.FC = () => {
                             value={`${overview?.products_count ?? 0}`}
                             comparison="vs Mês Anterior"
                             trend="up"
-                            iconSrc="/icons/box.svg"
+                            iconSrc="/products-blue.png"
                             emoji="📦"
                         />
                         <MetricCard
@@ -176,7 +176,7 @@ const Statistics: React.FC = () => {
                             value={`R$ ${(overview?.total_stock_value ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                             comparison="vs Mês Anterior"
                             trend="up"
-                            iconSrc="/icons/money.svg"
+                            iconSrc="/monet.png"
                             emoji="💰"
                         />
                         <MetricCard
@@ -184,7 +184,7 @@ const Statistics: React.FC = () => {
                             value={`${overview?.alerts_count ?? 0}`}
                             comparison="vs Mês Anterior 500 8.5%"
                             trend="down"
-                            iconSrc="/icons/alert.svg"
+                            iconSrc="/alerts-blue.png"
                             emoji="⚠️"
                         />
                         <MetricCard
@@ -192,7 +192,7 @@ const Statistics: React.FC = () => {
                             value={`${overview?.total_sold_qntd ?? 0} Itens`}
                             comparison="vs Mês Anterior 500 Pedidos 8.5%"
                             trend="up"
-                            iconSrc="/icons/sales.svg"
+                            iconSrc="/sales.png"
                             emoji="🛒"
                         />
                     </div>

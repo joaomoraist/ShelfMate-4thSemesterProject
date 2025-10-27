@@ -75,6 +75,16 @@ router.post('/login', async (req, res) => {
       company_id: userWithoutPassword.company_id
     };
 
+    // Incrementar contador de acessos do usuário
+    try {
+      await sql`
+        UPDATE users SET accesses = COALESCE(accesses, 0) + 1 WHERE id = ${userWithoutPassword.id}
+      `;
+    } catch (incErr) {
+      console.warn('Falha ao incrementar accesses:', incErr && incErr.message);
+      // Não interrompe o login em caso de falha no incremento
+    }
+
     // Log session info for debugging (no password)
     try {
       console.log('Sessão criada:', req.sessionID, req.session.user);
@@ -366,6 +376,8 @@ router.put('/me', upload.single('image'), async (req, res) => {
 
     if (updates.length > 0) {
       // Compose SET clause
+      // Incrementar changes junto com qualquer atualização realizada
+      updates.push(sql`changes = COALESCE(changes, 0) + 1`);
       const setClause = updates.reduce((prev, cur, idx) => idx === 0 ? cur : sql`${prev}, ${cur}`);
       await sql`
         UPDATE users SET ${setClause} WHERE id = ${userId}

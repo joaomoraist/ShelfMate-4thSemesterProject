@@ -288,8 +288,8 @@ router.get('/products-detailed', async (req, res) => {
 });
 
 
-// POST /stats/products - Adicionar novo produto
-router.post('/products', async (req, res) => {
+// POST /stats/products - Adicionar novo produto (usa company_id da sessão)
+router.post('/products', ensureAuthenticated, async (req, res) => {
   try {
     const { 
       name, 
@@ -299,8 +299,7 @@ router.post('/products', async (req, res) => {
       inventory, 
       category, 
       description, 
-      status, 
-      companyId: companyIdBody 
+      status 
     } = req.body || {};
 
     // Validações
@@ -317,11 +316,7 @@ router.post('/products', async (req, res) => {
     const productStatus = status || 'Disponível';
     const productCategory = category || 'Geral';
     const productDescription = description || '';
-    const companyId = companyIdBody ?? (req.session?.user?.company_id ?? null);
-
-    if (!companyId) {
-      return res.status(400).json({ error: 'Company ID é obrigatório' });
-    }
+    const companyId = req.session.user.company_id;
 
     // Verificar se produto já existe
     const existingProduct = await sql`
@@ -357,19 +352,16 @@ router.post('/products', async (req, res) => {
   }
 });
 
-// POST /stats/products/bulk - Adicionar vários produtos de uma vez
-router.post('/products/bulk', async (req, res) => {
+// POST /stats/products/bulk - Adicionar vários produtos de uma vez (usa company_id da sessão)
+router.post('/products/bulk', ensureAuthenticated, async (req, res) => {
   try {
-    const { rows, companyId: companyIdBody } = req.body || {};
+    const { rows } = req.body || {};
 
     if (!Array.isArray(rows) || rows.length === 0) {
       return res.status(400).json({ error: 'Lista de produtos (rows) é obrigatória' });
     }
 
-    const companyId = companyIdBody ?? (req.session?.user?.company_id ?? null);
-    if (!companyId) {
-      return res.status(400).json({ error: 'Company ID é obrigatório' });
-    }
+    const companyId = req.session.user.company_id;
 
     const results = [];
 

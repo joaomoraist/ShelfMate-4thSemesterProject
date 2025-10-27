@@ -188,7 +188,7 @@ const Home: React.FC = () => {
                         <p className={cssModule.accessSub}>Sua movimentação nos últimos 30 dias</p>
                     </div>
 
-                  <div className="grid grid-cols-5 gap-6">
+                  <div className={cssModule.statGrid}>
                     <StatCard
                         title="Últimos Acessos"
                         value={`${activityData?.last_accesses ?? 0} Logins`}
