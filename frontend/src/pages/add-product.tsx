@@ -62,7 +62,7 @@ const AddProduct: React.FC = () => {
           ...(companyId ? { 'x-company-id': String(companyId) } : {})
         },
         credentials: 'include',
-        body: JSON.stringify({ ...formData })
+        body: JSON.stringify({ ...formData, company_id: companyId ?? undefined })
       });
 
       const data = await response.json();
