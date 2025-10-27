@@ -26,9 +26,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     // Para permitir cookies em requisições cross-site (frontend em localhost/Vercel -> backend Render),
-    // usamos SameSite: 'none' e Secure: true em produção (https).
-    // Em desenvolvimento local, mantemos 'lax' e secure false.
-    sameSite: IS_PROD ? 'none' : 'lax',
+    // usar SameSite: 'none' em ambos ambientes. Em produção, Secure: true; em dev, Secure: false.
+    sameSite: 'none',
     secure: IS_PROD ? true : false,
     maxAge: 1000 * 60 * 60 * 24
   }

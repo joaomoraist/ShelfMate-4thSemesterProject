@@ -15,7 +15,7 @@ const resolveCompanyId = (req) => {
 
 // Middleware simples para garantir autenticação: aceita sessão OU companyId informado
 function ensureAuthenticated(req, res, next) {
-  const hasSession = req.session && req.session.user && req.session.user.company_id;
+  const hasSession = !!(req.session && req.session.user);
   const companyId = resolveCompanyId(req);
   if (hasSession || companyId) {
     return next();
@@ -318,10 +318,7 @@ router.post('/products', ensureAuthenticated, async (req, res) => {
     const productStatus = status || 'Disponível';
     const productCategory = category || 'Geral';
     const productDescription = description || '';
-    const companyId = resolveCompanyId(req);
-    if (!companyId) {
-      return res.status(400).json({ error: 'Company ID não detectado' });
-    }
+    const companyId = resolveCompanyId(req) ?? null;
 
     // Verificar se produto já existe
     const existingProduct = await sql`
