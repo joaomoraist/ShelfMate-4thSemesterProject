@@ -60,6 +60,16 @@ app.use(cors({
   methods: ['GET','POST','PUT','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','x-company-id']
 }));
+
+// Logging middleware for all routes
+app.use((req, res, next) => {
+  const sessionUser = req.session && req.session.user ? req.session.user : null;
+  const storedCompanyId = req.headers['x-company-id'] || (req.body && req.body.company_id) || (req.query && req.query.company_id);
+  const who = sessionUser?.email || sessionUser?.name || (storedCompanyId ? `empresa ${storedCompanyId}` : 'desconhecido');
+  const when = new Date().toLocaleString('pt-BR');
+  console.log(`[LOG] Usuário ${who} passou na rota ${req.method} ${req.originalUrl} às ${when}`);
+  next();
+});
 app.use(express.json());
 
 // Static files (simple test pages for routes)

@@ -20,6 +20,15 @@ function App() {
 
   // Função para navegar entre páginas (disponível globalmente)
   const navigateTo = (page: Page) => {
+    try {
+      const stored = localStorage.getItem('user');
+      const user = stored ? JSON.parse(stored) : null;
+      const who = user?.email || user?.name || 'desconhecido';
+      const when = new Date().toLocaleString('pt-BR');
+      console.log(`[LOG] Usuário ${who} mudou para a página ${page} às ${when}`);
+    } catch (e) {
+      // silêncio: logging não deve quebrar navegação
+    }
     setCurrentPage(page);
   };
 
@@ -31,6 +40,29 @@ function App() {
   React.useEffect(() => {
     document.body.className = isAuthPage ? "auth-page" : "logged-in";
   }, [currentPage, isAuthPage]);
+
+  // Log de todas solicitações de dados via fetch
+  React.useEffect(() => {
+    const originalFetch = window.fetch.bind(window);
+    window.fetch = async (input: RequestInfo, init?: RequestInit) => {
+      try {
+        const url = typeof input === 'string' ? input : input.url;
+        const method = (init && init.method) || (typeof input !== 'string' ? input.method : 'GET') || 'GET';
+        const stored = localStorage.getItem('user');
+        const user = stored ? JSON.parse(stored) : null;
+        const who = user?.email || user?.name || 'desconhecido';
+        const when = new Date().toLocaleString('pt-BR');
+        console.log(`[LOG] Usuário ${who} solicitou dados ${method} ${url} às ${when}`);
+      } catch (e) {
+        // não interromper a requisição, apenas falhar silenciosamente o log
+      }
+      return originalFetch(input as any, init);
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
 
   const renderPage = () => {
     switch (currentPage) {
