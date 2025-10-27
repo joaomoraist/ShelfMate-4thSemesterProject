@@ -37,6 +37,7 @@
 .menuItem { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; text-align: left; background: none; border: none; color: #374151; cursor: pointer; transition: background 0.2s; font-size: 14px; }
 .menuItem:hover { background: #f3f4f6; }
 .menuIcon { font-size: 16px; }
+.menuIconImg { width: 16px; height: 16px; object-fit: contain; display: inline-block; }
 
 /* Page header styles */
 .pageHeader { text-align: center; margin: 40px 0; }

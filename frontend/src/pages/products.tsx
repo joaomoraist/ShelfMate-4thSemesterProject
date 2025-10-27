@@ -1,5 +1,5 @@
 import React from "react";
-import { API_URLS } from '../config/api';
+import { API_URLS, API_CONFIG } from '../config/api';
 import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
@@ -142,23 +142,40 @@ const Products: React.FC = () => {
                 <div className={cssModule.topbarRight}>
                     <div className={cssModule.searchContainer}>
                         <img src="/search.png" alt="Buscar" className={cssModule.iconImg} />
-                        <input className={cssModule.searchInput} placeholder="Pesquisar" />
+                        <input
+                          className={cssModule.searchInput}
+                          placeholder="Pesquisar"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const q = (e.target as HTMLInputElement).value || '';
+                              import('../services/searchNavigation').then(({ getBestPageForQuery }) => {
+                                const page = getBestPageForQuery(q);
+                                navigateTo(page as any);
+                              });
+                            }
+                          }}
+                        />
                     </div>
                     <div className={cssModule.userContainer}>
                         <span className={cssModule.welcomeText}>Bem vindo {user?.name || 'Usuário'}</span>
                         <div className={cssModule.userDropdown}>
                             <div className={cssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
-                                <span className={cssModule.userIcon}>👤</span>
+                                <img
+                                  src={user?.image ? `${API_CONFIG.BASE_URL}${user.image}` : '/user_profile.png'}
+                                  alt={user?.name || 'Usuário'}
+                                  className={cssModule.userPhoto}
+                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/user_profile.png'; }}
+                                />
                                 <span className={cssModule.dropdownArrow}>▼</span>
                             </div>
                             {showUserMenu && (
                                 <div className={cssModule.userMenu}>
                                     <button className={cssModule.menuItem} onClick={() => navigateTo("settings")}>
-                                        <span className={cssModule.menuIcon}>⚙️</span>
+                                        <img src="/config.png" alt="Configurações" className={cssModule.menuIconImg} />
                                         Configurações
                                     </button>
                                     <button className={cssModule.menuItem} onClick={handleLogout}>
-                                        <span className={cssModule.menuIcon}>→</span>
+                                        <img src="/exit.png" alt="Sair" className={cssModule.menuIconImg} />
                                         Sair
                                     </button>
                                 </div>
@@ -241,7 +258,7 @@ const Products: React.FC = () => {
                                 </div>
                                 <div className={cssModule.alertsCell}>
                                     <span className={cssModule.alertIcon}>
-                                        <img src="/alert-blue.png" alt="Alert" />
+                                        <img src="/alerts-blue.png" alt="Alert" />
                                     </span>
                                     <span className={cssModule.alertCount}>{product.alerts_count ?? 0}</span>
                                     {(product.alerts_count > 0) && <span className={cssModule.alertDot}>●</span>}

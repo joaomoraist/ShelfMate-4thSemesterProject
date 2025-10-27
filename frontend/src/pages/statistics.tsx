@@ -1,5 +1,5 @@
 import React from "react";
-import { API_URLS } from '../config/api';
+import { API_URLS, API_CONFIG } from '../config/api';
 import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
@@ -125,23 +125,40 @@ const Statistics: React.FC = () => {
                 <div className={homeCssModule.topbarRight}>
                     <div className={homeCssModule.searchContainer}>
                         <img src="/search.png" alt="Buscar" className={homeCssModule.iconImg} />
-                        <input className={homeCssModule.searchInput} placeholder="Pesquisar" />
+                        <input
+                          className={homeCssModule.searchInput}
+                          placeholder="Pesquisar"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              const q = (e.target as HTMLInputElement).value || '';
+                              import('../services/searchNavigation').then(({ getBestPageForQuery }) => {
+                                const page = getBestPageForQuery(q);
+                                navigateTo(page as any);
+                              });
+                            }
+                          }}
+                        />
                     </div>
                     <div className={homeCssModule.userContainer}>
                         <span className={homeCssModule.welcomeText}>Bem vindo William</span>
                         <div className={homeCssModule.userDropdown}>
                             <div className={homeCssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
-                                <span className={homeCssModule.userIcon}>👤</span>
+                                <img
+                                  src={user?.image ? `${API_CONFIG.BASE_URL}${user.image}` : '/user_profile.png'}
+                                  alt={user?.name || 'Usuário'}
+                                  className={homeCssModule.userPhoto}
+                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/user_profile.png'; }}
+                                />
                                 <span className={homeCssModule.dropdownArrow}>▼</span>
                             </div>
                             {showUserMenu && (
                                 <div className={homeCssModule.userMenu}>
                                     <button className={homeCssModule.menuItem} onClick={() => navigateTo("settings")}>
-                                        <span className={homeCssModule.menuIcon}>⚙️</span>
+                                        <img src="/config.png" alt="Configurações" className={homeCssModule.menuIconImg} />
                                         Configurações
                                     </button>
                                     <button className={homeCssModule.menuItem} onClick={handleLogout}>
-                                        <span className={homeCssModule.menuIcon}>→</span>
+                                        <img src="/exit.png" alt="Sair" className={homeCssModule.menuIconImg} />
                                         Sair
                                     </button>
                                 </div>

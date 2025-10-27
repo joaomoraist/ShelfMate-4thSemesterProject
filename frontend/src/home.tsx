@@ -215,7 +215,7 @@ const Home: React.FC = () => {
                         <StatCard
                             title="Alertas Emitidos"
                             value={`${activityData?.alerts_issued ?? 0} Alertas enviados`}
-                            iconSrc="/alert-blue.png"
+                            iconSrc="/alerts-blue.png"
                             emoji="⚠️"
                         />
 

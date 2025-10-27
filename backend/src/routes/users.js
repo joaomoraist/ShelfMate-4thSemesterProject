@@ -8,15 +8,21 @@ import fs from 'fs';
 
 const router = express.Router();
 
-// setup multer storage for user images
-const uploadsDir = path.join(process.cwd(), 'backend', 'src', 'public', 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+// setup multer storage for user images (save by user ID under public/user_photos)
+const userPhotosDir = path.join(process.cwd(), 'backend', 'src', 'public', 'user_photos');
+if (!fs.existsSync(userPhotosDir)) fs.mkdirSync(userPhotosDir, { recursive: true });
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) { cb(null, uploadsDir); },
+  destination: function (req, file, cb) { cb(null, userPhotosDir); },
   filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const name = `user_${Date.now()}${ext}`;
-    cb(null, name);
+    try {
+      const userId = req.session && req.session.user && req.session.user.id;
+      const ext = path.extname(file.originalname) || '.png';
+      const name = userId ? `${userId}${ext}` : `user_${Date.now()}${ext}`;
+      cb(null, name);
+    } catch (e) {
+      const ext = path.extname(file.originalname) || '.png';
+      cb(null, `user_${Date.now()}${ext}`);
+    }
   }
 });
 const upload = multer({ storage });
@@ -41,7 +47,7 @@ router.post('/login', async (req, res) => {
 
     // Buscar usuário pelo email
     const users = await sql`
-      SELECT id, name, email, password, user_level, company_id, created_at 
+      SELECT id, name, email, password, user_level, company_id, created_at, image
       FROM users 
       WHERE email = ${email}
     `;
@@ -72,7 +78,8 @@ router.post('/login', async (req, res) => {
       name: userWithoutPassword.name,
       email: userWithoutPassword.email,
       user_level: userWithoutPassword.user_level,
-      company_id: userWithoutPassword.company_id
+      company_id: userWithoutPassword.company_id,
+      image: userWithoutPassword.image || null
     };
 
     // Incrementar contador de acessos do usuário
@@ -364,7 +371,7 @@ router.put('/me', upload.single('image'), async (req, res) => {
 
     if (req.file) {
       // save relative path for serving via express.static
-      imagePath = `/uploads/${req.file.filename}`;
+      imagePath = `/user_photos/${req.file.filename}`;
     }
 
     // Build dynamic update

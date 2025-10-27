@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
-import { API_URLS } from '../config/api';
+import { API_URLS, API_CONFIG } from '../config/api';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/settings.module.css';
 
@@ -70,17 +70,22 @@ const Settings: React.FC = () => {
                         <span className={cssModule.welcomeText}>Bem vindo William</span>
                         <div className={cssModule.userDropdown}>
                             <div className={cssModule.userAvatar} onClick={() => setShowUserMenu(!showUserMenu)}>
-                                <span className={cssModule.userIcon}>👤</span>
+                                <img
+                                  src={user?.image ? `${API_CONFIG.BASE_URL}${user.image}` : '/user_profile.png'}
+                                  alt={user?.name || 'Usuário'}
+                                  className={cssModule.userPhoto}
+                                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/user_profile.png'; }}
+                                />
                                 <span className={cssModule.dropdownArrow}>▼</span>
                             </div>
                             {showUserMenu && (
                                 <div className={cssModule.userMenu}>
                                     <button className={cssModule.menuItem} onClick={() => setShowUserMenu(false)}>
-                                        <span className={cssModule.menuIcon}>⚙️</span>
+                                        <img src="/config.png" alt="Configurações" className={cssModule.menuIconImg} />
                                         Configurações
                                     </button>
                                     <button className={cssModule.menuItem} onClick={handleLogout}>
-                                        <span className={cssModule.menuIcon}>→</span>
+                                        <img src="/exit.png" alt="Sair" className={cssModule.menuIconImg} />
                                         Sair
                                     </button>
                                 </div>

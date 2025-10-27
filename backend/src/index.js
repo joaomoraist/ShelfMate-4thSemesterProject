@@ -7,8 +7,6 @@ import usersRoutes from './routes/users.js';
 import statsRoutes from './routes/stats.js';
 import importsRoutes from './routes/imports.js';
 import session from 'express-session';
-import pg from 'pg';
-import connectPgSimple from 'connect-pg-simple';
 
 dotenv.config();
 const app = express();
@@ -20,22 +18,14 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
-// Session store setup (Postgres)
-const PgSession = connectPgSimple(session);
-const pgPool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
+// Sessão simplificada: usa MemoryStore (apenas para manter dados do usuário entre páginas)
 app.use(session({
-  store: new PgSession({ pool: pgPool }),
   secret: process.env.SESSION_SECRET || 'dev_secret',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    // Em desenvolvimento, permita cookies sem HTTPS e com sameSite lax
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    sameSite: 'lax',
+    secure: false,
     maxAge: 1000 * 60 * 60 * 24
   }
 }));
@@ -47,13 +37,17 @@ app.use(cors({
       'http://localhost:3000',
       'http://localhost:5173',
       'http://127.0.0.1:5173',
+      'http://localhost:5174',
+      'http://127.0.0.1:5174',
       'https://shelfmate-4thsemesterproject.onrender.com',
-      'https://shelfmate-4th-semester-project.vercel.app/'
+      'https://shelfmate-4th-semester-project.vercel.app'
     ];
     const vercelRegex = /\.vercel\.app$/i;
+    const renderRegex = /\.onrender\.com$/i;
 
     if (!origin) return callback(null, true); // same-origin or curl
-    if (allowed.includes(origin) || vercelRegex.test(new URL(origin).hostname)) {
+    const hostname = (() => { try { return new URL(origin).hostname; } catch { return ''; } })();
+    if (allowed.includes(origin) || vercelRegex.test(hostname) || renderRegex.test(hostname)) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));

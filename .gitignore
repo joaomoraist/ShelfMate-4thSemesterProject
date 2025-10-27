@@ -1,0 +1,20 @@
+# Dependencies
+backend/node_modules/
+frontend/node_modules/
+
+# Build outputs
+frontend/dist/
+
+# Runtime uploads
+backend/src/public/user_photos/
+
+# Environment files
+backend/.env
+
+# Python cache
+ml-intelligence/__pycache__/
+
+# Misc
+*.log
+*.tmp
+*.cache
