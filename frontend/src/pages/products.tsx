@@ -248,7 +248,9 @@ const Products: React.FC = () => {
                                     </span>
                                 </div>
                                 <div className={cssModule.alertsCell}>
-                                    <span className={cssModule.alertIcon}>🔔</span>
+                                    <span className={cssModule.alertIcon}>
+                                        <img src="/alert-blue.png" alt="Alert" />
+                                    </span>
                                     <span className={cssModule.alertCount}>{product.alerts_count ?? 0}</span>
                                     {(product.alerts_count > 0) && <span className={cssModule.alertDot}>●</span>}
                                 </div>

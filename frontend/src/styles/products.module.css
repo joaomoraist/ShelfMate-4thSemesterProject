@@ -79,7 +79,17 @@
 .status.orange { background: #fed7aa; color: #ea580c; }
 .status.red { background: #fecaca; color: #dc2626; }
 .alertsCell { display: flex; align-items: center; gap: 8px; position: relative; }
-.alertIcon { font-size: 16px; }
+.alertIcon { 
+    font-size: 16px; 
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.alertIcon img {
+    width: 16px;
+    height: 16px;
+    object-fit: contain;
+}
 .alertCount { font-weight: 600; color: #374151; }
 .alertDot { position: absolute; top: -2px; right: -2px; color: #ef4444; font-size: 8px; }
 

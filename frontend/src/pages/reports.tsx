@@ -99,7 +99,9 @@ const Reports: React.FC = () => {
                     <div className={cssModule.reportsGrid}>
                         <div className={cssModule.reportCard}>
                             <div className={cssModule.reportIcon}>
-                                <span className={cssModule.iconBox}>📦</span>
+                                <span className={cssModule.iconBox}>
+                                    <img src="/products.png" alt="Products" />
+                                </span>
                             </div>
                             <h3 className={cssModule.reportTitle}>Relatório de Produtos</h3>
                             <p className={cssModule.reportDescription}>
