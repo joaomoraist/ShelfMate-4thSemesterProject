@@ -247,9 +247,19 @@ const Products: React.FC = () => {
                                 <div className={cssModule.minMaxCell}>
                                     {product.inventory < 10 ? 'Baixo' : product.inventory > 100 ? 'Alto' : 'Normal'}
                                 </div>
-                                <div className={cssModule.salesCell}>{product.total_sales ?? 0}</div>
+                                <div className={cssModule.salesCell}>
+                                    {(product.total_sales ?? 0) > 0 ? (
+                                        <span className={cssModule.salesValue}>{product.total_sales}</span>
+                                    ) : (
+                                        <span className={`${cssModule.badge} ${cssModule.badgeGray}`}>Sem vendas</span>
+                                    )}
+                                </div>
                                 <div className={cssModule.restockCell}>
-                                    {product.last_sale_date ? new Date(product.last_sale_date).toLocaleDateString('pt-BR') : '-'}
+                                    {product.last_sale_date ? (
+                                        new Date(product.last_sale_date).toLocaleDateString('pt-BR')
+                                    ) : (
+                                        <span className={cssModule.muted}>Sem registro</span>
+                                    )}
                                 </div>
                                 <div className={cssModule.statusCell}>
                                     <span className={`${cssModule.status} ${cssModule[product.inventory < 10 ? 'red' : 'green']}`}>

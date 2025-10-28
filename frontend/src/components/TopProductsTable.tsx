@@ -21,10 +21,7 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({ className }) => {
     const load = async () => {
       try {
         setLoading(true);
-        const stored = localStorage.getItem('user');
-        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
-        const url = companyId ? `${API_URLS.TOP_PRODUCTS}?companyId=${companyId}` : API_URLS.TOP_PRODUCTS;
-        const res = await fetch(url);
+        const res = await fetch(API_URLS.TOP_PRODUCTS, { credentials: 'include' });
         if (!res.ok) throw new Error('Falha ao buscar top produtos');
         const data = await res.json();
         setProducts(data.rows || []);
@@ -38,23 +35,29 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({ className }) => {
     load();
   }, []);
 
-  if (loading) return <div>Carregando dados...</div>;
-  if (error) return <div>Erro ao carregar dados: {error}</div>;
+  if (loading) return <div className={cssModule.tableWrapper}>Carregando dados...</div>;
+  if (error) return <div className={cssModule.tableWrapper}>Erro ao carregar dados: {error}</div>;
 
   return (
-    <div className={className}>
-      <div className={cssModule.tableHeader}>
-        <span className={cssModule.tableColumn}>SKU</span>
-        <span className={cssModule.tableColumn}>Descrição</span>
-        <span className={cssModule.tableColumn}>Qntd</span>
-      </div>
-      {products.map((product) => (
-        <div key={product.product_id} className={cssModule.tableRow}>
-          <span className={cssModule.tableCell}>{product.product_id}</span>
-          <span className={cssModule.tableCell}>{product.name}</span>
-          <span className={cssModule.tableCell}>{product.total_qntd}</span>
-        </div>
-      ))}
+    <div className={`${className ?? ''} ${cssModule.tableWrapper}`}>
+      <table className={cssModule.dataTable}>
+        <thead>
+          <tr>
+            <th className={cssModule.skuCol}>SKU</th>
+            <th className={cssModule.nameCol}>Descrição</th>
+            <th className={cssModule.qtyCol}>Qntd</th>
+          </tr>
+        </thead>
+        <tbody>
+          {products.map((product) => (
+            <tr key={product.product_id}>
+              <td className={cssModule.skuCol}>{product.product_id}</td>
+              <td className={cssModule.nameCol}>{product.name}</td>
+              <td className={cssModule.qtyCol}>{product.total_qntd}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };

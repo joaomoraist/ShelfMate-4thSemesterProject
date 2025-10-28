@@ -149,3 +149,15 @@ html, body { overflow-x: hidden; }
   font-weight: 700;
   color: #1B31BA;
 }
+
+/* ====== Tabela de Principais Produtos ====== */
+.productsTable { margin: 16px 0; }
+.tableWrapper { width: 100%; overflow-x: auto; }
+.dataTable { width: 100%; border-collapse: collapse; font-size: 14px; }
+.dataTable thead th { background: #f9fafb; color: #374151; text-align: left; padding: 12px; border-bottom: 2px solid #e5e7eb; }
+.dataTable tbody td { padding: 12px; border-bottom: 1px solid #f3f4f6; color: #374151; }
+.dataTable tbody tr:hover { background: #f9fafb; }
+.dataTable tbody tr:nth-child(odd) { background: #fcfcfd; }
+.skuCol { width: 15%; color: #6b7280; }
+.nameCol { width: 65%; font-weight: 500; color: #1B31BA; }
+.qtyCol { width: 20%; text-align: right; font-weight: 600; color: #1B31BA; }

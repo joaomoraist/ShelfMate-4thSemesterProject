@@ -95,6 +95,12 @@
 .alertCount { font-weight: 600; color: #374151; }
 .alertDot { position: absolute; top: -2px; right: -2px; color: #ef4444; font-size: 8px; }
 
+/* Empty state badges and muted text */
+.badge { display: inline-block; padding: 4px 10px; border-radius: 9999px; font-size: 12px; font-weight: 600; }
+.badgeGray { background: #f3f4f6; color: #6b7280; border: 1px solid #e5e7eb; }
+.muted { color: #9ca3af; }
+.salesValue { font-weight: 600; color: #374151; }
+
 /* Bottom action styles */
 .bottomAction { display: none; }
 .salesButton { background: #1B31BA; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 12px; font-size: 16px; transition: background 0.2s; }

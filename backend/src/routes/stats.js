@@ -3,82 +3,53 @@ import sql from '../db.js';
 
 const router = express.Router();
 
-// Helper para resolver companyId (query/header/body/sessão)
+// Helper para resolver companyId APENAS da sessão do usuário
 const resolveCompanyId = (req) => {
-  const q = req.query && (req.query.companyId ?? req.query.company_id);
-  const h = req.headers && (req.headers['x-company-id'] ?? req.headers['x_company_id']);
-  const b = req.body && (req.body.companyId ?? req.body.company_id);
   const s = req.session && req.session.user && req.session.user.company_id;
-  const val = q ?? h ?? b ?? s;
-  return val !== undefined && val !== null && val !== '' ? Number(val) : undefined;
+  return s !== undefined && s !== null && s !== '' ? Number(s) : undefined;
 };
 
-// Middleware simples para garantir autenticação: aceita sessão OU companyId informado
+// Middleware simples para garantir autenticação: exige sessão
 function ensureAuthenticated(req, res, next) {
   const hasSession = !!(req.session && req.session.user);
-  const companyId = resolveCompanyId(req);
-  if (hasSession || companyId) {
+  if (hasSession) {
     return next();
   }
   return res.status(401).json({ error: 'Not authenticated' });
 }
 
 // GET /stats/overview
-router.get('/overview', async (req, res) => {
+router.get('/overview', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
 
-    const userAgg = companyId
-      ? await sql`
-        SELECT COALESCE(SUM(accesses),0) AS accesses_sum, COALESCE(SUM(changes),0) AS changes_sum, COALESCE(SUM(downloads),0) AS downloads_sum
-        FROM users
-        WHERE company_id = ${companyId}
-      `
-      : await sql`
-        SELECT COALESCE(SUM(accesses),0) AS accesses_sum, COALESCE(SUM(changes),0) AS changes_sum, COALESCE(SUM(downloads),0) AS downloads_sum
-        FROM users
-      `;
+    const userAgg = await sql`
+      SELECT COALESCE(SUM(accesses),0) AS accesses_sum, COALESCE(SUM(changes),0) AS changes_sum, COALESCE(SUM(downloads),0) AS downloads_sum
+      FROM users
+      WHERE company_id = ${companyId}
+    `;
 
-    const productsCount = companyId
-      ? await sql`SELECT COUNT(*)::int AS products_count FROM products WHERE company_id = ${companyId}`
-      : await sql`SELECT COUNT(*)::int AS products_count FROM products`;
+    const productsCount = await sql`SELECT COUNT(*)::int AS products_count FROM products WHERE company_id = ${companyId}`;
 
-    const alertsCount = companyId
-      ? await sql`
-        SELECT COUNT(a.*)::int AS alerts_count
-        FROM alerts a
-        JOIN products p ON p.id = a.product_id
-        WHERE p.company_id = ${companyId}
-      `
-      : await sql`
-        SELECT COUNT(a.*)::int AS alerts_count
-        FROM alerts a
-        JOIN products p ON p.id = a.product_id
-      `;
+    const alertsCount = await sql`
+      SELECT COUNT(a.*)::int AS alerts_count
+      FROM alerts a
+      JOIN products p ON p.id = a.product_id
+      WHERE p.company_id = ${companyId}
+    `;
 
-    const totalSold = companyId
-      ? await sql`
-        SELECT COALESCE(SUM(s.qntd),0) AS total_qntd
-        FROM sales s
-        JOIN products p ON p.id = s.product_id
-        WHERE p.company_id = ${companyId}
-      `
-      : await sql`
-        SELECT COALESCE(SUM(s.qntd),0) AS total_qntd
-        FROM sales s
-        JOIN products p ON p.id = s.product_id
-      `;
+    const totalSold = await sql`
+      SELECT COALESCE(SUM(s.qntd),0) AS total_qntd
+      FROM sales s
+      JOIN products p ON p.id = s.product_id
+      WHERE p.company_id = ${companyId}
+    `;
 
-    const totalStockValue = companyId
-      ? await sql`
-        SELECT COALESCE(SUM(p.inventory * p.unit_price),0) AS total_value
-        FROM products p
-        WHERE p.company_id = ${companyId}
-      `
-      : await sql`
-        SELECT COALESCE(SUM(p.inventory * p.unit_price),0) AS total_value
-        FROM products p
-      `;
+    const totalStockValue = await sql`
+      SELECT COALESCE(SUM(p.inventory * p.unit_price),0) AS total_value
+      FROM products p
+      WHERE p.company_id = ${companyId}
+    `;
 
     return res.json({
       accesses: userAgg[0].accesses_sum,
@@ -96,50 +67,33 @@ router.get('/overview', async (req, res) => {
 });
 
 // GET /stats/activity-last-30-days
-router.get('/activity-last-30-days', async (req, res) => {
+router.get('/activity-last-30-days', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const lastAccesses = companyId
-      ? await sql`
-        SELECT COALESCE(SUM(accesses),0) AS total_accesses
-        FROM users
-        WHERE company_id = ${companyId}
-        AND created_at >= ${thirtyDaysAgo.toISOString()}
-      `
-      : await sql`
-        SELECT COALESCE(SUM(accesses),0) AS total_accesses
-        FROM users
-        WHERE created_at >= ${thirtyDaysAgo.toISOString()}
-      `;
+    const lastAccesses = await sql`
+      SELECT COALESCE(SUM(accesses),0) AS total_accesses
+      FROM users
+      WHERE company_id = ${companyId}
+      AND created_at >= ${thirtyDaysAgo.toISOString()}
+    `;
 
     // Removido filtro por created_at em products pois a coluna não existe no schema atual
-    const productsInserted = companyId
-      ? await sql`SELECT COUNT(*)::int AS products_count FROM products WHERE company_id = ${companyId}`
-      : await sql`SELECT COUNT(*)::int AS products_count FROM products`;
+    const productsInserted = await sql`SELECT COUNT(*)::int AS products_count FROM products WHERE company_id = ${companyId}`;
 
-    const profileChanges = companyId
-      ? await sql`SELECT COALESCE(SUM(changes),0) AS total_changes FROM users WHERE company_id = ${companyId}`
-      : await sql`SELECT COALESCE(SUM(changes),0) AS total_changes FROM users`;
+    const profileChanges = await sql`SELECT COALESCE(SUM(changes),0) AS total_changes FROM users WHERE company_id = ${companyId}`;
 
-    const reportsDownloaded = companyId
-      ? await sql`SELECT COALESCE(SUM(downloads),0) AS total_downloads FROM users WHERE company_id = ${companyId}`
-      : await sql`SELECT COALESCE(SUM(downloads),0) AS total_downloads FROM users`;
+    const reportsDownloaded = await sql`SELECT COALESCE(SUM(downloads),0) AS total_downloads FROM users WHERE company_id = ${companyId}`;
 
     // Removido filtro por created_at em alerts pois a coluna não existe no schema atual
-    const alertsIssued = companyId
-      ? await sql`
-        SELECT COUNT(a.*)::int AS alerts_count
-        FROM alerts a
-        JOIN products p ON p.id = a.product_id
-        WHERE p.company_id = ${companyId}
-      `
-      : await sql`
-        SELECT COUNT(a.*)::int AS alerts_count
-        FROM alerts a
-      `;
+    const alertsIssued = await sql`
+      SELECT COUNT(a.*)::int AS alerts_count
+      FROM alerts a
+      JOIN products p ON p.id = a.product_id
+      WHERE p.company_id = ${companyId}
+    `;
 
     return res.json({
       last_accesses: lastAccesses[0].total_accesses,
@@ -155,25 +109,17 @@ router.get('/activity-last-30-days', async (req, res) => {
 });
 
 // GET /stats/sales-per-product
-router.get('/sales-per-product', async (req, res) => {
+router.get('/sales-per-product', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
-    const rows = companyId
-      ? await sql`
-        SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
-        FROM products p
-        LEFT JOIN sales s ON s.product_id = p.id
-        WHERE p.company_id = ${companyId}
-        GROUP BY p.id, p.name
-        ORDER BY total_qntd DESC
-      `
-      : await sql`
-        SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
-        FROM products p
-        LEFT JOIN sales s ON s.product_id = p.id
-        GROUP BY p.id, p.name
-        ORDER BY total_qntd DESC
-      `;
+    const rows = await sql`
+      SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
+      FROM products p
+      LEFT JOIN sales s ON s.product_id = p.id
+      WHERE p.company_id = ${companyId}
+      GROUP BY p.id, p.name
+      ORDER BY total_qntd DESC
+    `;
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/sales-per-product:', err);
@@ -182,45 +128,28 @@ router.get('/sales-per-product', async (req, res) => {
 });
 
 // GET /stats/top-products
-router.get('/top-products', async (req, res) => {
+router.get('/top-products', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
     
-    const rows = companyId
-      ? await sql`
-        SELECT 
-          p.id AS product_id, 
-          p.name, 
-          p.unit_price,
-          p.inventory,
-          COALESCE(SUM(s.qntd),0) AS total_sold,
-          COALESCE(SUM(s.value),0) AS total_revenue,
-          COUNT(s.id) AS total_sales_count,
-          COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale
-        FROM products p
-        LEFT JOIN sales s ON s.product_id = p.id
-        WHERE p.company_id = ${companyId}
-        GROUP BY p.id, p.name, p.unit_price, p.inventory
-        ORDER BY total_sold DESC
-        LIMIT ${limit}
-      `
-      : await sql`
-        SELECT 
-          p.id AS product_id, 
-          p.name, 
-          p.unit_price,
-          p.inventory,
-          COALESCE(SUM(s.qntd),0) AS total_sold,
-          COALESCE(SUM(s.value),0) AS total_revenue,
-          COUNT(s.id) AS total_sales_count,
-          COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale
-        FROM products p
-        LEFT JOIN sales s ON s.product_id = p.id
-        GROUP BY p.id, p.name, p.unit_price, p.inventory
-        ORDER BY total_sold DESC
-        LIMIT ${limit}
-      `;
+    const rows = await sql`
+      SELECT 
+        p.id AS product_id, 
+        p.name, 
+        p.unit_price,
+        p.inventory,
+        COALESCE(SUM(s.qntd),0) AS total_sold,
+        COALESCE(SUM(s.value),0) AS total_revenue,
+        COUNT(s.id) AS total_sales_count,
+        COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale
+      FROM products p
+      LEFT JOIN sales s ON s.product_id = p.id
+      WHERE p.company_id = ${companyId}
+      GROUP BY p.id, p.name, p.unit_price, p.inventory
+      ORDER BY total_sold DESC
+      LIMIT ${limit}
+    `;
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/top-products:', err);
@@ -229,12 +158,10 @@ router.get('/top-products', async (req, res) => {
 });
 
 // GET /stats/products
-router.get('/products', async (req, res) => {
+router.get('/products', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
-    const rows = companyId
-      ? await sql`SELECT * FROM products WHERE company_id = ${companyId} ORDER BY id`
-      : await sql`SELECT * FROM products ORDER BY id`;
+    const rows = await sql`SELECT * FROM products WHERE company_id = ${companyId} ORDER BY id`;
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/products:', err);
@@ -243,44 +170,27 @@ router.get('/products', async (req, res) => {
 });
 
 // ✅ CORRIGIDO: GET /stats/products-detailed (sem usar s.created_at)
-router.get('/products-detailed', async (req, res) => {
+router.get('/products-detailed', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
 
-    const rows = companyId
-      ? await sql`
-        SELECT 
-          p.id,
-          p.name,
-          p.unit_price,
-          p.inventory,
-          p.status,
-          p.company_id,
-          COALESCE(SUM(s.qntd), 0) AS total_sales,
-          COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count
-        FROM products p
-        LEFT JOIN sales s ON s.product_id = p.id
-        LEFT JOIN alerts a ON a.product_id = p.id
-        WHERE p.company_id = ${companyId}
-        GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id
-        ORDER BY total_sales DESC
-      `
-      : await sql`
-        SELECT 
-          p.id,
-          p.name,
-          p.unit_price,
-          p.inventory,
-          p.status,
-          p.company_id,
-          COALESCE(SUM(s.qntd), 0) AS total_sales,
-          COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count
-        FROM products p
-        LEFT JOIN sales s ON s.product_id = p.id
-        LEFT JOIN alerts a ON a.product_id = p.id
-        GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id
-        ORDER BY total_sales DESC
-      `;
+    const rows = await sql`
+      SELECT 
+        p.id,
+        p.name,
+        p.unit_price,
+        p.inventory,
+        p.status,
+        p.company_id,
+        COALESCE(SUM(s.qntd), 0) AS total_sales,
+        COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count
+      FROM products p
+      LEFT JOIN sales s ON s.product_id = p.id
+      LEFT JOIN alerts a ON a.product_id = p.id
+      WHERE p.company_id = ${companyId}
+      GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id
+      ORDER BY total_sales DESC
+    `;
 
     return res.json({ rows });
   } catch (err) {
@@ -422,9 +332,15 @@ router.post('/products/bulk', ensureAuthenticated, async (req, res) => {
 });
 
 // GET /stats/top-products-by-user/:userId - Produtos mais vendidos de um usuário específico
-router.get('/top-products-by-user/:userId', async (req, res) => {
+router.get('/top-products-by-user/:userId', ensureAuthenticated, async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = Number(req.params.userId);
+    const sessionUserId = req.session.user.id;
+    const companyId = resolveCompanyId(req);
+
+    if (userId !== sessionUserId) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
     const days = req.query.days ? parseInt(req.query.days) : null; // Filtro por período
     
@@ -460,7 +376,7 @@ router.get('/top-products-by-user/:userId', async (req, res) => {
       FROM products p
       LEFT JOIN sales s ON s.product_id = p.id ${days ? sql`AND s.sale_date >= NOW() - INTERVAL '${days} days'` : sql``}
       JOIN users u ON u.company_id = p.company_id
-      WHERE u.id = ${userId}
+      WHERE u.id = ${sessionUserId} AND p.company_id = ${companyId}
       GROUP BY p.id, p.name, p.price, p.current_stock, p.category
       ORDER BY total_sold DESC
       LIMIT ${limit}
@@ -478,12 +394,16 @@ router.get('/top-products-by-user/:userId', async (req, res) => {
 });
 
 // GET /stats/product/:id/sales
-router.get('/product/:id/sales', async (req, res) => {
+router.get('/product/:id/sales', ensureAuthenticated, async (req, res) => {
   try {
     const productId = Number(req.params.id);
+    const companyId = resolveCompanyId(req);
 
     const prod = await sql`SELECT id, name, company_id FROM products WHERE id = ${productId}`;
     if (prod.length === 0) return res.status(404).json({ error: 'Product not found' });
+    if (Number(prod[0].company_id) !== Number(companyId)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
 
     const salesRows = await sql`
       SELECT id, qntd, value FROM sales WHERE product_id = ${productId}
