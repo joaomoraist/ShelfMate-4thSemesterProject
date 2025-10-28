@@ -27,11 +27,9 @@ const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
 const MetricCard: React.FC<{ 
     title: string; 
     value: string; 
-    comparison: string; 
-    trend: 'up' | 'down'; 
     iconSrc: string; 
     emoji: string 
-}> = ({ title, value, comparison, trend, iconSrc, emoji }) => (
+}> = ({ title, value, iconSrc, emoji }) => (
     <div className={cssModule.metricCard}>
         <div className={cssModule.metricHeader}>
             <div className={cssModule.metricIcon}>
@@ -40,12 +38,6 @@ const MetricCard: React.FC<{
             <div className={cssModule.metricTitle}>{title}</div>
         </div>
         <div className={cssModule.metricValue}>{value}</div>
-        <div className={cssModule.metricComparison}>
-            <span className={cssModule.comparisonText}>{comparison}</span>
-            <span className={`${cssModule.trendIcon} ${cssModule[trend]}`}>
-                {trend === 'up' ? '↗' : '↘'}
-            </span>
-        </div>
     </div>
 );
 
@@ -183,32 +175,24 @@ const Statistics: React.FC = () => {
                         <MetricCard
                             title="Total de Produtos"
                             value={`${overview?.products_count ?? 0}`}
-                            comparison="vs Mês Anterior"
-                            trend="up"
                             iconSrc="/products-blue.png"
                             emoji="📦"
                         />
                         <MetricCard
                             title="Valor em Estoque"
                             value={`R$ ${(overview?.total_stock_value ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                            comparison="vs Mês Anterior"
-                            trend="up"
                             iconSrc="/money.png"
                             emoji="💰"
                         />
                         <MetricCard
                             title="Produtos com Estoque Baixo"
                             value={`${overview?.alerts_count ?? 0}`}
-                            comparison="vs Mês Anterior 500 8.5%"
-                            trend="down"
                             iconSrc="/alerts-blue.png"
                             emoji="⚠️"
                         />
                         <MetricCard
                             title="Vendas no Período"
                             value={`${overview?.total_sold_qntd ?? 0} Itens`}
-                            comparison="vs Mês Anterior 500 Pedidos 8.5%"
-                            trend="up"
                             iconSrc="/sales.png"
                             emoji="🛒"
                         />

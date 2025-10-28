@@ -21,6 +21,11 @@ export default function Signup() {
       return;
     }
 
+    if (!password || password.length < 6) {
+      showToast("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
     try {
       const response = await fetch(API_URLS.REGISTER, {
         method: "POST",

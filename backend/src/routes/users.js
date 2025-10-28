@@ -5,11 +5,16 @@ import { Resend } from 'resend';
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 const router = express.Router();
 
 // setup multer storage for user images (save by user ID under public/user_photos)
-const userPhotosDir = path.join(process.cwd(), 'backend', 'src', 'public', 'user_photos');
+// Resolve path relative to this file location to avoid relying on process.cwd()
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const publicDir = path.join(__dirname, '..', 'public');
+const userPhotosDir = path.join(publicDir, 'user_photos');
 if (!fs.existsSync(userPhotosDir)) fs.mkdirSync(userPhotosDir, { recursive: true });
 const storage = multer.diskStorage({
   destination: function (req, file, cb) { cb(null, userPhotosDir); },
@@ -123,6 +128,10 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({
         error: 'Nome, email, senha e CNPJ são obrigatórios'
       });
+    }
+
+    if (String(password).length < 6) {
+      return res.status(400).json({ error: 'A senha deve ter pelo menos 6 caracteres' });
     }
 
     // Normalizar CNPJ (apenas dígitos)
@@ -339,6 +348,10 @@ router.post('/reset-password', async (req, res) => {
       });
     }
 
+    if (String(newPassword).length < 6) {
+      return res.status(400).json({ error: 'A nova senha deve ter pelo menos 6 caracteres' });
+    }
+
     // Verificar código primeiro
     const users = await sql`
       SELECT id, recovery_code
@@ -387,6 +400,10 @@ router.put('/me', upload.single('image'), async (req, res) => {
     const userId = req.session.user.id;
     const { name, email, newPassword } = req.body;
     let imagePath = null;
+
+    if (newPassword && String(newPassword).length < 6) {
+      return res.status(400).json({ error: 'A nova senha deve ter pelo menos 6 caracteres' });
+    }
 
     if (req.file) {
       // save relative path for serving via express.static

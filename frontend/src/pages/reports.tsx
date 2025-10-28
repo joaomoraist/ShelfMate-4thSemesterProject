@@ -156,6 +156,13 @@ const Reports: React.FC = () => {
 export default Reports;
 
 
+// Helper para normalização de número/currency
+const formatCurrencyBR = (val: any): string => {
+    const num = typeof val === 'number' ? val : parseFloat(String(val).replace(',', '.'));
+    if (!isFinite(num)) return '0,00';
+    return Number(num).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+};
+
 // Exportar PDF: Produtos (usa /stats/products-detailed)
 const exportProductsPdf = async () => {
     try {
@@ -177,7 +184,12 @@ const exportProductsPdf = async () => {
                 'ID', 'Produto', 'Preço Unitário (R$)', 'Estoque', 'Status', 'Alertas'
             ]],
             body: rows.map(r => [
-                r.id, r.name, (r.unit_price ?? 0).toFixed(2), r.inventory ?? 0, r.status ?? '-', r.alerts_count ?? 0
+                r.id,
+                r.name,
+                formatCurrencyBR(r.unit_price),
+                r.inventory ?? 0,
+                r.status ?? '-',
+                r.alerts_count ?? 0
             ]),
             styles: { fontSize: 10 },
             headStyles: { fillColor: [27, 49, 186] }
@@ -214,7 +226,12 @@ const exportAlertsPdf = async () => {
                 'ID', 'Produto', 'Estoque', 'Preço (R$)', 'Status', 'Qtd. Alertas'
             ]],
             body: alertRows.map(r => [
-                r.id, r.name, r.inventory ?? 0, (r.unit_price ?? 0).toFixed(2), r.status ?? '-', r.alerts_count ?? 0
+                r.id,
+                r.name,
+                r.inventory ?? 0,
+                formatCurrencyBR(r.unit_price),
+                r.status ?? '-',
+                r.alerts_count ?? 0
             ]),
             styles: { fontSize: 10 },
             headStyles: { fillColor: [220, 53, 69] }

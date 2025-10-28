@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     downloads INT DEFAULT 0,
     changes INT DEFAULT 0,
     password VARCHAR(100),
+    image VARCHAR(200);
     created_at TIMESTAMP DEFAULT NOW()
 );
 

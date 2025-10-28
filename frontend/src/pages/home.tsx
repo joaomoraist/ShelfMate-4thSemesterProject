@@ -12,12 +12,12 @@ import TopProductsTable from "../components/TopProductsTable";
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
 const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
     const [error, setError] = React.useState(false);
-    if (error) return <span style={{ fontSize: 100, lineHeight: '100px', display: 'inline-block' }}>{emoji}</span>;
+    if (error) return <span style={{ fontSize: 72, lineHeight: '72px', display: 'inline-block' }}>{emoji}</span>;
     return (
         <img
             src={src}
             alt={alt}
-            style={{ width: 100, height: 100, objectFit: "contain", ...style }}
+            style={{ width: 72, height: 72, objectFit: "contain", ...style }}
             onError={() => setError(true)}
         />
     );

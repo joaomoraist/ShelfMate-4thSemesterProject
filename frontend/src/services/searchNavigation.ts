@@ -104,6 +104,23 @@ const scoreQuery = (query: string, keywords: string[]) => {
 };
 
 export function getBestPageForQuery(query: string): Page {
+  const q = normalize(query);
+
+  // Regra explícita: consultas genéricas sobre produtos vão para a lista,
+  // só enviar para "add-product" quando houver intenção clara de adicionar.
+  const mentionsProducts = (
+    q.includes("prod") ||
+    q.includes("produto") ||
+    q.includes("produtos") ||
+    q.includes("catalog") ||
+    q.includes("catalogo")
+  );
+  const addIntentTokens = ["adicionar", "inserir", "cadastrar", "cadastar", "novo", "add", "criar"];
+  const hasAddIntent = addIntentTokens.some(t => q.includes(t));
+  if (mentionsProducts && !hasAddIntent) {
+    return "products";
+  }
+
   const entries = Object.entries(PAGE_KEYWORDS) as Array<[Page, string[]]>;
   let best: Page = "home";
   let bestScore = 0;
@@ -117,11 +134,15 @@ export function getBestPageForQuery(query: string): Page {
 
   // Heurística simples quando nada casa
   if (bestScore === 0) {
-    const q = normalize(query);
     if (q.includes("config")) return "settings";
     if (q.includes("prod")) return "products";
     if (q.includes("relat")) return "reports";
     if (q.includes("estat")) return "statistics";
+  }
+
+  // Regra de segurança: se o best for "add-product" sem intenção de adicionar, redirecionar para lista
+  if (best === "add-product" && mentionsProducts && !hasAddIntent) {
+    return "products";
   }
 
   return best;

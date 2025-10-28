@@ -131,7 +131,7 @@ const AddProduct: React.FC = () => {
                 type="number"
                 id="unit_price"
                 name="unit_price"
-                value={formData.unit_price}
+                value={formData.unit_price === 0 ? '' : formData.unit_price}
                 onChange={handleInputChange}
                 className={styles.input}
                 placeholder="0.00"
@@ -149,7 +149,7 @@ const AddProduct: React.FC = () => {
                 type="number"
                 id="inventory"
                 name="inventory"
-                value={formData.inventory}
+                value={formData.inventory === 0 ? '' : formData.inventory}
                 onChange={handleInputChange}
                 className={styles.input}
                 placeholder="0"
@@ -171,8 +171,9 @@ const AddProduct: React.FC = () => {
               className={styles.select}
             >
               <option value="Disponível">Disponível</option>
+              <option value="Estoque Baixo">Estoque Baixo</option>
+              <option value="Estoque Alto">Estoque Alto</option>
               <option value="Indisponível">Indisponível</option>
-              <option value="Descontinuado">Descontinuado</option>
             </select>
           </div>
 

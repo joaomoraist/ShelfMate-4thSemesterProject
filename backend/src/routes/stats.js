@@ -299,8 +299,6 @@ router.post('/products', ensureAuthenticated, async (req, res) => {
       unit_price, 
       current_stock, 
       inventory, 
-      category, 
-      description, 
       status 
     } = req.body || {};
 
@@ -315,9 +313,15 @@ router.post('/products', ensureAuthenticated, async (req, res) => {
     // Usar current_stock ou inventory (compatibilidade)
     const stockQty = current_stock != null ? Number(current_stock) : (inventory != null ? Number(inventory) : 0);
     
-    const productStatus = status || 'Disponível';
-    const productCategory = category || 'Geral';
-    const productDescription = description || '';
+    // Validar status conforme ENUM do schema
+    const allowedStatus = ['Disponível','Estoque Baixo','Estoque Alto','Indisponível'];
+    let productStatus = (status || 'Disponível');
+    if (!allowedStatus.includes(productStatus)) {
+      // Se não for um valor permitido, inferir pelo estoque ou usar 'Disponível'
+      if (stockQty < 10) productStatus = 'Estoque Baixo';
+      else if (stockQty > 100) productStatus = 'Estoque Alto';
+      else productStatus = 'Disponível';
+    }
     const companyId = resolveCompanyId(req) ?? null;
 
     // Verificar se produto já existe
@@ -331,9 +335,12 @@ router.post('/products', ensureAuthenticated, async (req, res) => {
     }
 
     // Inserir produto
+    // Garantir duas casas decimais para unit_price (NUMERIC(10,2))
+    const priceFixed = Number.isFinite(productPrice) ? Number(productPrice.toFixed(2)) : null;
+
     const rows = await sql`
       INSERT INTO products (name, unit_price, inventory, status, company_id)
-      VALUES (${name.trim()}, ${productPrice}, ${stockQty}, ${productStatus}, ${companyId})
+      VALUES (${name.trim()}, ${priceFixed}, ${stockQty}, ${productStatus}, ${companyId})
       RETURNING *
     `;
 

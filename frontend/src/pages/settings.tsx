@@ -183,6 +183,11 @@ const Settings: React.FC = () => {
                     <div className={cssModule.saveSection}>
                         <button className={cssModule.saveButton} onClick={async () => {
                             try {
+                                if (newPassword && newPassword.length < 6) {
+                                    alert('A nova senha deve ter pelo menos 6 caracteres.');
+                                    return;
+                                }
+
                                 const form = new FormData();
                                 form.append('name', nameInput);
                                 form.append('email', emailInput);

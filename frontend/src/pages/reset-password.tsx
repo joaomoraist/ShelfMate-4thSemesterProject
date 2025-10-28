@@ -59,6 +59,11 @@ export default function ResetPassword() {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!newPassword || newPassword.length < 6) {
+      alert("A nova senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+
     try {
       const response = await fetch(API_URLS.RESET_PASSWORD, {
         method: "POST",
