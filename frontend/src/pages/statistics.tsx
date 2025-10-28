@@ -50,6 +50,7 @@ const Statistics: React.FC = () => {
     const [toastMsg, setToastMsg] = useState<string>('');
     const { navigateTo } = useNavigation();
     const [overview, setOverview] = useState<any>(null);
+    const [lowStockCount, setLowStockCount] = useState<number>(0);
     
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
@@ -63,20 +64,32 @@ const Statistics: React.FC = () => {
         });
     };
 
-    // carregar métricas
+    // carregar métricas e contagem de produtos com estoque baixo
     React.useEffect(() => {
         const load = async () => {
             try {
                 const stored = localStorage.getItem('user');
                 const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
-                const url = companyId ? `${API_URLS.STATS_OVERVIEW}?companyId=${companyId}` : API_URLS.STATS_OVERVIEW;
-                const res = await fetch(url, { credentials: 'include' });
-                if (!res.ok) throw new Error('Falha ao buscar overview');
-                const data = await res.json();
-                setOverview(data);
+
+                // Overview
+                const overviewUrl = companyId ? `${API_URLS.STATS_OVERVIEW}?companyId=${companyId}` : API_URLS.STATS_OVERVIEW;
+                const overviewRes = await fetch(overviewUrl, { credentials: 'include' });
+                if (!overviewRes.ok) throw new Error('Falha ao buscar overview');
+                const overviewData = await overviewRes.json();
+                setOverview(overviewData);
+
+                // Produtos para calcular estoque baixo (< 10)
+                const productsUrl = companyId ? `${API_URLS.STATS_PRODUCTS}?companyId=${companyId}` : API_URLS.STATS_PRODUCTS;
+                const productsRes = await fetch(productsUrl, { credentials: 'include' });
+                if (!productsRes.ok) throw new Error('Falha ao buscar produtos');
+                const productsData = await productsRes.json();
+                const rows = (productsData?.rows ?? []) as Array<any>;
+                const countLow = rows.filter(r => (r?.inventory ?? 0) < 10).length;
+                setLowStockCount(countLow);
             } catch (e) {
                 console.error(e);
                 setOverview(null);
+                setLowStockCount(0);
             }
         };
         load();
@@ -198,7 +211,7 @@ const Statistics: React.FC = () => {
                         />
                         <MetricCard
                             title="Produtos com Estoque Baixo"
-                            value={`${overview?.alerts_count ?? 0}`}
+                            value={`${lowStockCount}`}
                             iconSrc="/alerts-blue.png"
                             emoji="⚠️"
                         />
