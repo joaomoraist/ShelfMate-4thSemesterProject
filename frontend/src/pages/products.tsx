@@ -266,9 +266,21 @@ const Products: React.FC = () => {
                                     )}
                                 </div>
                                 <div className={cssModule.statusCell}>
-                                    <span className={`${cssModule.status} ${cssModule[product.inventory < 10 ? 'red' : 'green']}`}>
-                                        {product.status || 'Disponível'}
-                                    </span>
+                                    {(() => {
+                                        const statusText = (product.status || 'Disponível').toLowerCase();
+                                        const statusClass = statusText.includes('dispon')
+                                            ? cssModule.blue
+                                            : statusText.includes('baixo')
+                                                ? cssModule.red
+                                                : statusText.includes('alto')
+                                                    ? cssModule.green
+                                                    : (product.inventory < 10 ? cssModule.red : cssModule.green);
+                                        return (
+                                            <span className={`${cssModule.status} ${statusClass}`}>
+                                                {product.status || 'Disponível'}
+                                            </span>
+                                        );
+                                    })()}
                                 </div>
                                 <div className={cssModule.alertsCell}>
                                     <span className={cssModule.alertIcon}>
