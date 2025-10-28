@@ -1,0 +1,63 @@
+.error-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.error-dialog-card {
+  background: #0f172a; /* dark slate */
+  color: #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  width: min(520px, 92vw);
+  padding: 20px 22px;
+}
+
+.error-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.error-dialog-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.error-dialog-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #c7d2fe; /* indigo-200 */
+}
+
+.error-dialog-message {
+  margin: 6px 0 16px;
+  font-size: 14px;
+  color: #e5e7eb;
+}
+
+.error-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.error-dialog-button {
+  background: #6366f1; /* indigo */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.error-dialog-button:hover {
+  filter: brightness(1.05);
+}

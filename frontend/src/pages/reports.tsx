@@ -8,6 +8,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Toast from '../components/Toast';
 import LoadingScreen from '../components/LoadingScreen';
+import ErrorDialog from '../components/ErrorDialog';
 
 const Reports: React.FC = () => {
     const [user, setUser] = useState<any>(null);
@@ -15,9 +16,14 @@ const Reports: React.FC = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [toastMsg, setToastMsg] = useState<string>('');
     const { navigateTo } = useNavigation();
+    const [errorInfo, setErrorInfo] = useState<{ title: string; message: string; icon?: string } | null>(null);
     
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
+    React.useEffect(() => {
+        (window as any).__setReportsError = (val: any) => setErrorInfo(val);
+        return () => { delete (window as any).__setReportsError; };
+    }, []);
 
     const handleLogout = () => {
         fetch(API_URLS.LOGOUT, { method: 'POST', credentials: 'include' }).finally(() => {
@@ -162,6 +168,14 @@ const Reports: React.FC = () => {
                   durationMs={2500}
                 />
             )}
+            {errorInfo && (
+                <ErrorDialog
+                  title={errorInfo.title}
+                  message={errorInfo.message}
+                  iconSrc={errorInfo.icon || '/report-blue.png'}
+                  onClose={() => setErrorInfo(null)}
+                />
+            )}
         </div>
     );
 };
@@ -179,8 +193,16 @@ const formatCurrencyBR = (val: any): string => {
 // Exportar PDF: Produtos (usa /stats/products-detailed)
 const exportProductsPdf = async () => {
     try {
-        const res = await fetch(API_URLS.PRODUCTS_DETAILED);
-        if (!res.ok) throw new Error(`Falha ao buscar dados (${res.status})`);
+        const stored = localStorage.getItem('user');
+        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+        const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
+        const res = await fetch(url, { credentials: 'include' });
+        if (!res.ok) {
+            if (res.status === 401) {
+                throw new Error('Sessão expirada ou sem permissão (401)');
+            }
+            throw new Error(`Falha ao buscar dados (${res.status})`);
+        }
         const data = await res.json();
         const rows = (data?.rows ?? []) as Array<any>;
 
@@ -210,15 +232,36 @@ const exportProductsPdf = async () => {
 
         doc.save('relatorio_produtos.pdf');
     } catch (err: any) {
-        alert(`Erro ao exportar PDF de produtos: ${err.message || err}`);
+        const msg = err?.message || String(err);
+        const is401 = msg.includes('401');
+        const niceMsg = is401
+            ? 'Sua sessão parece ter expirado. Faça login novamente para exportar o relatório.'
+            : `Erro ao exportar PDF de produtos: ${msg}`;
+        const icon = is401 ? '/forget-password.png' : '/report-blue.png';
+        // Mostrar diálogo visual agradável em vez de alert
+        const evt = new CustomEvent('shelfmate-error', { detail: { source: 'export-products', message: msg } });
+        window.dispatchEvent(evt);
+        // Exibir modal
+        const setError = (window as any).__setReportsError;
+        if (typeof setError === 'function') {
+            setError({ title: 'Exportação de Produtos', message: niceMsg, icon });
+        }
     }
 };
 
 // Exportar PDF: Alertas (filtra produtos com alerts_count>0 ou estoque baixo)
 const exportAlertsPdf = async () => {
     try {
-        const res = await fetch(API_URLS.PRODUCTS_DETAILED);
-        if (!res.ok) throw new Error(`Falha ao buscar dados (${res.status})`);
+        const stored = localStorage.getItem('user');
+        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
+        const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
+        const res = await fetch(url, { credentials: 'include' });
+        if (!res.ok) {
+            if (res.status === 401) {
+                throw new Error('Sessão expirada ou sem permissão (401)');
+            }
+            throw new Error(`Falha ao buscar dados (${res.status})`);
+        }
         const data = await res.json();
         const rows = (data?.rows ?? []) as Array<any>;
 
@@ -252,6 +295,17 @@ const exportAlertsPdf = async () => {
 
         doc.save('relatorio_alertas.pdf');
     } catch (err: any) {
-        alert(`Erro ao exportar PDF de alertas: ${err.message || err}`);
+        const msg = err?.message || String(err);
+        const is401 = msg.includes('401');
+        const niceMsg = is401
+            ? 'Sua sessão parece ter expirado. Faça login novamente para exportar o relatório.'
+            : `Erro ao exportar PDF de alertas: ${msg}`;
+        const icon = '/alerts-red.png';
+        const evt = new CustomEvent('shelfmate-error', { detail: { source: 'export-alerts', message: msg } });
+        window.dispatchEvent(evt);
+        const setError = (window as any).__setReportsError;
+        if (typeof setError === 'function') {
+            setError({ title: 'Exportação de Alertas', message: niceMsg, icon });
+        }
     }
 };

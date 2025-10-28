@@ -37,7 +37,7 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
         const stored = localStorage.getItem('user');
         const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
         const url = companyId ? `${API_URLS.TOP_PRODUCTS}?companyId=${companyId}` : API_URLS.TOP_PRODUCTS;
-        const response = await fetch(url);
+        const response = await fetch(url, { credentials: 'include' });
 
         if (!response.ok) {
           const errorData = await response.json();
