@@ -104,34 +104,29 @@ html, body { overflow-x: hidden; }
 .statGrid {
   display: flex;
   flex-direction: row;
-  gap: 20px;
-  overflow-x: auto;
-  padding: 16px 0;
-  scrollbar-width: thin;
+  flex-wrap: wrap;
+  gap: 16px;
+  overflow-x: hidden;
+  padding: 12px 0;
+  justify-content: center;
 }
 
 /* Para garantir que os cards não quebrem linha e tenham tamanho consistente */
 .statGrid > * {
   flex-shrink: 0;
-  min-width: 220px;
-  width: 220px;
+  min-width: 210px;
+  width: 210px;
 }
 
 /* Custom scrollbar para Webkit browsers */
-.statGrid::-webkit-scrollbar {
-  height: 6px;
-}
-
-.statGrid::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
-}
+/* Sem barra de rolagem horizontal para os cards */
+.statGrid::-webkit-scrollbar { display: none; }
 
 /* Estilo individual dos cards */
 .statCard {
   background: white;
   border-radius: 12px;
-  padding: 20px;
+  padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   border: 1px solid #e0e0e0;
@@ -139,18 +134,18 @@ html, body { overflow-x: hidden; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 200px;
+  height: 180px;
 }
 
 .statCard .title {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 500;
 }
 
 .statCard .value {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1B31BA;
 }
