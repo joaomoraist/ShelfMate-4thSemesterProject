@@ -55,7 +55,7 @@ def simulate_sales_and_monitor():
                         # Reposição se estiver abaixo do limiar "quase zero"
                         if inventory <= NEAR_ZERO_THRESHOLD:
                             update_inventory(conn, pid, SAFE_STOCK_LEVEL)
-                            insert_alert(conn, pid, 'RESTOCK_APPLIED')
+                            insert_alert(conn, pid, 'Disponível')
                             print(f"[Restock] Produto {name} (id={pid}) sem estoque. Reposto para {SAFE_STOCK_LEVEL}.")
                         continue
 
@@ -75,13 +75,13 @@ def simulate_sales_and_monitor():
 
                     # Checar e criar alerta de estoque baixo
                     if new_inventory <= LOW_STOCK_THRESHOLD:
-                        insert_alert(conn, pid, 'LOW_STOCK')
+                        insert_alert(conn, pid, 'Estoque Baixo')
                         print(f"[Alert] Produto {name} (id={pid}) com estoque baixo: {new_inventory}")
 
                     # Reposição segura se quase zerado
                     if new_inventory <= NEAR_ZERO_THRESHOLD:
                         update_inventory(conn, pid, SAFE_STOCK_LEVEL)
-                        insert_alert(conn, pid, 'RESTOCK_APPLIED')
+                        insert_alert(conn, pid, 'Disponível')
                         print(f"[Restock] Produto {name} (id={pid}) quase zerado ({new_inventory}). Reposto para {SAFE_STOCK_LEVEL}.")
 
                 # Commit das operações do ciclo

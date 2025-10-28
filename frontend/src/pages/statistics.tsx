@@ -9,6 +9,8 @@ import LineChart from "../components/LineChart";
 import PieChart from "../components/PieChart";
 import BarChart from "../components/BarChart";
 import TopProductsTable from "../components/TopProductsTable";
+import Toast from '../components/Toast';
+import LoadingScreen from '../components/LoadingScreen';
 
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
 const Icon: React.FC<IconProps> = ({ src, emoji, alt = "", style }) => {
@@ -45,6 +47,7 @@ const Statistics: React.FC = () => {
     const [user, setUser] = useState<any>(null);
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [toastMsg, setToastMsg] = useState<string>('');
     const { navigateTo } = useNavigation();
     const [overview, setOverview] = useState<any>(null);
     
@@ -52,10 +55,12 @@ const Statistics: React.FC = () => {
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
-        setUser(null);
-        alert("👋 Logout realizado com sucesso!");
-        navigateTo("login");
+        fetch(API_URLS.LOGOUT, { method: 'POST', credentials: 'include' }).finally(() => {
+            localStorage.removeItem("user");
+            setUser(null);
+            setToastMsg("Logout realizado com sucesso!");
+            navigateTo("login");
+        });
     };
 
     // carregar métricas
@@ -77,11 +82,18 @@ const Statistics: React.FC = () => {
         load();
     }, []);
 
-    if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
+    if (loading) return <LoadingScreen message="Carregando" subtext="Preparando suas estatísticas" />;
     if (!user) return (
         <div style={{ padding: 40, textAlign: "center" }}>
             <h2>📊 Estatísticas</h2>
             <p>Você não está logado. Por favor, faça login para acessar suas estatísticas.</p>
+            {toastMsg && (
+                <Toast
+                    message={toastMsg}
+                    type="success"
+                    onClose={() => setToastMsg('')}
+                />
+            )}
         </div>
     );
 

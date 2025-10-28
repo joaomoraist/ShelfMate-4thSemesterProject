@@ -7,6 +7,8 @@ import cssModule from '../styles/home.module.css';
 import LineChart from "../components/LineChart";
 import PieChart from "../components/PieChart";
 import TopProductsTable from "../components/TopProductsTable";
+import Toast from '../components/Toast';
+import LoadingScreen from '../components/LoadingScreen';
 
 
 type IconProps = { src: string; emoji: string; alt?: string; style?: React.CSSProperties };
@@ -41,6 +43,7 @@ const Home: React.FC = () => {
     const [activityData, setActivityData] = useState<any>(null);
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [toastMsg, setToastMsg] = useState<string>('');
     const { navigateTo } = useNavigation();
 
     // mirror currentUser into local state for compatibility with existing handlers
@@ -50,7 +53,7 @@ const Home: React.FC = () => {
         fetch(API_URLS.LOGOUT, { method: 'POST', credentials: 'include' }).finally(() => {
             localStorage.removeItem("user");
             setUser(null);
-            alert("👋 Logout realizado com sucesso!");
+            setToastMsg("Logout realizado com sucesso!");
             navigateTo("login");
         });
     };
@@ -93,7 +96,7 @@ const Home: React.FC = () => {
         loadActivityData();
     }, []);
 
-    if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
+    if (loading) return <LoadingScreen message="Carregando" subtext="Preparando sua página" />;
 
     return (
         <div style={{ minHeight: "100vh", background: "transparent" }}>
@@ -285,6 +288,13 @@ const Home: React.FC = () => {
                     </div>
                 </section>
             </main>
+            {toastMsg && (
+                <Toast
+                    message={toastMsg}
+                    type="success"
+                    onClose={() => setToastMsg('')}
+                />
+            )}
         </div>
     );
 };

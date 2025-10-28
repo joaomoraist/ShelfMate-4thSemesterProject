@@ -6,24 +6,29 @@ import cssModule from '../styles/reports.module.css';
 import { API_URLS, API_CONFIG } from '../config/api';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Toast from '../components/Toast';
+import LoadingScreen from '../components/LoadingScreen';
 
 const Reports: React.FC = () => {
     const [user, setUser] = useState<any>(null);
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [toastMsg, setToastMsg] = useState<string>('');
     const { navigateTo } = useNavigation();
     
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
-        setUser(null);
-        alert("👋 Logout realizado com sucesso!");
-        navigateTo("login");
+        fetch(API_URLS.LOGOUT, { method: 'POST', credentials: 'include' }).finally(() => {
+            localStorage.removeItem("user");
+            setUser(null);
+            setToastMsg("Logout realizado com sucesso!");
+            navigateTo("login");
+        });
     };
 
-    if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
+    if (loading) return <LoadingScreen message="Carregando" subtext="Preparando seus relatórios" />;
     if (!user) return (
         <div style={{ padding: 40, textAlign: "center" }}>
             <h2>📄 Relatórios</h2>
@@ -149,6 +154,14 @@ const Reports: React.FC = () => {
 
 
             </main>
+            {toastMsg && (
+                <Toast
+                  message={toastMsg}
+                  type="success"
+                  onClose={() => setToastMsg('')}
+                  durationMs={2500}
+                />
+            )}
         </div>
     );
 };

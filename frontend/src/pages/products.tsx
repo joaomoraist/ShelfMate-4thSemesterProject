@@ -4,11 +4,13 @@ import { useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/products.module.css';
+import Toast from '../components/Toast';
 
 const Products: React.FC = () => {
     const [user, setUser] = useState<any>(null);
     const { user: currentUser, loading } = useCurrentUser();
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [toastMsg, setToastMsg] = useState<string>('');
     const { navigateTo } = useNavigation();
     const [products, setProducts] = useState<any[]>([]);
     const fileInputRef = React.useRef<HTMLInputElement | null>(null);
@@ -18,10 +20,12 @@ const Products: React.FC = () => {
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
 
     const handleLogout = () => {
-        localStorage.removeItem("user");
-        setUser(null);
-        alert("👋 Logout realizado com sucesso!");
-        navigateTo("login");
+        fetch(API_URLS.LOGOUT, { method: 'POST', credentials: 'include' }).finally(() => {
+            localStorage.removeItem("user");
+            setUser(null);
+            setToastMsg("Logout realizado com sucesso!");
+            navigateTo("login");
+        });
     };
 
     // Carregar produtos reais com dados detalhados
@@ -282,6 +286,13 @@ const Products: React.FC = () => {
 
 
             </main>
+            {toastMsg && (
+                <Toast
+                    message={toastMsg}
+                    type="success"
+                    onClose={() => setToastMsg('')}
+                />
+            )}
         </div>
     );
 

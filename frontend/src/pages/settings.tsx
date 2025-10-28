@@ -5,6 +5,7 @@ import { API_URLS, API_CONFIG } from '../config/api';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/settings.module.css';
 import Toast from '../components/Toast';
+import LoadingScreen from '../components/LoadingScreen';
 
 const Settings: React.FC = () => {
     const [user, setUser] = useState<any>(null);
@@ -47,7 +48,7 @@ const Settings: React.FC = () => {
         navigateTo("login");
     };
 
-    if (loading) return <div style={{ padding: 40 }}>⏳ Carregando...</div>;
+    if (loading) return <LoadingScreen message="Carregando" subtext="Carregando suas configurações" />;
     if (!user) return (
         <div style={{ padding: 40, textAlign: "center" }}>
             <h2>⚙️ Configurações</h2>

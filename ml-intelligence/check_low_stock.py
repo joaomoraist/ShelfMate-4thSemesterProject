@@ -26,14 +26,14 @@ def main():
             inventory = float(p['inventory'] or 0)
             if inventory <= LOW_STOCK_THRESHOLD:
                 low.append(p)
-                insert_alert(conn, p['id'], 'LOW_STOCK')
+                insert_alert(conn, p['id'], 'Estoque Baixo')
         # aplicar restock se solicitado
         if args.apply_restock:
             for p in low:
                 inv = float(p['inventory'] or 0)
                 if inv <= NEAR_ZERO_THRESHOLD:
                     update_inventory(conn, p['id'], SAFE_STOCK_LEVEL)
-                    insert_alert(conn, p['id'], 'RESTOCK_APPLIED')
+                    insert_alert(conn, p['id'], 'Disponível')
         commit(conn)
         print(f"[Check] {len(low)} produtos com estoque <= {LOW_STOCK_THRESHOLD} (company_id={args.company_id})")
         for p in low:
