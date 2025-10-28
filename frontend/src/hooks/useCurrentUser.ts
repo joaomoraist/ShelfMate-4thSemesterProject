@@ -12,6 +12,13 @@ export default function useCurrentUser() {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        try {
+          if (data && data.user) {
+            localStorage.setItem('user', JSON.stringify(data.user));
+          }
+        } catch (e) {
+          console.warn('Falha ao salvar user no localStorage:', e && (e as any).message);
+        }
       } else {
         const stored = localStorage.getItem('user');
         setUser(stored ? JSON.parse(stored) : null);

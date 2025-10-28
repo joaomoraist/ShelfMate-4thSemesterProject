@@ -4,6 +4,7 @@ import useCurrentUser from '../hooks/useCurrentUser';
 import { API_URLS, API_CONFIG } from '../config/api';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/settings.module.css';
+import Toast from '../components/Toast';
 
 const Settings: React.FC = () => {
     const [user, setUser] = useState<any>(null);
@@ -15,6 +16,8 @@ const Settings: React.FC = () => {
     const fileInputRef = React.useRef<HTMLInputElement>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [toastMsg, setToastMsg] = useState<string>('');
+    const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info');
     const { navigateTo } = useNavigation();
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
@@ -39,7 +42,8 @@ const Settings: React.FC = () => {
     const handleLogout = () => {
         localStorage.removeItem("user");
         setUser(null);
-        alert("👋 Logout realizado com sucesso!");
+        setToastType('success');
+        setToastMsg("Logout realizado com sucesso!");
         navigateTo("login");
     };
 
@@ -184,7 +188,8 @@ const Settings: React.FC = () => {
                         <button className={cssModule.saveButton} onClick={async () => {
                             try {
                                 if (newPassword && newPassword.length < 6) {
-                                    alert('A nova senha deve ter pelo menos 6 caracteres.');
+                                    setToastType('error');
+                                    setToastMsg('A nova senha deve ter pelo menos 6 caracteres.');
                                     return;
                                 }
 
@@ -196,16 +201,25 @@ const Settings: React.FC = () => {
 
                                 const res = await fetch(API_URLS.ME, { method: 'PUT', body: form, credentials: 'include' });
                                 if (res.ok) {
-                                    await res.json();
-                                    alert('✅ Salvo com sucesso');
+                                    const data = await res.json();
+                                    try {
+                                        if (data && data.user) {
+                                            localStorage.setItem('user', JSON.stringify(data.user));
+                                            setUser(data.user);
+                                        }
+                                    } catch {}
+                                    setToastType('success');
+                                    setToastMsg('Salvo com sucesso');
                                     await refresh();
                                 } else {
                                     const err = await res.json();
-                                    alert('Erro: ' + (err.error || 'Unknown'));
+                                    setToastType('error');
+                                    setToastMsg('Erro: ' + (err.error || 'Unknown'));
                                 }
                             } catch (err) {
                                 console.error(err);
-                                alert('Erro ao salvar');
+                                setToastType('error');
+                                setToastMsg('Erro ao salvar');
                             }
                             }}>
                                 <img src="/save.png" alt="Salvar" className={cssModule.saveIconImg} />
@@ -218,6 +232,13 @@ const Settings: React.FC = () => {
 
 
             </main>
+            {toastMsg && (
+                <Toast
+                    message={toastMsg}
+                    type={toastType}
+                    onClose={() => setToastMsg('')}
+                />
+            )}
         </div>
     );
 };
