@@ -425,10 +425,12 @@ router.get('/product/:id/sales', ensureAuthenticated, async (req, res) => {
 router.post('/reports-exported', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
+    const sessionUser = req.session && req.session.user;
     if (!companyId) {
       return res.status(400).json({ error: 'Empresa não identificada na sessão' });
     }
 
+    // Incrementa contador na tabela de empresas
     const rows = await sql`
       UPDATE companies
       SET reports_exported = COALESCE(reports_exported, 0) + 1
@@ -440,7 +442,19 @@ router.post('/reports-exported', ensureAuthenticated, async (req, res) => {
       return res.status(404).json({ error: 'Empresa não encontrada' });
     }
 
-    return res.json({ success: true, company: rows[0] });
+    // Também incrementa contador de downloads do usuário que exportou
+    let userUpdate = null;
+    if (sessionUser && sessionUser.id) {
+      const userRows = await sql`
+        UPDATE users
+        SET downloads = COALESCE(downloads, 0) + 1
+        WHERE id = ${sessionUser.id} AND company_id = ${companyId}
+        RETURNING id, name, email, company_id, downloads
+      `;
+      userUpdate = userRows && userRows[0] ? userRows[0] : null;
+    }
+
+    return res.json({ success: true, company: rows[0], user: userUpdate });
   } catch (err) {
     console.error('Erro em POST /stats/reports-exported:', err);
     res.status(500).json({ error: 'Erro interno do servidor' });
