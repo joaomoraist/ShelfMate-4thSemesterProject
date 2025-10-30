@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
 import "../styles/auth.css";
@@ -8,7 +8,24 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [toast, setToast] = useState<string>("");
+  const [welcomeTitle, setWelcomeTitle] = useState<string>("Bem vindo de Volta");
   const { navigateTo } = useNavigation();
+
+  // Determina mensagem de boas-vindas pela primeira visita
+  useEffect(() => {
+    try {
+      const visited = localStorage.getItem("hasVisited");
+      if (!visited) {
+        setWelcomeTitle("Bem vindo");
+        localStorage.setItem("hasVisited", "1");
+      } else {
+        setWelcomeTitle("Bem vindo de Volta");
+      }
+    } catch (e) {
+      // Fallback se localStorage não estiver disponível
+      setWelcomeTitle("Bem vindo");
+    }
+  }, []);
 
   const handleForgotFromLogin = async () => {
     if (!email) {
@@ -80,7 +97,7 @@ export default function Login() {
         <div className="auth-content">
           <div style={{ textAlign: 'center' }}>
             <img src="/home_login.png" alt="Login" className="auth-icon" />
-            <h1 className="auth-title">Bem vindo de Volta</h1>
+            <h1 className="auth-title">{welcomeTitle}</h1>
             <p className="auth-sub">Digite as suas informações</p>
           </div>
 

@@ -21,7 +21,8 @@ export const API_CONFIG = {
       TOP_PRODUCTS: '/stats/top-products',
       PRODUCTS: '/stats/products',
       PRODUCTS_BULK: '/stats/products/bulk',
-      PRODUCTS_DETAILED: '/stats/products-detailed'
+      PRODUCTS_DETAILED: '/stats/products-detailed',
+      REPORTS_EXPORTED_INC: '/stats/reports-exported'
     }
   }
 };
@@ -50,5 +51,6 @@ export const API_URLS = {
   TOP_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.TOP_PRODUCTS),
   STATS_PRODUCTS: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS),
   STATS_PRODUCTS_BULK: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS_BULK),
-  PRODUCTS_DETAILED: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS_DETAILED)
+  PRODUCTS_DETAILED: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.PRODUCTS_DETAILED),
+  REPORTS_EXPORTED_INC: buildApiUrl(API_CONFIG.ENDPOINTS.STATS.REPORTS_EXPORTED_INC)
 };

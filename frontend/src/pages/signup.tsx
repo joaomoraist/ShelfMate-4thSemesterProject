@@ -71,7 +71,7 @@ export default function Signup() {
             <input id="email" type="email" placeholder="Digite seu email" value={email} onChange={(e) => setEmail(e.target.value)} />
 
             <label htmlFor="cnpj">CNPJ da Empresa</label>
-            <input id="cnpj" type="text" placeholder="Digite o CNPJ da empresa" value={cnpj} onChange={(e) => setCnpj(e.target.value)} maxLength={18} />
+            <input id="cnpj" type="text" placeholder="Digite apenas números do CNPJ" value={cnpj} onChange={(e) => setCnpj(e.target.value)} maxLength={18} />
 
             <label htmlFor="password">Senha</label>
             <input id="password" type="password" placeholder="Digite sua senha" value={password} onChange={(e) => setPassword(e.target.value)} />

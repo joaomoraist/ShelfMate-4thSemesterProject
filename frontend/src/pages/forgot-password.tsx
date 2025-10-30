@@ -5,11 +5,12 @@ import "../styles/auth.css";
 import AuthIllustration from "../components/AuthIllustration";
 
 export default function ForgotPassword() {
-  // Steps: 1 = send code, 2 = verify code, 3 = reset password
+  // Steps: 1 = enviar código (fallback), 2 = inserir código e nova senha
   const [step, setStep] = useState<number>(1);
   const [email, setEmail] = useState<string>("");
   const [recoveryCode, setRecoveryCode] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [toast, setToast] = useState<string>("");
   const { navigateTo } = useNavigation();
 
@@ -33,7 +34,7 @@ export default function ForgotPassword() {
         });
 
         if (response.ok) {
-          showToast("Código enviado automaticamente. Verifique seu email.");
+          showToast("Código enviado. Verifique seu email e digite abaixo.");
           setStep(2);
         } else {
           const errorData = await response.json();
@@ -71,34 +72,17 @@ export default function ForgotPassword() {
     }
   };
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await fetch(API_URLS.VERIFY_RESET_CODE, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, recoveryCode }),
-      });
-
-      if (response.ok) {
-        setStep(3);
-        showToast("Código verificado. Agora defina sua nova senha.");
-      } else {
-        const error = await response.json();
-        showToast("Código inválido: " + (error.error || "Erro desconhecido"));
-      }
-    } catch (error) {
-      console.error(error);
-      showToast("Erro ao conectar com o servidor.");
-    }
-  };
+  // Unificado: o usuário informa código, nova senha e confirmação
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!newPassword || newPassword.length < 6) {
       showToast("A nova senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showToast("A confirmação não corresponde à nova senha.");
       return;
     }
 
@@ -149,29 +133,21 @@ export default function ForgotPassword() {
           )}
 
           {step === 2 && (
-            <form onSubmit={handleVerifyCode}>
-              <label htmlFor="email">Email</label>
-              <input id="email" type="email" value={email} disabled />
+            <form onSubmit={handleResetPassword}>
+              {/* Email já foi informado antes; manter oculto/disabled se necessário */}
+              {/* <input type="hidden" value={email} /> */}
 
               <label htmlFor="code">Código encaminhado</label>
               <input id="code" type="text" placeholder="Digite o código encaminhado" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value)} />
 
-              <div className="row" style={{ marginTop: 16 }}>
-                <button className="primary" type="submit">Verificar</button>
-              </div>
-            </form>
-          )}
-
-          {step === 3 && (
-            <form onSubmit={handleResetPassword}>
-              <label htmlFor="email">Email</label>
-              <input id="email" type="email" value={email} disabled />
-
               <label htmlFor="newpass">Nova senha</label>
               <input id="newpass" type="password" placeholder="Digite sua nova senha" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
 
+              <label htmlFor="confirmpass">Confirmar nova senha</label>
+              <input id="confirmpass" type="password" placeholder="Confirme sua nova senha" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+
               <div className="row" style={{ marginTop: 16 }}>
-                <button className="primary" type="submit">Atualizar</button>
+                <button className="primary" type="submit">Redefinir</button>
               </div>
             </form>
           )}

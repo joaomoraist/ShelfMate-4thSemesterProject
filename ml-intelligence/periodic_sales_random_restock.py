@@ -2,11 +2,12 @@
 Script demonstrativo:
 - A cada 1 minuto: insere vendas para todos os produtos.
 - A cada 2 minutos: adiciona reposição aleatória no estoque de todos os produtos.
-- Após cada operação, verifica estoque baixo e envia e-mail (SES) com resumo.
+- Após cada operação, verifica estoque baixo e envia e-mail (SMTP/Gmail) com resumo.
 
-Requer variáveis de ambiente para DB e (opcional) e-mail via AWS SES:
+Requer variáveis de ambiente para DB e (opcional) e-mail via SMTP (Gmail):
 - DATABASE_URL (PostgreSQL)
-- AWS_REGION, AWS_SES_SENDER, AWS_SES_RECIPIENTS (comma-separated), opcionais
+- SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_SENDER, SMTP_RECIPIENTS (comma-separated)
+  * Valores padrão: host=smtp.gmail.com, port=587; SENDER usa SMTP_USER se não definido
 
 Execução:
   python ml-intelligence/periodic_sales_random_restock.py
@@ -17,8 +18,9 @@ import random
 from datetime import datetime
 from typing import List, Dict
 
-import boto3
-from botocore.exceptions import BotoCoreError, ClientError
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from dotenv import load_dotenv
 
 from db_utils import (
@@ -26,6 +28,8 @@ from db_utils import (
     fetch_all_products,
     insert_sale,
     update_inventory,
+    update_product_status,
+    get_product_sales_daily_avg,
     insert_alert,
     commit,
     rollback,
@@ -36,8 +40,10 @@ from db_utils import (
 SALES_INTERVAL_SECONDS = 60
 RESTOCK_INTERVAL_SECONDS = 120
 
-# Limiar de estoque baixo
+# Limiar de estoque baixo (base)
 LOW_STOCK_THRESHOLD = float(os.environ.get('LOW_STOCK_THRESHOLD', 10))
+# Fator multiplicador para limite dinâmico com base na média diária de vendas
+DYNAMIC_LOW_STOCK_MULTIPLIER = float(os.environ.get('DYNAMIC_LOW_STOCK_MULTIPLIER', 1.33))
 
 # Reposição aleatória
 RANDOM_RESTOCK_MIN = int(os.environ.get('RANDOM_RESTOCK_MIN', 1))
@@ -50,32 +56,51 @@ if os.path.exists(BACKEND_ENV_PATH):
 else:
     load_dotenv()
 
-# E-mail via SES (opcional)
-AWS_REGION = os.environ.get('AWS_REGION')
-SES_SENDER = os.environ.get('AWS_SES_SENDER')
-SES_RECIPIENTS = [r.strip() for r in os.environ.get('AWS_SES_RECIPIENTS', '').split(',') if r.strip()]
+# E-mail via SMTP (opcional)
+SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
+SMTP_USER = os.environ.get('SMTP_USER')
+SMTP_PASS = os.environ.get('SMTP_PASS')
+SMTP_SENDER = os.environ.get('SMTP_SENDER') or SMTP_USER
+SMTP_RECIPIENTS = [r.strip() for r in os.environ.get('SMTP_RECIPIENTS', '').split(',') if r.strip()]
 
 
-def send_email_summary(subject: str, lines: List[str]) -> None:
-    """Envia e-mail via SES se configurado; caso contrário, apenas loga no console."""
+def send_email_summary(subject: str, lines: List[str], recipients: List[str] | None = None) -> None:
+    """Envia e-mail via SMTP (Gmail) se configurado; destinatários podem ser dinâmicos.
+    Se 'recipients' não for informado, usa SMTP_RECIPIENTS do ambiente; caso não haja, apenas loga no console.
+    """
     body = "\n".join(lines) if lines else "Sem itens."
-    if not (AWS_REGION and SES_SENDER and SES_RECIPIENTS):
+    dests = recipients if (recipients and len(recipients) > 0) else SMTP_RECIPIENTS
+    if not (SMTP_SENDER and SMTP_USER and SMTP_PASS and dests):
         print(f"[Email:SKIP] {subject}\n{body}")
         return
 
     try:
-        ses = boto3.client('ses', region_name=AWS_REGION)
-        ses.send_email(
-            Source=SES_SENDER,
-            Destination={'ToAddresses': SES_RECIPIENTS},
-            Message={
-                'Subject': {'Data': subject, 'Charset': 'UTF-8'},
-                'Body': {'Text': {'Data': body, 'Charset': 'UTF-8'}},
-            },
-        )
-        print(f"[Email:OK] {subject} -> {', '.join(SES_RECIPIENTS)}")
-    except (BotoCoreError, ClientError) as e:
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_SENDER
+        msg['To'] = ", ".join(dests)
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain'))
+
+        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+        server.starttls()
+        server.login(SMTP_USER, SMTP_PASS)
+        server.sendmail(SMTP_SENDER, dests, msg.as_string())
+        server.quit()
+        print(f"[Email:OK] {subject} -> {', '.join(dests)}")
+    except Exception as e:
         print(f"[Email:ERR] {e}")
+
+
+def send_password_reset_email(recipient: str, code: str) -> None:
+    """Envia e-mail de reset de senha (conteúdo simples) via SMTP."""
+    subject = "[ShelfMate] Código de recuperação de senha"
+    lines = [
+        "Você solicitou a recuperação de senha.",
+        f"Seu código é: {code}",
+        "Se não foi você, ignore este e-mail.",
+    ]
+    send_email_summary(subject, lines, recipients=[recipient])
 
 
 def perform_sales(conn, company_id=None) -> int:
@@ -86,8 +111,10 @@ def perform_sales(conn, company_id=None) -> int:
         name = p['name']
         price = float(p['unit_price'] or 0)
         inventory = float(p['inventory'] or 0)
+        status = (p.get('status') or '').strip()
 
-        if inventory <= 0:
+        # Não vender se estoque zerado ou produto indisponível
+        if inventory <= 0 or status.lower() == 'indisponível':
             continue
 
         max_q = max(1, min(int(inventory), 5))
@@ -112,6 +139,7 @@ def perform_random_restock(conn, company_id=None) -> Dict[int, float]:
         new_inv = inventory + inc
         update_inventory(conn, pid, new_inv)
         # Marcar como disponível após reposição aleatória
+        update_product_status(conn, pid, 'Disponível')
         insert_alert(conn, pid, 'Disponível')
         updated[pid] = new_inv
     commit(conn)
@@ -123,9 +151,15 @@ def check_low_stock_and_notify(conn, company_id=None) -> int:
     lows = []
     for p in products:
         inv = float(p['inventory'] or 0)
-        if inv <= LOW_STOCK_THRESHOLD:
+        # Calcular limiar dinâmico com base na média diária de vendas
+        daily_avg = get_product_sales_daily_avg(conn, p['id'])
+        dynamic_threshold = max(LOW_STOCK_THRESHOLD, daily_avg * DYNAMIC_LOW_STOCK_MULTIPLIER)
+        if inv <= dynamic_threshold:
             lows.append(p)
-            insert_alert(conn, p['id'], 'Estoque Baixo')
+            # Atualizar status e alerta conforme nível
+            new_status = 'Indisponível' if inv <= 0 else 'Estoque Baixo'
+            update_product_status(conn, p['id'], new_status)
+            insert_alert(conn, p['id'], new_status)
     commit(conn)
 
     if lows:
@@ -134,13 +168,27 @@ def check_low_stock_and_notify(conn, company_id=None) -> int:
             for p in lows
         ]
         send_email_summary(
-            subject=f"[ShelfMate] {len(lows)} produtos com estoque baixo (<= {LOW_STOCK_THRESHOLD})",
+            subject=f"[ShelfMate] {len(lows)} produtos com estoque baixo (limiar dinâmico)",
             lines=lines,
         )
     else:
         print("[Notify] Nenhum produto com estoque baixo.")
 
     return len(lows)
+
+
+def get_low_stock_lines(conn, company_id=None) -> List[str]:
+    """Retorna linhas de produtos com estoque baixo sem enviar e-mail."""
+    products = fetch_all_products(conn, company_id)
+    lows = []
+    for p in products:
+        inv = float(p['inventory'] or 0)
+        if inv <= LOW_STOCK_THRESHOLD:
+            lows.append(p)
+    return [
+        f"id={p['id']} | {p['name']} | estoque={p['inventory']}"
+        for p in lows
+    ]
 
 
 def main():

@@ -43,8 +43,8 @@
 .menuIconImg { width: 16px; height: 16px; object-fit: contain; display: inline-block; }
 
 /* Settings section styles */
-.settingsSection { background: #fff; border-radius: 16px; padding: 40px; margin: 28px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
-.settingsContainer { display: grid; grid-template-columns: 1fr 2fr; gap: 40px; align-items: start; }
+.settingsSection { background: #fff; border-radius: 16px; padding: 28px; margin: 24px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; }
+.settingsContainer { display: grid; grid-template-columns: minmax(280px, 360px) 1fr; gap: 24px; align-items: start; }
 .profileSection { display: flex; flex-direction: column; align-items: center; gap: 24px; }
 .userAvatarLarge { width: 120px; height: 120px; background: #1B31BA; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .avatarIcon { font-size: 48px; color: #fff; }
@@ -57,10 +57,10 @@
 .fieldHelp { font-size: 12px; color: #6b7280; margin-top: 4px; }
 
 /* Forms section styles */
-.formsSection { display: flex; flex-direction: column; gap: 32px; }
+.formsSection { display: flex; flex-direction: column; gap: 24px; align-items: flex-start; }
 .sectionTitle { color: #1B31BA; font-size: 20px; font-weight: 700; margin: 0 0 20px; }
-.passwordSection, .companySection { border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; }
-.saveSection { display: flex; justify-content: flex-end; margin-top: 32px; }
+.passwordSection, .companySection { border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; max-width: 560px; width: 100%; }
+.saveSection { display: flex; justify-content: flex-end; margin-top: 16px; max-width: 560px; width: 100%; }
 .saveButton { background: #1B31BA; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 16px; transition: background 0.2s; }
 .saveButton:hover { background: #1d4ed8; }
 .saveIcon { font-size: 18px; }
@@ -84,7 +84,7 @@
 }
 
 @media (max-width: 960px) {
-	.settingsContainer { grid-template-columns: 1fr; gap: 32px; }
+	.settingsContainer { grid-template-columns: 1fr; gap: 24px; }
 	.footerInner { grid-template-columns: repeat(2, 1fr); }
 	.topbarCenter { gap: 12px; }
 	.navButton { padding: 6px 8px; }
@@ -96,7 +96,7 @@
 	.topbarRight { order: 3; }
 	.settingsSection { padding: 24px; }
 	.footerInner { grid-template-columns: 1fr; gap: 24px; }
-	.passwordSection, .companySection { padding: 20px; }
+	.passwordSection, .companySection { padding: 18px; }
 }
 
 @media (max-width: 480px) {

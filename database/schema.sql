@@ -3,8 +3,8 @@ CREATE DATABASE shelfmate_database;
 
 CREATE TABLE IF NOT EXISTS companies (
     id SERIAL PRIMARY KEY,             
-    name VARCHAR(150) NOT NULL,        
-    cnpj VARCHAR(20) NOT NULL UNIQUE   
+    cnpj VARCHAR(20) NOT NULL UNIQUE,
+    reports_exported INT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS users (

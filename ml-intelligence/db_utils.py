@@ -56,6 +56,35 @@ def update_inventory(conn, product_id, new_inventory):
         )
 
 
+def update_product_status(conn, product_id, new_status):
+    with conn.cursor() as cur:
+        cur.execute(
+            "UPDATE products SET status = %s WHERE id = %s",
+            (str(new_status), product_id),
+        )
+
+
+def get_product_sales_daily_avg(conn, product_id):
+    """Retorna a média diária de vendas (qntd/dia) para um produto.
+    Caso não haja datas, cai no total dividido por 1 (fallback).
+    """
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT CASE
+              WHEN MAX(s.sale_date) IS NOT NULL AND EXTRACT(DAYS FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1 > 0
+              THEN COALESCE(SUM(s.qntd),0) / (EXTRACT(DAYS FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1)
+              ELSE COALESCE(SUM(s.qntd),0)
+            END AS daily_avg
+            FROM sales s
+            WHERE s.product_id = %s
+            """,
+            (product_id,),
+        )
+        row = cur.fetchone()
+        return float(row[0] or 0.0)
+
+
 def insert_alert(conn, product_id, alert_type):
     with conn.cursor() as cur:
         cur.execute(

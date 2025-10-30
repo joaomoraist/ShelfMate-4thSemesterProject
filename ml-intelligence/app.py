@@ -1,18 +1,27 @@
 from fastapi import FastAPI, Body, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Any, Dict
 from datetime import datetime
 import os
+import threading
+import time
+import traceback
 
 from .stock_alert_system import StockAlertSystem
 from .db_utils import get_connection, fetch_all_products, update_inventory, insert_alert, commit, rollback
-
+from .periodic_sales_random_restock import (
+    perform_sales,
+    perform_random_restock,
+    check_low_stock_and_notify,
+    get_low_stock_lines,
+    send_email_summary,
+    send_password_reset_email,
+)
 
 class SalesRecord(BaseModel):
     product_id: int
     quantity: float
     sale_date: str
-
 
 class ProductRecord(BaseModel):
     product_id: int
@@ -43,6 +52,84 @@ class GenerateAlertsRequest(BaseModel):
 
 app = FastAPI(title="ShelfMate ML Intelligence Service", version="0.1.0")
 
+# ===========================
+# Orquestrador de tarefas
+# ===========================
+
+SALES_INTERVAL_SECONDS = int(os.environ.get('SALES_INTERVAL_SECONDS', '60'))
+RESTOCK_INTERVAL_SECONDS = int(os.environ.get('RESTOCK_INTERVAL_SECONDS', '120'))
+
+_company_id_env = os.environ.get('SIM_COMPANY_ID')
+try:
+    COMPANY_ID = int(_company_id_env) if _company_id_env is not None else None
+except ValueError:
+    COMPANY_ID = None
+
+_threads_started = False
+_last_runs: Dict[str, str] = {
+    "sales": "never",
+    "restock": "never",
+}
+
+
+def _sales_loop():
+    global _last_runs
+    while True:
+        conn = get_connection()
+        try:
+            cnt = perform_sales(conn, COMPANY_ID)
+            low_cnt = check_low_stock_and_notify(conn, COMPANY_ID)
+            _last_runs["sales"] = datetime.utcnow().isoformat() + "Z"
+            print(f"[SalesLoop] vendas={cnt}, low_stock={low_cnt}")
+        except Exception as e:
+            print(f"[SalesLoop:ERR] {e}\n{traceback.format_exc()}")
+            try:
+                rollback(conn)
+            except Exception:
+                pass
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
+        time.sleep(SALES_INTERVAL_SECONDS)
+
+
+def _restock_loop():
+    global _last_runs
+    while True:
+        conn = get_connection()
+        try:
+            updates = perform_random_restock(conn, COMPANY_ID)
+            low_cnt = check_low_stock_and_notify(conn, COMPANY_ID)
+            _last_runs["restock"] = datetime.utcnow().isoformat() + "Z"
+            print(f"[RestockLoop] atualizados={len(updates)}, low_stock={low_cnt}")
+        except Exception as e:
+            print(f"[RestockLoop:ERR] {e}\n{traceback.format_exc()}")
+            try:
+                rollback(conn)
+            except Exception:
+                pass
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
+        time.sleep(RESTOCK_INTERVAL_SECONDS)
+
+
+@app.on_event("startup")
+def _start_background_threads():
+    global _threads_started
+    if _threads_started:
+        return
+    print(f"[Orchestrator] Iniciando loops: sales={SALES_INTERVAL_SECONDS}s, restock={RESTOCK_INTERVAL_SECONDS}s, company_id={COMPANY_ID}")
+    t1 = threading.Thread(target=_sales_loop, daemon=True)
+    t2 = threading.Thread(target=_restock_loop, daemon=True)
+    t1.start()
+    t2.start()
+    _threads_started = True
+
 
 @app.get("/health")
 def health():
@@ -51,6 +138,12 @@ def health():
         "service": "ml-intelligence",
         "version": "0.1.0",
         "time": datetime.utcnow().isoformat() + "Z",
+        "orchestrator": {
+            "sales_interval_seconds": SALES_INTERVAL_SECONDS,
+            "restock_interval_seconds": RESTOCK_INTERVAL_SECONDS,
+            "last_runs": _last_runs,
+            "company_id": COMPANY_ID,
+        }
     }
 
 
@@ -126,6 +219,70 @@ def generate_alerts(req: GenerateAlertsRequest):
     alerts_df = ml.generate_alerts_for_user(req.user_id, alert_threshold_days=req.alert_threshold_days)
     alerts = alerts_df.to_dict(orient='records') if not alerts_df.empty else []
     return {"alerts": alerts}
+
+
+# ===========================
+# Endpoints de disparo de e-mail pelo backend
+# ===========================
+
+class LowStockEmailRequest(BaseModel):
+    recipient: EmailStr
+    company_id: Optional[int] = None
+
+
+class PasswordResetEmailRequest(BaseModel):
+    recipient: EmailStr
+    code: str
+
+
+@app.post("/notify/email/low-stock")
+def notify_low_stock_email(req: LowStockEmailRequest):
+    conn = get_connection()
+    try:
+        lines = get_low_stock_lines(conn, req.company_id)
+        if not lines:
+            return {"sent": False, "reason": "no_low_stock"}
+        subject = f"[ShelfMate] {len(lines)} produtos com estoque baixo"
+        send_email_summary(subject=subject, lines=lines, recipients=[req.recipient])
+        return {"sent": True, "count": len(lines)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+
+@app.post("/notify/email/password-reset")
+def notify_password_reset(req: PasswordResetEmailRequest):
+    try:
+        send_password_reset_email(req.recipient, req.code)
+        return {"sent": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class PasswordResetByCodeRequest(BaseModel):
+    code: str
+
+
+@app.post("/notify/email/password-reset-by-code")
+def notify_password_reset_by_code(req: PasswordResetByCodeRequest):
+    conn = get_connection()
+    try:
+        # Buscar e-mail pelo código (uppercase para consistência com backend)
+        with conn.cursor() as cur:
+            cur.execute("SELECT email FROM users WHERE recovery_code = %s", (req.code.upper(),))
+            row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="code_not_found")
+        recipient = row[0]
+        send_password_reset_email(recipient, req.code)
+        return {"sent": True, "recipient": recipient}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
 
 
 # Execução local: uvicorn ml-intelligence.app:app --reload --port 8001

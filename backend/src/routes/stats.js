@@ -421,4 +421,30 @@ router.get('/product/:id/sales', ensureAuthenticated, async (req, res) => {
   }
 });
 
+// POST /stats/reports-exported - incrementa contador de relatórios exportados para a empresa do usuário
+router.post('/reports-exported', ensureAuthenticated, async (req, res) => {
+  try {
+    const companyId = resolveCompanyId(req);
+    if (!companyId) {
+      return res.status(400).json({ error: 'Empresa não identificada na sessão' });
+    }
+
+    const rows = await sql`
+      UPDATE companies
+      SET reports_exported = COALESCE(reports_exported, 0) + 1
+      WHERE id = ${companyId}
+      RETURNING id, name, cnpj, reports_exported
+    `;
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Empresa não encontrada' });
+    }
+
+    return res.json({ success: true, company: rows[0] });
+  } catch (err) {
+    console.error('Erro em POST /stats/reports-exported:', err);
+    res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 export default router;

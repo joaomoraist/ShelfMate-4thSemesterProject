@@ -231,6 +231,17 @@ const exportProductsPdf = async () => {
         });
 
         doc.save('relatorio_produtos.pdf');
+
+        // Incrementa contador de relatórios exportados (não bloqueante)
+        try {
+            await fetch(API_URLS.REPORTS_EXPORTED_INC, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (incErr) {
+            console.warn('Falha ao incrementar reports_exported:', incErr);
+        }
     } catch (err: any) {
         const msg = err?.message || String(err);
         const is401 = msg.includes('401');
@@ -294,6 +305,17 @@ const exportAlertsPdf = async () => {
         });
 
         doc.save('relatorio_alertas.pdf');
+
+        // Incrementa contador de relatórios exportados (não bloqueante)
+        try {
+            await fetch(API_URLS.REPORTS_EXPORTED_INC, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
+            });
+        } catch (incErr) {
+            console.warn('Falha ao incrementar reports_exported:', incErr);
+        }
     } catch (err: any) {
         const msg = err?.message || String(err);
         const is401 = msg.includes('401');

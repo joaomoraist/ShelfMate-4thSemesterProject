@@ -51,7 +51,8 @@
 .heroSubtitle { font-size: 18px; color: #6b7280; margin: 0 0 24px; }
 .heroActions { display: flex; gap: 16px; justify-content: center; }
 .ctaPrimary { background: #1B31BA; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-.ctaSecondary { background: #fff; color: #1B31BA; border: 1px solid #1B31BA; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.ctaSecondary { background: #fff; color: #1B31BA; border: 1px solid #1B31BA; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-size: 14px; transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.ctaSecondary:hover { background: #1B31BA; color: #fff; border-color: #1B31BA; }
 
 /* Analytics section styles */
 .analyticsCard { background: #fff; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }

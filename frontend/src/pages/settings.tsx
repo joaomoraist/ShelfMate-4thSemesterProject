@@ -182,51 +182,50 @@ const Settings: React.FC = () => {
                                     </p>
                                 </div>
                             </div>
+                            <div className={cssModule.saveSection}>
+                                <button className={cssModule.saveButton} onClick={async () => {
+                                    try {
+                                        if (newPassword && newPassword.length < 6) {
+                                            setToastType('error');
+                                            setToastMsg('A nova senha deve ter pelo menos 6 caracteres.');
+                                            return;
+                                        }
+
+                                        const form = new FormData();
+                                        form.append('name', nameInput);
+                                        form.append('email', emailInput);
+                                        if (newPassword) form.append('newPassword', newPassword);
+                                        if (imageFile) form.append('image', imageFile);
+
+                                        const res = await fetch(API_URLS.ME, { method: 'PUT', body: form, credentials: 'include' });
+                                        if (res.ok) {
+                                            const data = await res.json();
+                                            try {
+                                                if (data && data.user) {
+                                                    localStorage.setItem('user', JSON.stringify(data.user));
+                                                    setUser(data.user);
+                                                }
+                                            } catch {}
+                                            setToastType('success');
+                                            setToastMsg('Salvo com sucesso');
+                                            await refresh();
+                                        } else {
+                                            const err = await res.json();
+                                            setToastType('error');
+                                            setToastMsg('Erro: ' + (err.error || 'Unknown'));
+                                        }
+                                    } catch (err) {
+                                        console.error(err);
+                                        setToastType('error');
+                                        setToastMsg('Erro ao salvar');
+                                    }
+                                    }}>
+                                    <img src="/save.png" alt="Salvar" className={cssModule.saveIconImg} />
+                                    Salvar
+                                </button>
+                            </div>
                         </div>
                     </div>
-
-                    <div className={cssModule.saveSection}>
-                        <button className={cssModule.saveButton} onClick={async () => {
-                            try {
-                                if (newPassword && newPassword.length < 6) {
-                                    setToastType('error');
-                                    setToastMsg('A nova senha deve ter pelo menos 6 caracteres.');
-                                    return;
-                                }
-
-                                const form = new FormData();
-                                form.append('name', nameInput);
-                                form.append('email', emailInput);
-                                if (newPassword) form.append('newPassword', newPassword);
-                                if (imageFile) form.append('image', imageFile);
-
-                                const res = await fetch(API_URLS.ME, { method: 'PUT', body: form, credentials: 'include' });
-                                if (res.ok) {
-                                    const data = await res.json();
-                                    try {
-                                        if (data && data.user) {
-                                            localStorage.setItem('user', JSON.stringify(data.user));
-                                            setUser(data.user);
-                                        }
-                                    } catch {}
-                                    setToastType('success');
-                                    setToastMsg('Salvo com sucesso');
-                                    await refresh();
-                                } else {
-                                    const err = await res.json();
-                                    setToastType('error');
-                                    setToastMsg('Erro: ' + (err.error || 'Unknown'));
-                                }
-                            } catch (err) {
-                                console.error(err);
-                                setToastType('error');
-                                setToastMsg('Erro ao salvar');
-                            }
-                            }}>
-                                <img src="/save.png" alt="Salvar" className={cssModule.saveIconImg} />
-                                Salvar
-                         </button>
-                     </div>
                  </section>
 
 
