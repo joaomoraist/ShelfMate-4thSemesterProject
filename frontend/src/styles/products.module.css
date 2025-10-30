@@ -63,8 +63,8 @@
 
 /* Table styles */
 .productsTable { margin: 24px 0; }
-.tableHeader { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 0; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; }
-.tableRow { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f3f4f6; align-items: center; }
+.tableHeader { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 0; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; }
+.tableRow { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f3f4f6; align-items: center; }
 .tableColumn { font-weight: 700; color: #374151; }
 .productCell { display: flex; align-items: center; gap: 8px; }
 .productName { font-weight: 600; color: #1B31BA; }

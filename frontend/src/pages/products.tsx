@@ -218,17 +218,16 @@ const Products: React.FC = () => {
 
 
 
-                    <div className={cssModule.productsTable}>
-                        <div className={cssModule.tableHeader}>
-                            <div className={cssModule.tableColumn}>Produto</div>
-                            <div className={cssModule.tableColumn}>Preço Unitário</div>
-                            <div className={cssModule.tableColumn}>Estoque Atual</div>
-                            <div className={cssModule.tableColumn}>Status</div>
-                            <div className={cssModule.tableColumn}>Total Vendas</div>
-                            <div className={cssModule.tableColumn}>Última Venda</div>
-                            <div className={cssModule.tableColumn}>Alertas</div>
-                            <div className={cssModule.tableColumn}>Ações</div>
-                        </div>
+                        <div className={cssModule.productsTable}>
+                            <div className={cssModule.tableHeader}>
+                                <div className={cssModule.tableColumn}>Produto</div>
+                                <div className={cssModule.tableColumn}>Preço Unitário</div>
+                                <div className={cssModule.tableColumn}>Estoque Atual</div>
+                                <div className={cssModule.tableColumn}>Status</div>
+                                <div className={cssModule.tableColumn}>Total Vendas</div>
+                                <div className={cssModule.tableColumn}>Alertas</div>
+                                <div className={cssModule.tableColumn}>Ações</div>
+                            </div>
                         
                         {products.length === 0 && (
                             <div style={{ padding: '16px 0', color: '#6b7280' }}>
@@ -270,13 +269,6 @@ const Products: React.FC = () => {
                                         <span className={cssModule.salesValue}>{product.total_sales}</span>
                                     ) : (
                                         <span className={`${cssModule.badge} ${cssModule.badgeGray}`}>Sem vendas</span>
-                                    )}
-                                </div>
-                                <div className={cssModule.restockCell}>
-                                    {product.last_sale_date ? (
-                                        new Date(product.last_sale_date).toLocaleDateString('pt-BR')
-                                    ) : (
-                                        <span className={cssModule.muted}>Sem registro</span>
                                     )}
                                 </div>
                                 <div className={cssModule.alertsCell}>

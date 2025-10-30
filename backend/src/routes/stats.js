@@ -143,7 +143,7 @@ router.get('/top-products', ensureAuthenticated, async (req, res) => {
         p.name, 
         p.unit_price,
         p.inventory,
-        COALESCE(SUM(s.qntd),0) AS total_sold,
+        COALESCE(SUM(s.qntd),0) AS total_qntd,
         COALESCE(SUM(s.value),0) AS total_revenue,
         COUNT(s.id) AS total_sales_count,
         COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale
@@ -151,7 +151,7 @@ router.get('/top-products', ensureAuthenticated, async (req, res) => {
       LEFT JOIN sales s ON s.product_id = p.id AND s.company_id = ${companyId}
       WHERE p.company_id = ${companyId}
       GROUP BY p.id, p.name, p.unit_price, p.inventory
-      ORDER BY total_sold DESC
+      ORDER BY total_qntd DESC
       LIMIT ${limit}
     `;
     return res.json({ rows });
@@ -379,12 +379,6 @@ router.get('/top-products-by-user/:userId', ensureAuthenticated, async (req, res
       return res.status(403).json({ error: 'Forbidden' });
     }
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
-    const days = req.query.days ? parseInt(req.query.days) : null; // Filtro por período
-    
-    let dateFilter = '';
-    if (days) {
-      dateFilter = `AND s.sale_date >= NOW() - INTERVAL '${days} days'`;
-    }
     
     const rows = await sql`
       SELECT 
@@ -393,35 +387,23 @@ router.get('/top-products-by-user/:userId', ensureAuthenticated, async (req, res
         p.price,
         p.current_stock,
         p.category,
-        COALESCE(SUM(s.qntd),0) AS total_sold,
+        COALESCE(SUM(s.qntd),0) AS total_qntd,
         COALESCE(SUM(s.qntd * p.price),0) AS total_revenue,
         COUNT(s.id) AS total_sales_count,
         COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale,
-        COALESCE(STDDEV(s.qntd),0) AS std_quantity,
-        MAX(s.sale_date) AS last_sale_date,
-        MIN(s.sale_date) AS first_sale_date,
-        CASE 
-          WHEN MAX(s.sale_date) IS NOT NULL THEN 
-            EXTRACT(DAYS FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1
-          ELSE 0 
-        END AS days_selling,
-        CASE 
-          WHEN MAX(s.sale_date) IS NOT NULL AND EXTRACT(DAYS FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1 > 0 THEN 
-            COALESCE(SUM(s.qntd),0) / (EXTRACT(DAYS FROM (MAX(s.sale_date) - MIN(s.sale_date))) + 1)
-          ELSE 0 
-        END AS sales_rate_per_day
+        COALESCE(STDDEV(s.qntd),0) AS std_quantity
       FROM products p
-      LEFT JOIN sales s ON s.product_id = p.id ${days ? sql`AND s.sale_date >= NOW() - INTERVAL '${days} days'` : sql``}
+      LEFT JOIN sales s ON s.product_id = p.id AND s.company_id = ${companyId}
       JOIN users u ON u.company_id = p.company_id
       WHERE u.id = ${sessionUserId} AND p.company_id = ${companyId}
       GROUP BY p.id, p.name, p.price, p.current_stock, p.category
-      ORDER BY total_sold DESC
+      ORDER BY total_qntd DESC
       LIMIT ${limit}
     `;
     
     return res.json({ 
       user_id: userId,
-      period_days: days || 'all_time',
+      period_days: 'all_time',
       products: rows 
     });
   } catch (err) {
