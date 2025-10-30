@@ -37,12 +37,56 @@ CREATE TYPE alerts_type_enum AS ENUM ('Disponível', 'Estoque Baixo','Estoque Al
 CREATE TABLE IF NOT EXISTS alerts (
     id SERIAL PRIMARY KEY,
     alert_type alerts_type_enum DEFAULT 'Disponível' NOT NULL,
-    product_id INT REFERENCES products(id) NOT NULL
+    product_id INT REFERENCES products(id) NOT NULL,
+    company_id INT REFERENCES companies(id),
 );
 
 CREATE TABLE IF NOT EXISTS sales (
     id SERIAL PRIMARY KEY,
     product_id INT REFERENCES products(id) NOT NULL, 
     qntd FLOAT NOT NULL CHECK (qntd > 0),
-    value FLOAT NOT NULL CHECK (value > 0)
+    value FLOAT NOT NULL CHECK (value > 0),
+    company_id INT REFERENCES companies(id),
 );
+
+----------------------- TRIGGERS -------------------------
+
+-- Função para preencher automaticamente o company_id
+CREATE OR REPLACE FUNCTION set_company_id()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- If the table has a product_id, inherit the company from product
+    IF NEW.product_id IS NOT NULL THEN
+        SELECT company_id INTO NEW.company_id
+        FROM products
+        WHERE id = NEW.product_id;
+    END IF;
+
+    -- If the table has a user_id (future use), inherit from user
+    IF (TG_ARGV[0] = 'user') THEN
+        SELECT company_id INTO NEW.company_id
+        FROM users
+        WHERE id = NEW.user_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Triggers Alerts
+CREATE TRIGGER trg_set_company_alerts
+BEFORE INSERT ON alerts
+FOR EACH ROW
+EXECUTE FUNCTION set_company_id();
+
+-- Triggers Sales
+CREATE TRIGGER trg_set_company_sales
+BEFORE INSERT ON sales
+FOR EACH ROW
+EXECUTE FUNCTION set_company_id();
+
+-- Triggers Products
+CREATE TRIGGER trg_set_company_products
+BEFORE INSERT ON products
+FOR EACH ROW
+EXECUTE FUNCTION set_company_id();

@@ -278,6 +278,35 @@ router.post('/products', ensureAuthenticated, async (req, res) => {
   }
 });
 
+// DELETE /stats/products/:id - Remove produto da empresa (e dependências)
+router.delete('/products/:id', ensureAuthenticated, async (req, res) => {
+  try {
+    const companyId = resolveCompanyId(req);
+    const productId = Number(req.params.id);
+
+    if (!companyId) return res.status(400).json({ error: 'Empresa não identificada na sessão' });
+    if (!Number.isFinite(productId)) return res.status(400).json({ error: 'ID de produto inválido' });
+
+    const prod = await sql`SELECT id, company_id FROM products WHERE id = ${productId}`;
+    if (prod.length === 0) return res.status(404).json({ error: 'Produto não encontrado' });
+    if (Number(prod[0].company_id) !== Number(companyId)) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+
+    // Apagar dependências (alerts, sales) antes para evitar violação de FK
+    await sql`DELETE FROM alerts WHERE product_id = ${productId}`;
+    await sql`DELETE FROM sales WHERE product_id = ${productId}`;
+
+    const del = await sql`DELETE FROM products WHERE id = ${productId} AND company_id = ${companyId} RETURNING id`;
+    if (del.length === 0) return res.status(404).json({ error: 'Produto não encontrado para esta empresa' });
+
+    return res.json({ success: true, deleted_id: del[0].id });
+  } catch (err) {
+    console.error('Erro em DELETE /stats/products/:id:', err);
+    return res.status(500).json({ error: 'Erro interno do servidor' });
+  }
+});
+
 // POST /stats/products/bulk - Adicionar vários produtos de uma vez (usa company_id da sessão)
 router.post('/products/bulk', ensureAuthenticated, async (req, res) => {
   try {

@@ -223,11 +223,11 @@ const Products: React.FC = () => {
                             <div className={cssModule.tableColumn}>Produto</div>
                             <div className={cssModule.tableColumn}>Preço Unitário</div>
                             <div className={cssModule.tableColumn}>Estoque Atual</div>
-                            <div className={cssModule.tableColumn}>Nível Estoque</div>
+                            <div className={cssModule.tableColumn}>Status</div>
                             <div className={cssModule.tableColumn}>Total Vendas</div>
                             <div className={cssModule.tableColumn}>Última Venda</div>
-                            <div className={cssModule.tableColumn}>Status</div>
                             <div className={cssModule.tableColumn}>Alertas</div>
+                            <div className={cssModule.tableColumn}>Ações</div>
                         </div>
                         
                         {products.length === 0 && (
@@ -248,23 +248,6 @@ const Products: React.FC = () => {
                                 <div className={cssModule.stockCell}>
                                     <span className={cssModule.stockValue}>{product.inventory ?? 0}</span>
                                 </div>
-                                <div className={cssModule.minMaxCell}>
-                                    {product.inventory < 10 ? 'Baixo' : product.inventory > 100 ? 'Alto' : 'Normal'}
-                                </div>
-                                <div className={cssModule.salesCell}>
-                                    {(product.total_sales ?? 0) > 0 ? (
-                                        <span className={cssModule.salesValue}>{product.total_sales}</span>
-                                    ) : (
-                                        <span className={`${cssModule.badge} ${cssModule.badgeGray}`}>Sem vendas</span>
-                                    )}
-                                </div>
-                                <div className={cssModule.restockCell}>
-                                    {product.last_sale_date ? (
-                                        new Date(product.last_sale_date).toLocaleDateString('pt-BR')
-                                    ) : (
-                                        <span className={cssModule.muted}>Sem registro</span>
-                                    )}
-                                </div>
                                 <div className={cssModule.statusCell}>
                                     {(() => {
                                         const statusText = (product.status || 'Disponível').toLowerCase();
@@ -282,12 +265,50 @@ const Products: React.FC = () => {
                                         );
                                     })()}
                                 </div>
+                                <div className={cssModule.salesCell}>
+                                    {(product.total_sales ?? 0) > 0 ? (
+                                        <span className={cssModule.salesValue}>{product.total_sales}</span>
+                                    ) : (
+                                        <span className={`${cssModule.badge} ${cssModule.badgeGray}`}>Sem vendas</span>
+                                    )}
+                                </div>
+                                <div className={cssModule.restockCell}>
+                                    {product.last_sale_date ? (
+                                        new Date(product.last_sale_date).toLocaleDateString('pt-BR')
+                                    ) : (
+                                        <span className={cssModule.muted}>Sem registro</span>
+                                    )}
+                                </div>
                                 <div className={cssModule.alertsCell}>
                                     <span className={cssModule.alertIcon}>
                                         <img src="/alerts-blue.png" alt="Alert" />
                                     </span>
                                     <span className={cssModule.alertCount}>{product.alerts_count ?? 0}</span>
                                     {(product.alerts_count > 0) && <span className={cssModule.alertDot}>●</span>}
+                                </div>
+                                <div className={cssModule.actionsCell}>
+                                    <button
+                                        className={cssModule.deleteButton}
+                                        title="Excluir produto"
+                                        onClick={async () => {
+                                            try {
+                                                if (!window.confirm(`Excluir '${product.name}'? Esta ação não pode ser desfeita.`)) return;
+                                                const res = await fetch(`${API_URLS.STATS_PRODUCTS}/${product.id}`, {
+                                                    method: 'DELETE',
+                                                    credentials: 'include'
+                                                });
+                                                const data = await res.json().catch(() => ({}));
+                                                if (!res.ok) throw new Error(data?.error || 'Falha ao excluir produto');
+                                                setProducts(prev => prev.filter(p => p.id !== product.id));
+                                                setToastMsg('Produto excluído com sucesso');
+                                            } catch (err) {
+                                                console.error(err);
+                                                setToastMsg(err instanceof Error ? err.message : 'Erro ao excluir produto');
+                                            }
+                                        }}
+                                    >
+                                        Excluir
+                                    </button>
                                 </div>
                             </div>
                         ))}
