@@ -38,10 +38,7 @@ const BarChart: React.FC<BarChartProps> = ({ className }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const stored = localStorage.getItem('user');
-        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
-        const url = companyId ? `${API_URLS.SALES_PER_PRODUCT}?companyId=${companyId}` : API_URLS.SALES_PER_PRODUCT;
-        const response = await fetch(url, { credentials: 'include' });
+        const response = await fetch(API_URLS.SALES_PER_PRODUCT, { credentials: 'include' });
         
         if (!response.ok) {
           const errorData = await response.json();

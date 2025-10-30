@@ -33,11 +33,8 @@ const PieChart: React.FC<PieChartProps> = ({ className }) => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        // Buscar dados dos produtos mais vendidos
-        const stored = localStorage.getItem('user');
-        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
-        const url = companyId ? `${API_URLS.TOP_PRODUCTS}?companyId=${companyId}` : API_URLS.TOP_PRODUCTS;
-        const response = await fetch(url, { credentials: 'include' });
+        // Buscar dados dos produtos mais vendidos (empresa definida pela sessão)
+        const response = await fetch(API_URLS.TOP_PRODUCTS, { credentials: 'include' });
 
         if (!response.ok) {
           const errorData = await response.json();

@@ -193,10 +193,7 @@ const formatCurrencyBR = (val: any): string => {
 // Exportar PDF: Produtos (usa /stats/products-detailed)
 const exportProductsPdf = async () => {
     try {
-        const stored = localStorage.getItem('user');
-        const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
-        const url = companyId ? `${API_URLS.PRODUCTS_DETAILED}?companyId=${companyId}` : API_URLS.PRODUCTS_DETAILED;
-        const res = await fetch(url, { credentials: 'include' });
+        const res = await fetch(API_URLS.PRODUCTS_DETAILED, { credentials: 'include' });
         if (!res.ok) {
             if (res.status === 401) {
                 throw new Error('Sessão expirada ou sem permissão (401)');

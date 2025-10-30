@@ -68,19 +68,14 @@ const Statistics: React.FC = () => {
     React.useEffect(() => {
         const load = async () => {
             try {
-                const stored = localStorage.getItem('user');
-                const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
-
-                // Overview
-                const overviewUrl = companyId ? `${API_URLS.STATS_OVERVIEW}?companyId=${companyId}` : API_URLS.STATS_OVERVIEW;
-                const overviewRes = await fetch(overviewUrl, { credentials: 'include' });
+                // Overview (empresa derivada da sessão)
+                const overviewRes = await fetch(API_URLS.STATS_OVERVIEW, { credentials: 'include' });
                 if (!overviewRes.ok) throw new Error('Falha ao buscar overview');
                 const overviewData = await overviewRes.json();
                 setOverview(overviewData);
 
-                // Produtos para calcular estoque baixo (< 10)
-                const productsUrl = companyId ? `${API_URLS.STATS_PRODUCTS}?companyId=${companyId}` : API_URLS.STATS_PRODUCTS;
-                const productsRes = await fetch(productsUrl, { credentials: 'include' });
+                // Produtos para calcular estoque baixo pelo status
+                const productsRes = await fetch(API_URLS.STATS_PRODUCTS, { credentials: 'include' });
                 if (!productsRes.ok) throw new Error('Falha ao buscar produtos');
                 const productsData = await productsRes.json();
                 const rows = (productsData?.rows ?? []) as Array<any>;
