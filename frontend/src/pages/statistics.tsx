@@ -84,7 +84,8 @@ const Statistics: React.FC = () => {
                 if (!productsRes.ok) throw new Error('Falha ao buscar produtos');
                 const productsData = await productsRes.json();
                 const rows = (productsData?.rows ?? []) as Array<any>;
-                const countLow = rows.filter(r => (r?.inventory ?? 0) < 10).length;
+                // Contar produtos com status exatamente 'Estoque Baixo'
+                const countLow = rows.filter(r => String(r?.status) === 'Estoque Baixo').length;
                 setLowStockCount(countLow);
             } catch (e) {
                 console.error(e);
