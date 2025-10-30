@@ -115,10 +115,10 @@ router.get('/sales-per-product', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
     const sessionUserId = req.session?.user?.id; // não será usado para filtrar
-    const rows = await sql`
+  const rows = await sql`
       SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
       FROM products p
-      LEFT JOIN sales s ON s.product_id = p.id
+      LEFT JOIN sales s ON s.product_id = p.id AND s.company_id = ${companyId}
       WHERE p.company_id = ${companyId}
       GROUP BY p.id, p.name
       ORDER BY total_qntd DESC
@@ -148,7 +148,7 @@ router.get('/top-products', ensureAuthenticated, async (req, res) => {
         COUNT(s.id) AS total_sales_count,
         COALESCE(AVG(s.qntd),0) AS avg_quantity_per_sale
       FROM products p
-      LEFT JOIN sales s ON s.product_id = p.id
+      LEFT JOIN sales s ON s.product_id = p.id AND s.company_id = ${companyId}
       WHERE p.company_id = ${companyId}
       GROUP BY p.id, p.name, p.unit_price, p.inventory
       ORDER BY total_sold DESC
@@ -191,8 +191,8 @@ router.get('/products-detailed', ensureAuthenticated, async (req, res) => {
         COALESCE(SUM(s.qntd), 0) AS total_sales,
         COALESCE(COUNT(DISTINCT a.id), 0) AS alerts_count
       FROM products p
-      LEFT JOIN sales s ON s.product_id = p.id
-      LEFT JOIN alerts a ON a.product_id = p.id
+      LEFT JOIN sales s ON s.product_id = p.id AND s.company_id = ${companyId}
+      LEFT JOIN alerts a ON a.product_id = p.id AND a.company_id = ${companyId}
       WHERE p.company_id = ${companyId}
       GROUP BY p.id, p.name, p.unit_price, p.inventory, p.status, p.company_id
       ORDER BY total_sales DESC
@@ -443,12 +443,12 @@ router.get('/product/:id/sales', ensureAuthenticated, async (req, res) => {
     }
 
     const salesRows = await sql`
-      SELECT id, qntd, value FROM sales WHERE product_id = ${productId}
+      SELECT id, qntd, value FROM sales WHERE product_id = ${productId} AND company_id = ${companyId}
     `;
 
     const agg = await sql`
       SELECT COALESCE(SUM(qntd),0) AS total_qntd, COALESCE(SUM(value),0) AS total_value
-      FROM sales WHERE product_id = ${productId}
+      FROM sales WHERE product_id = ${productId} AND company_id = ${companyId}
     `;
 
     return res.json({ product: prod[0], sales: salesRows, totals: agg[0] });
