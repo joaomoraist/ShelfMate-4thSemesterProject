@@ -10,9 +10,10 @@ interface Product {
 
 interface TopProductsTableProps {
   className?: string;
+  limit?: number;
 }
 
-const TopProductsTable: React.FC<TopProductsTableProps> = ({ className }) => {
+const TopProductsTable: React.FC<TopProductsTableProps> = ({ className, limit }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,10 +22,12 @@ const TopProductsTable: React.FC<TopProductsTableProps> = ({ className }) => {
     const load = async () => {
       try {
         setLoading(true);
-        const res = await fetch(API_URLS.TOP_PRODUCTS, { credentials: 'include' });
+        const url = limit ? `${API_URLS.TOP_PRODUCTS}?limit=${limit}` : API_URLS.TOP_PRODUCTS;
+        const res = await fetch(url, { credentials: 'include' });
         if (!res.ok) throw new Error('Falha ao buscar top produtos');
         const data = await res.json();
-        setProducts(data.rows || []);
+        const rows = (data.rows || []) as Product[];
+        setProducts(limit ? rows.slice(0, limit) : rows);
       } catch (e) {
         console.error(e);
         setError(e instanceof Error ? e.message : 'Erro ao carregar top produtos');

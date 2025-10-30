@@ -274,12 +274,10 @@ const Home: React.FC = () => {
                         <div className={cssModule.analyticsCard}>
                             <div className={cssModule.cardHeader}>
                                 <h4 className={cssModule.cardTitle}>Top 5 Mais Vendidos</h4>
-                                <p className={cssModule.cardSubtitle}>Considerando Vendas dos Últimos 3 meses</p>
+                                <p className={cssModule.cardSubtitle}>Com base em vendas da sua empresa</p>
                             </div>
                             <div className={cssModule.chartContainer}>
-                                <div className={cssModule.pieChart}>
-                                    <PieChart />
-                                </div>
+                                <TopProductsTable className={cssModule.productsTable} limit={5} />
                             </div>
                         </div>
                     </div>
