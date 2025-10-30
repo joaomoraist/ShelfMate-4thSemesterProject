@@ -2,6 +2,9 @@
 
 Sistema completo para gestão de estoque, análise de vendas e geração de relatórios, com alertas inteligentes e integração de um serviço de ML.
 
+## Overview
+<img width="1919" height="917" alt="image" src="https://github.com/user-attachments/assets/6b2cb768-a9d4-4202-b547-39fe73385f65" />
+
 ## Visão Geral
 
 - Frontend (React + Vite) para experiência do usuário, exporta relatórios em PDF.
