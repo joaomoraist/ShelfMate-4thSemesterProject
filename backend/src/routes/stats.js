@@ -22,6 +22,7 @@ function ensureAuthenticated(req, res, next) {
 router.get('/overview', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
+    const sessionUserId = req.session?.user?.id; // não será usado para filtrar
 
     const userAgg = await sql`
       SELECT COALESCE(SUM(accesses),0) AS accesses_sum, COALESCE(SUM(changes),0) AS changes_sum, COALESCE(SUM(downloads),0) AS downloads_sum
@@ -38,10 +39,11 @@ router.get('/overview', ensureAuthenticated, async (req, res) => {
       WHERE p.company_id = ${companyId}
     `;
 
+    // Vendas no período considerando toda a empresa
     const totalSold = await sql`
       SELECT COALESCE(SUM(s.qntd),0) AS total_qntd
-      FROM sales s
-      JOIN products p ON p.id = s.product_id
+      FROM products p
+      LEFT JOIN sales s ON s.product_id = p.id
       WHERE p.company_id = ${companyId}
     `;
 
@@ -112,6 +114,7 @@ router.get('/activity-last-30-days', ensureAuthenticated, async (req, res) => {
 router.get('/sales-per-product', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
+    const sessionUserId = req.session?.user?.id; // não será usado para filtrar
     const rows = await sql`
       SELECT p.id AS product_id, p.name, COALESCE(SUM(s.qntd),0) AS total_qntd
       FROM products p
@@ -131,6 +134,7 @@ router.get('/sales-per-product', ensureAuthenticated, async (req, res) => {
 router.get('/top-products', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
+    const sessionUserId = req.session?.user?.id; // não será usado para filtrar
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
     
     const rows = await sql`
@@ -161,6 +165,7 @@ router.get('/top-products', ensureAuthenticated, async (req, res) => {
 router.get('/products', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
+    const sessionUserId = req.session?.user?.id; // não será usado para filtrar
     const rows = await sql`SELECT * FROM products WHERE company_id = ${companyId} ORDER BY id`;
     return res.json({ rows });
   } catch (err) {
@@ -173,6 +178,7 @@ router.get('/products', ensureAuthenticated, async (req, res) => {
 router.get('/products-detailed', ensureAuthenticated, async (req, res) => {
   try {
     const companyId = resolveCompanyId(req);
+    const sessionUserId = req.session?.user?.id; // não será usado para filtrar
 
     const rows = await sql`
       SELECT 
@@ -248,9 +254,10 @@ router.post('/products', ensureAuthenticated, async (req, res) => {
     // Garantir duas casas decimais para unit_price (NUMERIC(10,2))
     const priceFixed = Number.isFinite(productPrice) ? Number(productPrice.toFixed(2)) : null;
 
+    const createdBy = req.session?.user?.id || null;
     const rows = await sql`
-      INSERT INTO products (name, unit_price, inventory, status, company_id)
-      VALUES (${name.trim()}, ${priceFixed}, ${stockQty}, ${productStatus}, ${companyId})
+      INSERT INTO products (name, unit_price, inventory, status, company_id, created_by)
+      VALUES (${name.trim()}, ${priceFixed}, ${stockQty}, ${productStatus}, ${companyId}, ${createdBy})
       RETURNING *
     `;
 
@@ -281,6 +288,7 @@ router.post('/products/bulk', ensureAuthenticated, async (req, res) => {
     }
 
     const companyId = req.session.user.company_id;
+    const createdBy = req.session.user.id;
 
     const results = [];
 
@@ -305,8 +313,8 @@ router.post('/products/bulk', ensureAuthenticated, async (req, res) => {
         }
 
         const inserted = await sql`
-          INSERT INTO products (name, unit_price, inventory, status, company_id)
-          VALUES (${name}, ${unit_price}, ${inventory}, ${status}, ${companyId})
+          INSERT INTO products (name, unit_price, inventory, status, company_id, created_by)
+          VALUES (${name}, ${unit_price}, ${inventory}, ${status}, ${companyId}, ${createdBy})
           RETURNING *
         `;
         results.push({ index: i, status: 'created', name, product: inserted[0] });
