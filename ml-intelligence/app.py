@@ -17,6 +17,7 @@ from .periodic_sales_random_restock import (
     send_email_summary,
     send_password_reset_email,
 )
+from .db_utils import fetch_company_user_emails, get_connection
 
 class SalesRecord(BaseModel):
     product_id: int
@@ -226,7 +227,7 @@ def generate_alerts(req: GenerateAlertsRequest):
 # ===========================
 
 class LowStockEmailRequest(BaseModel):
-    recipient: EmailStr
+    recipient: Optional[EmailStr] = None
     company_id: Optional[int] = None
 
 
@@ -243,8 +244,19 @@ def notify_low_stock_email(req: LowStockEmailRequest):
         if not lines:
             return {"sent": False, "reason": "no_low_stock"}
         subject = f"[ShelfMate] {len(lines)} produtos com estoque baixo"
-        send_email_summary(subject=subject, lines=lines, recipients=[req.recipient])
-        return {"sent": True, "count": len(lines)}
+        recipients = []
+        if req.company_id is not None:
+            try:
+                recipients = fetch_company_user_emails(conn, req.company_id)
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Falha ao buscar e-mails da empresa: {e}")
+        # Se um recipient específico foi informado, adiciona junto à lista da empresa
+        if req.recipient:
+            recipients = list({*(recipients or []), req.recipient})
+        send_email_summary(subject=subject, lines=lines, recipients=recipients if recipients else None)
+        return {"sent": True, "count": len(lines), "recipients": recipients}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:

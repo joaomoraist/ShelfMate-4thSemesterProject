@@ -93,6 +93,17 @@ def insert_alert(conn, product_id, alert_type):
         )
 
 
+def fetch_company_user_emails(conn, company_id):
+    """Retorna lista de e-mails dos usuários da empresa especificada."""
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(
+            "SELECT email FROM users WHERE company_id = %s AND email IS NOT NULL",
+            (company_id,),
+        )
+        rows = cur.fetchall()
+        return [str(r['email']).strip() for r in rows if str(r.get('email', '')).strip()]
+
+
 def commit(conn):
     conn.commit()
 

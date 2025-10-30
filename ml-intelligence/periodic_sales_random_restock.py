@@ -31,6 +31,7 @@ from db_utils import (
     update_product_status,
     get_product_sales_daily_avg,
     insert_alert,
+    fetch_company_user_emails,
     commit,
     rollback,
 )
@@ -149,6 +150,7 @@ def perform_random_restock(conn, company_id=None) -> Dict[int, float]:
 def check_low_stock_and_notify(conn, company_id=None) -> int:
     products = fetch_all_products(conn, company_id)
     lows = []
+    by_company: dict[int, list[dict]] = {}
     for p in products:
         inv = float(p['inventory'] or 0)
         # Calcular limiar dinâmico com base na média diária de vendas
@@ -160,17 +162,31 @@ def check_low_stock_and_notify(conn, company_id=None) -> int:
             new_status = 'Indisponível' if inv <= 0 else 'Estoque Baixo'
             update_product_status(conn, p['id'], new_status)
             insert_alert(conn, p['id'], new_status)
+            cid = p.get('company_id')
+            if cid is not None:
+                by_company.setdefault(int(cid), []).append(p)
     commit(conn)
 
     if lows:
-        lines = [
-            f"id={p['id']} | {p['name']} | estoque={p['inventory']}"
-            for p in lows
-        ]
-        send_email_summary(
-            subject=f"[ShelfMate] {len(lows)} produtos com estoque baixo (limiar dinâmico)",
-            lines=lines,
-        )
+        # Enviar por empresa para todos os usuários da empresa correspondente
+        for cid, items in by_company.items():
+            lines = [
+                f"id={p['id']} | {p['name']} | estoque={p['inventory']}"
+                for p in items
+            ]
+            recipients = []
+            try:
+                recipients = fetch_company_user_emails(conn, cid)
+            except Exception as e:
+                print(f"[Email:ERR] Falha ao buscar e-mails da empresa {cid}: {e}")
+            if recipients:
+                send_email_summary(
+                    subject=f"[ShelfMate] {len(items)} produtos com estoque baixo (empresa {cid})",
+                    lines=lines,
+                    recipients=recipients,
+                )
+            else:
+                print(f"[Email:SKIP] Empresa {cid} sem destinatários configurados")
     else:
         print("[Notify] Nenhum produto com estoque baixo.")
 
