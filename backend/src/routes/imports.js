@@ -53,8 +53,8 @@ router.post('/csv-sales', ensureAuthenticated, upload.single('file'), async (req
         `;
       } else {
         const inserted = await tx`
-          INSERT INTO products (name, unit_price, inventory, status, company_id, created_by)
-          VALUES (${name}, ${unit_price}, ${inventory}, ${status}, ${companyId}, ${sessionUserId})
+          INSERT INTO products (name, unit_price, inventory, status, company_id)
+          VALUES (${name}, ${unit_price}, ${inventory}, ${status}, ${companyId})
           RETURNING id
         `;
         productId = inserted[0].id;
@@ -65,8 +65,8 @@ router.post('/csv-sales', ensureAuthenticated, upload.single('file'), async (req
         const qntd = row.qntd ? Number(row.qntd) : 0;
         const value = row.value ? Number(row.value) : 0;
         await tx`
-          INSERT INTO sales (product_id, qntd, value, recorded_by)
-          VALUES (${productId}, ${qntd}, ${value}, ${sessionUserId})
+          INSERT INTO sales (product_id, qntd, value)
+          VALUES (${productId}, ${qntd}, ${value})
         `;
       }
 

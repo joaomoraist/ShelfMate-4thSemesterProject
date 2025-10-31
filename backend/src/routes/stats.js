@@ -254,10 +254,9 @@ router.post('/products', ensureAuthenticated, async (req, res) => {
     // Garantir duas casas decimais para unit_price (NUMERIC(10,2))
     const priceFixed = Number.isFinite(productPrice) ? Number(productPrice.toFixed(2)) : null;
 
-    const createdBy = req.session?.user?.id || null;
     const rows = await sql`
-      INSERT INTO products (name, unit_price, inventory, status, company_id, created_by)
-      VALUES (${name.trim()}, ${priceFixed}, ${stockQty}, ${productStatus}, ${companyId}, ${createdBy})
+      INSERT INTO products (name, unit_price, inventory, status, company_id)
+      VALUES (${name.trim()}, ${priceFixed}, ${stockQty}, ${productStatus}, ${companyId})
       RETURNING *
     `;
 
@@ -342,8 +341,8 @@ router.post('/products/bulk', ensureAuthenticated, async (req, res) => {
         }
 
         const inserted = await sql`
-          INSERT INTO products (name, unit_price, inventory, status, company_id, created_by)
-          VALUES (${name}, ${unit_price}, ${inventory}, ${status}, ${companyId}, ${createdBy})
+          INSERT INTO products (name, unit_price, inventory, status, company_id)
+          VALUES (${name}, ${unit_price}, ${inventory}, ${status}, ${companyId})
           RETURNING *
         `;
         results.push({ index: i, status: 'created', name, product: inserted[0] });
