@@ -136,17 +136,11 @@ export default function Signup() {
           </div>
         </div>
 
-        <AuthIllustration
-          images={[
-            "/image1.jpg",
-            "/image2.png",
-            "/image3.jpg",
-            "/image4.jpg",
-          ]}
-          intervalMs={3500}
-        />
+        <div className="auth-logo-container">
+          <img src="/logo-removebg.png" alt="Logo" className="rotating-logo" />
+        </div>
       </div>
       {toast && <div className="toast show" id="toast">{toast}</div>}
-    </div>
+      </div>
   );
 }
