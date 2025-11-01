@@ -20,13 +20,15 @@ export default function useCurrentUser() {
           console.warn('Falha ao salvar user no localStorage:', e && (e as any).message);
         }
       } else {
-        const stored = localStorage.getItem('user');
-        setUser(stored ? JSON.parse(stored) : null);
+        // Sessão inválida: evitar dados de outro usuário no localStorage
+        try { localStorage.removeItem('user'); } catch {}
+        setUser(null);
       }
     } catch (err) {
       console.error('Erro ao buscar usuário:', err);
-      const stored = localStorage.getItem('user');
-      setUser(stored ? JSON.parse(stored) : null);
+      // Em erro de rede, evitar exibir dados possivelmente desatualizados
+      try { localStorage.removeItem('user'); } catch {}
+      setUser(null);
     } finally {
       setLoading(false);
     }

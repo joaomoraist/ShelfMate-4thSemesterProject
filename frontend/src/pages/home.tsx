@@ -74,14 +74,11 @@ const Home: React.FC = () => {
         loadOverview();
     }, []);
 
-    // Carregar dados de atividade dos últimos 30 dias
+    // Carregar dados de atividade dos últimos 30 dias (sempre pela sessão)
     React.useEffect(() => {
         const loadActivityData = async () => {
             try {
-                const stored = localStorage.getItem('user');
-                const companyId = stored ? (JSON.parse(stored)?.company_id) : undefined;
-                const url = companyId ? `${API_URLS.ACTIVITY_LAST_30_DAYS}?companyId=${companyId}` : API_URLS.ACTIVITY_LAST_30_DAYS;
-                const res = await fetch(url, { credentials: 'include' });
+                const res = await fetch(API_URLS.ACTIVITY_LAST_30_DAYS, { credentials: 'include' });
                 if (!res.ok) throw new Error('Falha ao buscar dados de atividade');
                 const data = await res.json();
                 setActivityData(data);

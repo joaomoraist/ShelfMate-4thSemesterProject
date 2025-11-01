@@ -13,6 +13,7 @@ import Reports from "./pages/reports";
 import Settings from "./pages/settings";
 import SiteFooter from "./components/SiteFooter";
 import ChatWidget from "./components/ChatWidget";
+import { API_CONFIG } from "./config/api";
 
 type Page = "login" | "signup" | "forgot-password" | "home" | "statistics" | "products" | "add-product" | "reports" | "settings";
 
@@ -54,6 +55,11 @@ function App() {
         const who = user?.email || user?.name || 'desconhecido';
         const when = new Date().toLocaleString('pt-BR');
         console.log(`[LOG] Usuário ${who} solicitou dados ${method} ${url} às ${when}`);
+        // Garantir envio de cookies para chamadas na nossa API
+        const isApiCall = typeof url === 'string' && url.startsWith(API_CONFIG.BASE_URL);
+        if (isApiCall) {
+          init = { ...(init || {}), credentials: (init && init.credentials) ? init.credentials : 'include' };
+        }
       } catch (e) {
         // não interromper a requisição, apenas falhar silenciosamente o log
       }
