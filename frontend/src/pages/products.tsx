@@ -249,8 +249,8 @@ const Products: React.FC = () => {
                     
                     <div className={cssModule.actionBar}>
                         <div className={cssModule.searchGroup}>
+                            <img src="/product-filter.png" alt="Filtros" className={cssModule.iconImg} />
                             <div className={cssModule.searchInputContainer}>
-                                <img src="/search_black.png" alt="Buscar" className={cssModule.iconImg} />
                                 <input
                                     className={cssModule.searchField}
                                     placeholder="Filtrar por nome do produto"
@@ -259,7 +259,6 @@ const Products: React.FC = () => {
                                     aria-label="Filtrar por nome"
                                 />
                             </div>
-                            <img src="/product-filter.png" alt="Filtros" className={cssModule.iconImg} />
                             <select
                                 className={cssModule.filterSelect}
                                 value={statusFilter}
