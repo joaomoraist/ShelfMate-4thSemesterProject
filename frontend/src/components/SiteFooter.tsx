@@ -22,10 +22,24 @@ const SiteFooter: React.FC = () => {
         <div className={styles.footerSection}>
           <div className={styles.footerTitle}>Código Fonte</div>
           <div className={styles.footerDescription}>
-            Acesse nosso Github e Conheça toda nossa infraestrutura
+            <a
+              href="https://github.com/will-csc/ShelfMate-4thSemesterProject"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.footerLink}
+            >
+              Acesse nosso Github e Conheça toda nossa infraestrutura
+            </a>
           </div>
           <div className={styles.githubLink}>
-            https://github.com/will-csc/ShelfMate-4thSemesterProject
+            <a
+              href="https://github.com/will-csc/ShelfMate-4thSemesterProject"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.footerLink}
+            >
+              https://github.com/will-csc/ShelfMate-4thSemesterProject
+            </a>
           </div>
         </div>
 
