@@ -40,6 +40,8 @@ const ChatWidget: React.FC = () => {
 
   return (
     <div className={styles.widgetRoot}>
+      {/* Ícone do robô ao lado do botão do chat */}
+      <img src="/robot.png" alt="Robô assistente" className={styles.robotIcon} />
       {open && (
         <div className={styles.panel}>
           <div className={styles.panelHeader}>

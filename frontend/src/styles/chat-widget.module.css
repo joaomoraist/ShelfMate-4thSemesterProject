@@ -1,6 +1,8 @@
-.widgetRoot { position: fixed; right: 20px; bottom: 20px; z-index: 1000; }
+.widgetRoot { position: fixed; right: 20px; bottom: 20px; z-index: 1000; display: flex; align-items: center; gap: 10px; }
 .fab { background: #1B31BA; color: #fff; border: none; padding: 10px 14px; border-radius: 999px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
 .fab:hover { background: #1d4ed8; }
+
+.robotIcon { width: 28px; height: 28px; object-fit: contain; display: inline-block; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.12)); }
 
 .panel { position: fixed; right: 20px; bottom: 70px; width: 320px; max-height: 60vh; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden; }
 .panelHeader { background: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; color: #374151; }
@@ -21,5 +23,5 @@
 
 @media (max-width: 480px) {
   .panel { right: 12px; bottom: 64px; width: 92vw; }
-  .widgetRoot { right: 12px; bottom: 12px; }
+  .widgetRoot { right: 12px; bottom: 12px; gap: 8px; }
 }
