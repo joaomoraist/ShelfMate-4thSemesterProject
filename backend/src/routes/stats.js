@@ -1,5 +1,6 @@
 import express from 'express';
 import sql from '../db.js';
+import { createProduct } from '../services/productsService.js';
 
 const router = express.Router();
 
@@ -209,62 +210,11 @@ router.get('/products-detailed', ensureAuthenticated, async (req, res) => {
 // POST /stats/products - Adicionar novo produto (usa company_id da sessão)
 router.post('/products', ensureAuthenticated, async (req, res) => {
   try {
-    const { 
-      name, 
-      price, 
-      unit_price, 
-      current_stock, 
-      inventory, 
-      status 
-    } = req.body || {};
-
-    // Validações
-    if (!name || name.trim() === '') {
-      return res.status(400).json({ error: 'Nome do produto é obrigatório' });
-    }
-
-    // Usar price ou unit_price (compatibilidade)
-    const productPrice = price != null ? Number(price) : (unit_price != null ? Number(unit_price) : 0);
-    
-    // Usar current_stock ou inventory (compatibilidade)
-    const stockQty = current_stock != null ? Number(current_stock) : (inventory != null ? Number(inventory) : 0);
-    
-    // Validar status conforme ENUM do schema
-    const allowedStatus = ['Disponível','Estoque Baixo','Estoque Alto','Indisponível'];
-    let productStatus = (status || 'Disponível');
-    if (!allowedStatus.includes(productStatus)) {
-      // Se não for um valor permitido, inferir pelo estoque ou usar 'Disponível'
-      if (stockQty < 10) productStatus = 'Estoque Baixo';
-      else if (stockQty > 100) productStatus = 'Estoque Alto';
-      else productStatus = 'Disponível';
-    }
     const companyId = resolveCompanyId(req) ?? null;
-
-    // Verificar se produto já existe
-    const existingProduct = await sql`
-      SELECT id FROM products 
-      WHERE LOWER(name) = LOWER(${name}) AND company_id = ${companyId}
-    `;
-
-    if (existingProduct.length > 0) {
-      return res.status(409).json({ error: 'Produto com este nome já existe' });
-    }
-
-    // Inserir produto
-    // Garantir duas casas decimais para unit_price (NUMERIC(10,2))
-    const priceFixed = Number.isFinite(productPrice) ? Number(productPrice.toFixed(2)) : null;
-
-    const rows = await sql`
-      INSERT INTO products (name, unit_price, inventory, status, company_id)
-      VALUES (${name.trim()}, ${priceFixed}, ${stockQty}, ${productStatus}, ${companyId})
-      RETURNING *
-    `;
-
-    return res.status(201).json({ 
-      success: true,
-      message: 'Produto adicionado com sucesso',
-      product: rows[0] 
-    });
+    const result = await createProduct(req.body, companyId);
+    if (result.error) return res.status(400).json({ error: result.error });
+    if (result.conflict) return res.status(409).json({ error: 'Produto com este nome já existe' });
+    return res.status(201).json({ success: true, message: 'Produto adicionado com sucesso', product: result.product });
   } catch (err) {
     console.error('Erro em POST /stats/products:', err);
     

@@ -17,12 +17,16 @@ API em Node.js + Express responsável por autenticação, estatísticas, importa
   - `RESEND_API_KEY=chave_resend`
 - Iniciar: `npm start` (executa `node src/index.js`)
 - Health: `http://localhost:3000/health` (ajuste porta conforme sua infra)
+ - Docs (Swagger UI): `http://localhost:3000/api-docs`
 
 ## Estrutura
 - `src/index.js` – bootstrap do servidor, sessões, static e registro de rotas
 - `src/db.js` – conexão com banco Postgres
 - `src/routes/users.js` – login, cadastro e recuperação de senha
 - `src/routes/stats.js` – estatísticas, produtos e incremento de relatórios exportados
+- `src/services/` – regras de negócio (ex.: `productsService.js`)
+- `src/repositories/` – acesso ao banco (ex.: `productsRepository.js`)
+- `src/openapi.json` – especificação OpenAPI para documentação Swagger
 - `src/public/` – assets estáticos (ex.: imagens de perfil)
 
 ## Endpoints Principais

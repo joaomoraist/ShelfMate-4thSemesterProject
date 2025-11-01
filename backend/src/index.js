@@ -7,6 +7,8 @@ import usersRoutes from './routes/users.js';
 import statsRoutes from './routes/stats.js';
 import importsRoutes from './routes/imports.js';
 import session from 'express-session';
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
 
 dotenv.config();
 const app = express();
@@ -87,6 +89,17 @@ app.get('/health', (req, res) => {
 });
 
 // ============== ROTAS =================
+// Swagger UI
+const openapiPath = path.join(__dirname, 'openapi.json');
+let openapiDoc = null;
+try { openapiDoc = JSON.parse(fs.readFileSync(openapiPath, 'utf-8')); } catch {}
+if (openapiDoc) {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiDoc));
+  console.log(`📚 Swagger UI: http://localhost:${PORT}/api-docs`);
+} else {
+  console.warn('Swagger OpenAPI file not found or invalid');
+}
+
 app.use('/users', usersRoutes);
 app.use('/stats', statsRoutes);
 app.use('/imports', importsRoutes);

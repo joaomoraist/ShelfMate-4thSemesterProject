@@ -1,0 +1,170 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "ShelfMate API",
+    "version": "1.0.0",
+    "description": "API de autenticação, produtos e estatísticas"
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "tags": [
+    { "name": "Users" },
+    { "name": "Stats" },
+    { "name": "Imports" }
+  ],
+  "paths": {
+    "/users/login": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Login do usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sessão criada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": { "user": { "$ref": "#/components/schemas/User" } }
+                }
+              }
+            }
+          },
+          "401": { "description": "Credenciais inválidas" }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Usuário autenticado",
+        "responses": {
+          "200": {
+            "description": "Dados da sessão",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "user": { "$ref": "#/components/schemas/User" } } }
+              }
+            }
+          },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/stats/overview": {
+      "get": {
+        "tags": ["Stats"],
+        "summary": "Visão geral de métricas",
+        "responses": {
+          "200": {
+            "description": "Resumo de métricas",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    },
+    "/stats/products": {
+      "post": {
+        "tags": ["Stats"],
+        "summary": "Criar produto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ProductCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Produto criado",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object", "properties": { "product": { "$ref": "#/components/schemas/Product" } } }
+              }
+            }
+          },
+          "401": { "description": "Não autenticado" },
+          "409": { "description": "Duplicado" }
+        }
+      }
+    },
+    "/imports/csv-sales": {
+      "post": {
+        "tags": ["Imports"],
+        "summary": "Importar CSV de produtos e vendas",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": { "file": { "type": "string", "format": "binary" } },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Importação realizada" },
+          "401": { "description": "Não autenticado" }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "user_level": { "type": "integer" },
+          "company_id": { "type": "integer" }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "unit_price": { "type": "number" },
+          "inventory": { "type": "number" },
+          "status": { "type": "string" },
+          "company_id": { "type": "integer" }
+        }
+      },
+      "ProductCreate": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "unit_price": { "type": "number" },
+          "inventory": { "type": "number" },
+          "status": { "type": "string" }
+        },
+        "required": ["name"]
+      }
+    }
+  }
+}
