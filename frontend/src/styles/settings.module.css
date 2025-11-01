@@ -66,6 +66,13 @@
 .saveIcon { font-size: 18px; }
 .saveIconImg { width: 18px; height: 18px; object-fit: contain; display: inline-block; }
 
+/* Danger (destructive) section */
+.dangerSection { border: 1px solid #fee2e2; background: #fef2f2; border-radius: 12px; padding: 20px; max-width: 560px; width: 100%; margin-top: 8px; }
+.dangerText { font-size: 13px; color: #991b1b; margin: 0 0 12px; }
+.dangerButton { background: #dc2626; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 15px; transition: background 0.2s; }
+.dangerButton:hover { background: #b91c1c; }
+.dangerIconImg { width: 18px; height: 18px; object-fit: contain; display: inline-block; }
+
 /* Footer styles */
 .siteFooter { margin-top: 40px; background: #1B31BA; color: #fff; padding: 32px; border-radius: 12px; }
 .footerInner { display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px; align-items: start; }

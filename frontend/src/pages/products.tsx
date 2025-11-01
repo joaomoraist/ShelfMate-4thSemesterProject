@@ -1,6 +1,6 @@
 import React from "react";
 import { API_URLS, API_CONFIG } from '../config/api';
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import useCurrentUser from '../hooks/useCurrentUser';
 import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/products.module.css';
@@ -15,6 +15,12 @@ const Products: React.FC = () => {
     const [products, setProducts] = useState<any[]>([]);
     const fileInputRef = React.useRef<HTMLInputElement | null>(null);
     const [bulkSummary, setBulkSummary] = useState<{created?: number; skipped?: number; errors?: number} | null>(null);
+
+    // Filtros e ordenação
+    const [query, setQuery] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<string>("todos");
+    const [sortKey, setSortKey] = useState<"name"|"unit_price"|"inventory"|"status"|"total_sales"|"alerts_count">("name");
+    const [sortDir, setSortDir] = useState<"asc"|"desc">("asc");
 
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
@@ -45,6 +51,51 @@ const Products: React.FC = () => {
     }, []);
 
 
+    // Produtos filtrados e ordenados
+    const displayedProducts = useMemo(() => {
+        const q = query.trim().toLowerCase();
+        let list = products;
+
+        // Filtrar por nome
+        if (q.length > 0) {
+            list = list.filter(p => String(p.name || "").toLowerCase().includes(q));
+        }
+        // Filtrar por status
+        if (statusFilter !== 'todos') {
+            list = list.filter(p => String(p.status || '').toLowerCase().includes(statusFilter.toLowerCase()));
+        }
+
+        // Ordenar
+        const dir = sortDir === 'asc' ? 1 : -1;
+        list = [...list].sort((a, b) => {
+            const va = a?.[sortKey];
+            const vb = b?.[sortKey];
+            // Normalizar valores para comparação
+            const na = typeof va === 'string' ? va.toLowerCase() : Number(va ?? 0);
+            const nb = typeof vb === 'string' ? vb.toLowerCase() : Number(vb ?? 0);
+            if (na < nb) return -1 * dir;
+            if (na > nb) return 1 * dir;
+            return 0;
+        });
+
+        return list;
+    }, [products, query, statusFilter, sortKey, sortDir]);
+
+    function toggleSort(key: typeof sortKey) {
+        if (sortKey === key) {
+            setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'));
+        } else {
+            setSortKey(key);
+            setSortDir('asc');
+        }
+    }
+
+    function clearFilters() {
+        setQuery('');
+        setStatusFilter('todos');
+        setSortKey('name');
+        setSortDir('asc');
+    }
 
     // Handlers CSV declarados antes do JSX para evitar TDZ
     function handleBulkButtonClick() {
@@ -197,6 +248,43 @@ const Products: React.FC = () => {
                     )}
                     
                     <div className={cssModule.actionBar}>
+                        <div className={cssModule.searchGroup}>
+                            <div className={cssModule.searchInputContainer}>
+                                <img src="/search_black.png" alt="Buscar" className={cssModule.iconImg} />
+                                <input
+                                    className={cssModule.searchField}
+                                    placeholder="Filtrar por nome do produto"
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    aria-label="Filtrar por nome"
+                                />
+                            </div>
+                            <select
+                                className={cssModule.filterSelect}
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                aria-label="Filtrar por status"
+                            >
+                                <option value="todos">Todos status</option>
+                                <option value="dispon">Disponível</option>
+                                <option value="baixo">Baixo estoque</option>
+                                <option value="alto">Alto estoque</option>
+                            </select>
+                            <select
+                                className={cssModule.filterSelect}
+                                value={sortKey}
+                                onChange={(e) => setSortKey(e.target.value as any)}
+                                aria-label="Ordenar por"
+                            >
+                                <option value="name">Ordenar por: Nome</option>
+                                <option value="unit_price">Ordenar por: Preço</option>
+                                <option value="inventory">Ordenar por: Estoque</option>
+                                <option value="status">Ordenar por: Status</option>
+                                <option value="total_sales">Ordenar por: Vendas</option>
+                                <option value="alerts_count">Ordenar por: Alertas</option>
+                            </select>
+                            <button className={cssModule.clearFiltersButton} onClick={clearFilters} aria-label="Limpar filtros">Limpar</button>
+                        </div>
                         <div className={cssModule.actionButtons}>
                             <button className={cssModule.addButton} onClick={() => navigateTo("add-product")}>
                                 <span className={cssModule.buttonIcon}>+</span>
@@ -220,12 +308,24 @@ const Products: React.FC = () => {
 
                         <div className={cssModule.productsTable}>
                             <div className={cssModule.tableHeader}>
-                                <div className={cssModule.tableColumn}>Produto</div>
-                                <div className={cssModule.tableColumn}>Preço Unitário</div>
-                                <div className={cssModule.tableColumn}>Estoque Atual</div>
-                                <div className={cssModule.tableColumn}>Status</div>
-                                <div className={cssModule.tableColumn}>Total Vendas</div>
-                                <div className={cssModule.tableColumn}>Alertas</div>
+                                <button className={cssModule.sortHeader} onClick={() => toggleSort('name')} aria-label="Ordenar por produto">
+                                    Produto {sortKey === 'name' && <span className={cssModule.sortIndicator}>{sortDir === 'asc' ? '▲' : '▼'}</span>}
+                                </button>
+                                <button className={cssModule.sortHeader} onClick={() => toggleSort('unit_price')} aria-label="Ordenar por preço">
+                                    Preço Unitário {sortKey === 'unit_price' && <span className={cssModule.sortIndicator}>{sortDir === 'asc' ? '▲' : '▼'}</span>}
+                                </button>
+                                <button className={cssModule.sortHeader} onClick={() => toggleSort('inventory')} aria-label="Ordenar por estoque">
+                                    Estoque Atual {sortKey === 'inventory' && <span className={cssModule.sortIndicator}>{sortDir === 'asc' ? '▲' : '▼'}</span>}
+                                </button>
+                                <button className={cssModule.sortHeader} onClick={() => toggleSort('status')} aria-label="Ordenar por status">
+                                    Status {sortKey === 'status' && <span className={cssModule.sortIndicator}>{sortDir === 'asc' ? '▲' : '▼'}</span>}
+                                </button>
+                                <button className={cssModule.sortHeader} onClick={() => toggleSort('total_sales')} aria-label="Ordenar por vendas">
+                                    Total Vendas {sortKey === 'total_sales' && <span className={cssModule.sortIndicator}>{sortDir === 'asc' ? '▲' : '▼'}</span>}
+                                </button>
+                                <button className={cssModule.sortHeader} onClick={() => toggleSort('alerts_count')} aria-label="Ordenar por alertas">
+                                    Alertas {sortKey === 'alerts_count' && <span className={cssModule.sortIndicator}>{sortDir === 'asc' ? '▲' : '▼'}</span>}
+                                </button>
                                 <div className={cssModule.tableColumn}>Ações</div>
                             </div>
                         
@@ -235,7 +335,7 @@ const Products: React.FC = () => {
                             </div>
                         )}
                         
-                        {products.map((product: any, index) => (
+                        {displayedProducts.map((product: any, index) => (
                             <div key={product.id ?? index} className={cssModule.tableRow}>
                                 <div className={cssModule.productCell}>
                                     <span className={cssModule.productName}>{product.name}</span>

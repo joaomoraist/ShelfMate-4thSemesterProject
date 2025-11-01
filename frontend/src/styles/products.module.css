@@ -61,9 +61,17 @@
 .addMultipleButton:hover { background: #4b5563; }
 .buttonIcon { font-size: 16px; }
 
+/* Filter inputs */
+.filterSelect { padding: 12px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; font-size: 14px; color: #374151; }
+.clearFiltersButton { padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff; font-size: 14px; color: #374151; cursor: pointer; }
+.clearFiltersButton:hover { background: #f9fafb; }
+
 /* Table styles */
 .productsTable { margin: 24px 0; }
 .tableHeader { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 0; border-bottom: 2px solid #e5e7eb; font-weight: 700; color: #374151; }
+.sortHeader { text-align: left; background: transparent; border: none; padding: 0; font-weight: 700; color: #374151; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+.sortHeader:hover { color: #1B31BA; }
+.sortIndicator { font-size: 12px; color: #6b7280; }
 .tableRow { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid #f3f4f6; align-items: center; }
 .tableColumn { font-weight: 700; color: #374151; }
 .productCell { display: flex; align-items: center; gap: 8px; }

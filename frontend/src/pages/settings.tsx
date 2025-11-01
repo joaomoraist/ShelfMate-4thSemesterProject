@@ -224,6 +224,42 @@ const Settings: React.FC = () => {
                                     Salvar
                                 </button>
                             </div>
+                            {/* Excluir Conta */}
+                            <div className={cssModule.dangerSection}>
+                                <h3 className={cssModule.sectionTitle}>Excluir Conta</h3>
+                                <p className={cssModule.dangerText}>
+                                    Esta ação é permanente e removerá sua conta do sistema. Você
+                                    será desconectado e não poderá recuperar os dados do usuário.
+                                </p>
+                                <button
+                                    className={cssModule.dangerButton}
+                                    onClick={async () => {
+                                        try {
+                                            const confirmed = window.confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.');
+                                            if (!confirmed) return;
+                                            const res = await fetch(API_URLS.ME, { method: 'DELETE', credentials: 'include' });
+                                            if (res.ok) {
+                                                setToastType('success');
+                                                setToastMsg('Conta excluída com sucesso.');
+                                                localStorage.removeItem('user');
+                                                navigateTo('login');
+                                            } else {
+                                                let errMsg = 'Erro ao excluir a conta';
+                                                try { const err = await res.json(); errMsg = err.error || errMsg; } catch {}
+                                                setToastType('error');
+                                                setToastMsg(errMsg);
+                                            }
+                                        } catch (err) {
+                                            console.error(err);
+                                            setToastType('error');
+                                            setToastMsg('Erro inesperado ao excluir a conta');
+                                        }
+                                    }}
+                                >
+                                    <img src="/trash.png" alt="Excluir" className={cssModule.saveIconImg} />
+                                    Excluir minha conta
+                                </button>
+                            </div>
                         </div>
                     </div>
                  </section>

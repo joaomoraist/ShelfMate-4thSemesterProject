@@ -12,6 +12,7 @@ import AddProduct from "./pages/add-product";
 import Reports from "./pages/reports";
 import Settings from "./pages/settings";
 import SiteFooter from "./components/SiteFooter";
+import ChatWidget from "./components/ChatWidget";
 
 type Page = "login" | "signup" | "forgot-password" | "home" | "statistics" | "products" | "add-product" | "reports" | "settings";
 
@@ -95,6 +96,7 @@ function App() {
         <main className="appMain">
           {renderPage()}
         </main>
+        {!isAuthPage && <ChatWidget />}
         {!isAuthPage && <SiteFooter />}
       </NavigationProvider>
     </div>

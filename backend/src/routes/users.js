@@ -485,6 +485,56 @@ router.post('/logout', (req, res) => {
   }
 });
 
+// Excluir conta do usuário logado
+// DELETE /users/me
+router.delete('/me', async (req, res) => {
+  try {
+    if (!req.session || !req.session.user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+
+    const userId = req.session.user.id;
+
+    // Buscar imagem para remover do disco, se existir
+    let imagePath = null;
+    try {
+      const rows = await sql`SELECT image FROM users WHERE id = ${userId}`;
+      imagePath = rows && rows[0] ? rows[0].image : null;
+    } catch (e) {
+      console.warn('Falha ao buscar imagem do usuário antes da exclusão:', e && e.message);
+    }
+
+    // Excluir usuário
+    await sql`DELETE FROM users WHERE id = ${userId}`;
+
+    // Remover arquivo de imagem se estiver na pasta user_photos
+    if (typeof imagePath === 'string' && imagePath.startsWith('/user_photos/')) {
+      const filename = imagePath.replace('/user_photos/', '');
+      const filepath = path.join(userPhotosDir, filename);
+      try {
+        if (fs.existsSync(filepath)) {
+          fs.unlinkSync(filepath);
+        }
+      } catch (fileErr) {
+        console.warn('Falha ao remover foto do usuário:', fileErr && fileErr.message);
+      }
+    }
+
+    // Destruir sessão após exclusão
+    req.session.destroy(err => {
+      if (err) {
+        console.error('Erro ao destruir sessão após excluir conta:', err);
+        return res.status(500).json({ error: 'Account deleted but failed to end session' });
+      }
+      res.clearCookie('connect.sid');
+      return res.json({ message: 'Account deleted' });
+    });
+  } catch (err) {
+    console.error('Erro em DELETE /users/me:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // GET /users/home -> small helper for testing that user is logged in
 router.get('/home', (req, res) => {
   try {

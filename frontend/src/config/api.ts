@@ -42,6 +42,7 @@ export const API_URLS = {
   RESET_PASSWORD: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.RESET_PASSWORD),
   ME: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.ME),
   LOGOUT: buildApiUrl(API_CONFIG.ENDPOINTS.USERS.LOGOUT),
+  CHAT: buildApiUrl('/chat'),
   HOME: buildApiUrl('/home'),
   
   // Stats endpoints

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import usersRoutes from './routes/users.js';
 import statsRoutes from './routes/stats.js';
 import importsRoutes from './routes/imports.js';
+import chatRoutes from './routes/chat.js';
 import session from 'express-session';
 import swaggerUi from 'swagger-ui-express';
 import fs from 'fs';
@@ -103,6 +104,7 @@ if (openapiDoc) {
 app.use('/users', usersRoutes);
 app.use('/stats', statsRoutes);
 app.use('/imports', importsRoutes);
+app.use('/chat', chatRoutes);
 
 // Página inicial -> login.html (para facilitar testes)
 app.get('/', (req, res) => {

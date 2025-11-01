@@ -1,0 +1,25 @@
+.widgetRoot { position: fixed; right: 20px; bottom: 20px; z-index: 1000; }
+.fab { background: #1B31BA; color: #fff; border: none; padding: 10px 14px; border-radius: 999px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.fab:hover { background: #1d4ed8; }
+
+.panel { position: fixed; right: 20px; bottom: 70px; width: 320px; max-height: 60vh; background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); display: flex; flex-direction: column; overflow: hidden; }
+.panelHeader { background: #f9fafb; border-bottom: 1px solid #e5e7eb; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; color: #374151; }
+.closeBtn { background: transparent; border: none; font-size: 18px; cursor: pointer; color: #6b7280; }
+.closeBtn:hover { color: #111827; }
+
+.messages { flex: 1; overflow: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.placeholder { color: #6b7280; font-size: 13px; }
+.msgUser { align-self: flex-end; background: #1B31BA; color: #fff; padding: 8px 10px; border-radius: 10px; max-width: 85%; }
+.msgAssistant { align-self: flex-start; background: #f3f4f6; color: #111827; padding: 8px 10px; border-radius: 10px; max-width: 85%; }
+.loading { color: #6b7280; font-size: 12px; }
+
+.inputBar { display: flex; gap: 8px; padding: 10px; border-top: 1px solid #e5e7eb; }
+.input { flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; }
+.input:focus { outline: none; border-color: #1B31BA; }
+.sendBtn { background: #1B31BA; color: #fff; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.sendBtn:hover { background: #1d4ed8; }
+
+@media (max-width: 480px) {
+  .panel { right: 12px; bottom: 64px; width: 92vw; }
+  .widgetRoot { right: 12px; bottom: 12px; }
+}
