@@ -226,7 +226,7 @@ const Settings: React.FC = () => {
                             </div>
                             {/* Excluir Conta */}
                             <div className={cssModule.dangerSection}>
-                                <h3 className={cssModule.sectionTitle}>Excluir Conta</h3>
+                                <h3 className={`${cssModule.sectionTitle} ${cssModule.dangerTitle}`}>Excluir Conta</h3>
                                 <p className={cssModule.dangerText}>
                                     Esta ação é permanente e removerá sua conta do sistema. Você
                                     será desconectado e não poderá recuperar os dados do usuário.

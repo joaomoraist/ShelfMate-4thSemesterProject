@@ -59,6 +59,7 @@
 /* Forms section styles */
 .formsSection { display: flex; flex-direction: column; gap: 24px; align-items: flex-start; }
 .sectionTitle { color: #1B31BA; font-size: 20px; font-weight: 700; margin: 0 0 20px; }
+.dangerTitle { color: #dc2626; }
 .passwordSection, .companySection { border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px; max-width: 560px; width: 100%; }
 .saveSection { display: flex; justify-content: flex-end; margin-top: 16px; max-width: 560px; width: 100%; }
 .saveButton { background: #1B31BA; color: #fff; border: none; padding: 16px 32px; border-radius: 8px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; font-size: 16px; transition: background 0.2s; }

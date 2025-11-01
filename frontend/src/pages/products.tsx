@@ -259,6 +259,7 @@ const Products: React.FC = () => {
                                     aria-label="Filtrar por nome"
                                 />
                             </div>
+                            <img src="/product-filter.png" alt="Filtros" className={cssModule.iconImg} />
                             <select
                                 className={cssModule.filterSelect}
                                 value={statusFilter}
