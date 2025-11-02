@@ -15,6 +15,8 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const IS_PROD = process.env.NODE_ENV === 'production';
+const AI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const HAS_GEMINI_KEY = !!process.env.GOOGLE_API_KEY;
 
 // When running behind a proxy (Render, Heroku, etc.) Express needs
 // to trust the first proxy for secure cookies to work correctly.
@@ -85,7 +87,9 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'Server is running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development',
+    ai: { provider: 'gemini', model: AI_MODEL, hasKey: HAS_GEMINI_KEY }
   });
 });
 
@@ -144,4 +148,5 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
+  console.log(`🤖 AI provider: Gemini, model=${AI_MODEL}, key=${HAS_GEMINI_KEY ? 'set' : 'missing'}`);
 });
