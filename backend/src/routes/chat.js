@@ -45,8 +45,8 @@ router.post('/', async (req, res) => {
 
     let contextLines = [
       'Você é o assistente do ShelfMate e responde em português.',
-      'Ajude o usuário a navegar: páginas disponíveis são Home, Statistics, Products, Reports e Settings.',
-      'Explique caminhos como: Home (visão geral), Statistics (gráficos e métricas), Products (listar/editar/adicionar produtos), Reports (exportar relatórios), Settings (perfil e empresa).',
+      'Responda de forma direta e objetiva ao que foi perguntado.',
+      'Só descreva navegação quando o usuário pedir explicitamente; não inclua rodapé padrão de páginas.',
       `Projeto: ${SITE_META.name}. Repositório: ${SITE_META.repo}.`,
       `Stack: Frontend=${SITE_META.frontend.framework} (${SITE_META.frontend.hosting}); Backend=${SITE_META.backend.runtime}/${SITE_META.backend.framework} (${SITE_META.backend.hosting}); Banco=${SITE_META.database.engine} - ${SITE_META.database.provider}.`,
       `Autenticação: ${SITE_META.auth.session}. Rotas principais: ${SITE_META.routes.join(', ')}.`,
