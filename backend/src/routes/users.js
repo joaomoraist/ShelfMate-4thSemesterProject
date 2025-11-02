@@ -252,50 +252,58 @@ router.post('/send-reset-code', async (req, res) => {
       WHERE email = ${email}
     `;
 
-    // Enviar email usando Resend, se configurado; caso contrário, responder com fallback
+    // Preferir envio via serviço ML na AWS; fallback para Resend se necessário
+    const mlBaseUrl = process.env.ML_BASE_URL || 'http://54.207.253.238:8001';
     try {
-      const resend = getResend();
-      if (!resend) {
-        console.warn(`RESEND_API_KEY ausente; código de recuperação para ${email}: ${recoveryCode}`);
-        return res.json({
-          message: 'Código gerado. Email não enviado (serviço não configurado).',
-          fallback: true
-        });
+      const resp = await fetch(`${mlBaseUrl}/notify/email/password-reset`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipient: email, code: recoveryCode })
+      });
+      if (!resp.ok) {
+        const text = await resp.text();
+        throw new Error(`ML email notify failed: ${resp.status} ${text}`);
       }
-      await resend.emails.send({
-        from: 'ShelfMate <noreply@semestralproject.com>',
-        to: [email],
-        subject: 'Seu código de recuperação - ShelfMate',
-        text: `Seu código é: ${recoveryCode}.`,
-        html: `<p>Seu código é: <strong>${recoveryCode}</strong>.</p>`
-      });
-      console.log('Email enviado com sucesso para:', email);
-      
-      res.json({
-        message: 'Recovery code sent successfully'
-      });
-    } catch (emailError) {
-      console.error('Erro ao enviar email:', emailError);
-      
-      // Tratar erros específicos do Resend
-      if (emailError.message?.includes('Invalid API key')) {
+      console.log('Email de recuperação solicitado ao ML com sucesso para:', email);
+      return res.json({ message: 'Recovery code sent successfully via ML' });
+    } catch (mlErr) {
+      console.warn('Falha ao enviar via ML, tentando Resend como fallback:', mlErr && mlErr.message);
+      try {
+        const resend = getResend();
+        if (!resend) {
+          console.warn(`RESEND_API_KEY ausente; código de recuperação para ${email}: ${recoveryCode}`);
+          return res.json({
+            message: 'Código gerado. Email não enviado (serviço não configurado).',
+            fallback: true
+          });
+        }
+        await resend.emails.send({
+          from: 'ShelfMate <noreply@semestralproject.com>',
+          to: [email],
+          subject: 'Seu código de recuperação - ShelfMate',
+          text: `Seu código é: ${recoveryCode}.`,
+          html: `<p>Seu código é: <strong>${recoveryCode}</strong>.</p>`
+        });
+        console.log('Email enviado com sucesso via Resend para:', email);
+        return res.json({ message: 'Recovery code sent successfully' });
+      } catch (emailError) {
+        console.error('Erro ao enviar email via Resend:', emailError);
+        if (emailError.message?.includes('Invalid API key')) {
+          return res.status(500).json({
+            error: 'Email service configuration error',
+            details: 'Invalid API key'
+          });
+        }
+        if (emailError.message?.includes('Invalid domain')) {
+          return res.status(500).json({
+            error: 'Email service configuration error',
+            details: 'Invalid sender domain'
+          });
+        }
         return res.status(500).json({
-          error: 'Email service configuration error',
-          details: 'Invalid API key'
+          error: 'Failed to send recovery code email'
         });
       }
-      
-      if (emailError.message?.includes('Invalid domain')) {
-        return res.status(500).json({
-          error: 'Email service configuration error',
-          details: 'Invalid sender domain'
-        });
-      }
-      
-      res.status(500).json({
-        error: 'Failed to send email',
-        details: emailError.message
-      });
     }
 
   } catch (error) {
