@@ -86,10 +86,40 @@ def get_product_sales_daily_avg(conn, product_id):
 
 
 def insert_alert(conn, product_id, alert_type):
+    """Insere alerta garantindo compatibilidade com enum alerts_type_enum.
+
+    Enum permitido: 'Disponível', 'Estoque Baixo', 'Estoque Alto', 'Estoque Zerado'.
+    Mapeia valores comuns não permitidos:
+      - 'Indisponível'/'Esgotado'/'Zerado' -> 'Estoque Zerado'
+      - 'Baixo' -> 'Estoque Baixo'
+      - 'Alto' -> 'Estoque Alto'
+      - 'Disponivel' (sem acento) -> 'Disponível'
+    """
+    allowed = {
+        'Disponível',
+        'Estoque Baixo',
+        'Estoque Alto',
+        'Estoque Zerado',
+    }
+    normalized = (alert_type or '').strip()
+    if normalized not in allowed:
+        mapping = {
+            'Indisponível': 'Estoque Zerado',
+            'Esgotado': 'Estoque Zerado',
+            'Zerado': 'Estoque Zerado',
+            'Baixo': 'Estoque Baixo',
+            'Alto': 'Estoque Alto',
+            'Disponivel': 'Disponível',
+        }
+        normalized = mapping.get(normalized, normalized)
+        if normalized not in allowed:
+            # Falha controlada com mensagem clara, evitando erro do Postgres
+            raise ValueError(f"alert_type inválido: '{alert_type}'. Permitidos: {sorted(allowed)}")
+
     with conn.cursor() as cur:
         cur.execute(
             "INSERT INTO alerts (alert_type, product_id) VALUES (%s, %s)",
-            (alert_type, product_id),
+            (normalized, product_id),
         )
 
 
