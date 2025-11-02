@@ -158,8 +158,8 @@ Observações:
 - Configuração:
   - `DYNAMIC_LOW_STOCK_MULTIPLIER` (default `1.33`) — ex.: média de 300 ⇒ limiar ~ 400
 - Comportamentos ajustados:
-  - Status quando estoque = 0: `Indisponível` (em vez de `Esgotado`)
-  - Produtos `Indisponível` não recebem novas vendas no simulador/loop automático.
+  - Status quando estoque = 0: `Estoque Zerado` (em vez de `Esgotado`)
+  - Produtos com `Estoque Zerado` não recebem novas vendas no simulador/loop automático.
 
 ## Arquivos
 

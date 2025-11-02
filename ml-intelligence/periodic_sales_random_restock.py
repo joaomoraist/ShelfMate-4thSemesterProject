@@ -114,8 +114,8 @@ def perform_sales(conn, company_id=None) -> int:
         inventory = float(p['inventory'] or 0)
         status = (p.get('status') or '').strip()
 
-        # Não vender se estoque zerado ou produto indisponível
-        if inventory <= 0 or status.lower() == 'indisponível':
+        # Não vender se estoque zerado (evitar uso de 'Indisponível')
+        if inventory <= 0:
             continue
 
         max_q = max(1, min(int(inventory), 5))
@@ -159,7 +159,7 @@ def check_low_stock_and_notify(conn, company_id=None) -> int:
         if inv <= dynamic_threshold:
             lows.append(p)
             # Atualizar status do produto e usar tipo de alerta compatível com enum do banco
-            new_status = 'Indisponível' if inv <= 0 else 'Estoque Baixo'
+            new_status = 'Estoque Zerado' if inv <= 0 else 'Estoque Baixo'
             alert_type = 'Estoque Zerado' if inv <= 0 else 'Estoque Baixo'
             update_product_status(conn, p['id'], new_status)
             insert_alert(conn, p['id'], alert_type)

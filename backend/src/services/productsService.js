@@ -1,6 +1,6 @@
 import { findByNameAndCompany, insertProduct } from '../repositories/productsRepository.js';
 
-const allowedStatus = ['Disponível','Estoque Baixo','Estoque Alto','Indisponível'];
+const allowedStatus = ['Disponível','Estoque Baixo','Estoque Alto','Estoque Zerado'];
 
 export async function createProduct(payload, companyId) {
   const { name, price, unit_price, current_stock, inventory, status } = payload || {};
@@ -12,7 +12,8 @@ export async function createProduct(payload, companyId) {
   const stockQty = current_stock != null ? Number(current_stock) : (inventory != null ? Number(inventory) : 0);
   let productStatus = status || 'Disponível';
   if (!allowedStatus.includes(productStatus)) {
-    if (stockQty < 10) productStatus = 'Estoque Baixo';
+    if (stockQty === 0) productStatus = 'Estoque Zerado';
+    else if (stockQty < 10) productStatus = 'Estoque Baixo';
     else if (stockQty > 100) productStatus = 'Estoque Alto';
     else productStatus = 'Disponível';
   }

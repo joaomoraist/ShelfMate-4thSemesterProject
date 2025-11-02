@@ -90,7 +90,7 @@ def insert_alert(conn, product_id, alert_type):
 
     Enum permitido: 'Disponível', 'Estoque Baixo', 'Estoque Alto', 'Estoque Zerado'.
     Mapeia valores comuns não permitidos:
-      - 'Indisponível'/'Esgotado'/'Zerado' -> 'Estoque Zerado'
+      - 'Esgotado'/'Zerado' -> 'Estoque Zerado'
       - 'Baixo' -> 'Estoque Baixo'
       - 'Alto' -> 'Estoque Alto'
       - 'Disponivel' (sem acento) -> 'Disponível'
@@ -104,7 +104,6 @@ def insert_alert(conn, product_id, alert_type):
     normalized = (alert_type or '').strip()
     if normalized not in allowed:
         mapping = {
-            'Indisponível': 'Estoque Zerado',
             'Esgotado': 'Estoque Zerado',
             'Zerado': 'Estoque Zerado',
             'Baixo': 'Estoque Baixo',

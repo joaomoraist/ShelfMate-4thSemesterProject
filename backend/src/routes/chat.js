@@ -79,7 +79,7 @@ router.post('/', async (req, res) => {
         contextLines.push(reqSummary);
         contextLines.push('--- Fim do Extrato ---');
       } else {
-        contextLines.push('Observação: extrato de requisitos funcionais indisponível no momento.');
+        contextLines.push('Observação: extrato de requisitos funcionais não disponível no momento.');
       }
     } catch {}
 
