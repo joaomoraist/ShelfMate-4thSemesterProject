@@ -1,6 +1,9 @@
+// Define BASE_URL de forma dinâmica para facilitar testes locais
+const BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE_URL)
+  || (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.DEV ? 'http://localhost:3000' : 'https://shelfmate-4thsemesterproject.onrender.com');
+
 export const API_CONFIG = {
-  // Backend hospedado no Render
-  BASE_URL: 'https://shelfmate-4thsemesterproject.onrender.com',
+  BASE_URL,
   
   // Endpoints
   ENDPOINTS: {
@@ -28,9 +31,7 @@ export const API_CONFIG = {
 };
 
 // Função helper para construir URLs completas
-export const buildApiUrl = (endpoint: string): string => {
-  return `${API_CONFIG.BASE_URL}${endpoint}`;
-};
+export const buildApiUrl = (endpoint: string): string => `${API_CONFIG.BASE_URL}${endpoint}`;
 
 // URLs prontas para uso
 export const API_URLS = {

@@ -9,6 +9,8 @@ const ChatWidget: React.FC = () => {
   const [input, setInput] = React.useState('');
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [loading, setLoading] = React.useState(false);
+  const GROQ_API_KEY: string | undefined = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GROQ_API_KEY) as any;
+  const GROQ_MODEL: string = ((typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env as any).VITE_GROQ_MODEL) as any) || 'openai/gpt-oss-20b';
 
   const send = async () => {
     const text = input.trim();
@@ -29,7 +31,32 @@ const ChatWidget: React.FC = () => {
         setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
       } else {
         const err = await res.json().catch(() => ({} as any));
-        setMessages((prev) => [...prev, { role: 'assistant', content: `Erro: ${err.error || 'Falha ao enviar'}` }]);
+        const errMsg = String(err?.error || 'Falha ao enviar');
+        // Fallback: se backend não estiver com chave, tenta direto na Groq pelo frontend
+        const needsGroq = /OPENAI_API_KEY not configured|GROQ_API_KEY/i.test(errMsg);
+        if (needsGroq && GROQ_API_KEY) {
+          try {
+            const groqResp = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${GROQ_API_KEY}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                model: GROQ_MODEL,
+                messages: [...messages, { role: 'user', content: text }],
+                temperature: 0.3
+              })
+            });
+            const groqData = await groqResp.json().catch(() => ({} as any));
+            const groqReply = groqData?.choices?.[0]?.message?.content || 'Sem resposta.';
+            setMessages((prev) => [...prev, { role: 'assistant', content: groqReply }]);
+          } catch (ge) {
+            setMessages((prev) => [...prev, { role: 'assistant', content: 'Erro ao contatar a Groq diretamente.' }]);
+          }
+        } else {
+          setMessages((prev) => [...prev, { role: 'assistant', content: `Erro: ${errMsg}` }]);
+        }
       }
     } catch (e) {
       setMessages((prev) => [...prev, { role: 'assistant', content: 'Erro de rede ao contatar o chatbot.' }]);
@@ -40,8 +67,6 @@ const ChatWidget: React.FC = () => {
 
   return (
     <div className={styles.widgetRoot}>
-      {/* Ícone do robô ao lado do botão do chat */}
-      <img src="/robot.png" alt="Robô assistente" className={styles.robotIcon} />
       {open && (
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
@@ -71,7 +96,8 @@ const ChatWidget: React.FC = () => {
           </div>
         </div>
       )}
-      <button className={styles.fab} onClick={() => setOpen(!open)} title="Abrir chat">
+      <button className={styles.fab} onClick={() => setOpen(!open)} title={open ? 'Fechar chat' : 'Abrir chat'}>
+        <img src="/robot.png" alt="Robô assistente" className={styles.robotIcon} />
         {open ? 'Fechar' : 'Chat'}
       </button>
     </div>

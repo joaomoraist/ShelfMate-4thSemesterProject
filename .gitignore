@@ -10,6 +10,13 @@ backend/src/public/user_photos/
 
 # Environment files
 backend/.env
+# Ignore all env files across project (but keep examples)
+**/.env*
+!**/.env.example
+
+# Vite local env
+frontend/.env*
+!frontend/.env.example
 
 # Python cache
 ml-intelligence/__pycache__/
