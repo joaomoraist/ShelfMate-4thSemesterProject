@@ -33,9 +33,25 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ===============================================
-// Configuração do Resend
+// Configuração do Resend (lazy)
+// Evita crash quando RESEND_API_KEY não está presente em produção.
 // ===============================================
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resendClient = null;
+const getResend = () => {
+  try {
+    if (resendClient) return resendClient;
+    const key = process.env.RESEND_API_KEY;
+    if (!key) {
+      console.warn('RESEND_API_KEY não configurado; envio de email será pulado.');
+      return null;
+    }
+    resendClient = new Resend(key);
+    return resendClient;
+  } catch (e) {
+    console.warn('Falha ao inicializar Resend:', e && e.message);
+    return null;
+  }
+};
 
 // ===============================================
 // 1. Verificar se um usuário existe pelo email e senha
@@ -236,8 +252,16 @@ router.post('/send-reset-code', async (req, res) => {
       WHERE email = ${email}
     `;
 
-    // Enviar email usando Resend
+    // Enviar email usando Resend, se configurado; caso contrário, responder com fallback
     try {
+      const resend = getResend();
+      if (!resend) {
+        console.warn(`RESEND_API_KEY ausente; código de recuperação para ${email}: ${recoveryCode}`);
+        return res.json({
+          message: 'Código gerado. Email não enviado (serviço não configurado).',
+          fallback: true
+        });
+      }
       await resend.emails.send({
         from: 'ShelfMate <noreply@semestralproject.com>',
         to: [email],
