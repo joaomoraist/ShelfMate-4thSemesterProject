@@ -71,7 +71,10 @@ const ChatWidget: React.FC = () => {
         <div className={styles.panel}>
           <div className={styles.panelHeader}>
             <span>Assistente</span>
-            <button className={styles.closeBtn} onClick={() => setOpen(false)}>×</button>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className={styles.clearBtn} onClick={() => setMessages([])} title="Limpar conversa">Limpar</button>
+              <button className={styles.closeBtn} onClick={() => setOpen(false)} title="Fechar">×</button>
+            </div>
           </div>
           <div className={styles.messages}>
             {messages.length === 0 && (

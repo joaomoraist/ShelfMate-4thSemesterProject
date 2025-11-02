@@ -23,6 +23,23 @@ const SITE_META = {
 
 const router = express.Router();
 
+function sanitizeReply(text) {
+  if (!text) return '';
+  let t = String(text);
+  // Remover markdown básico: **negrito**, *itálico*, listas e cabeçalhos
+  t = t.replace(/\*\*+/g, '');
+  t = t.replace(/(^|\n)[\s]*[\-*]\s+/g, '$1');
+  t = t.replace(/(^|\n)#{1,6}\s+/g, '$1');
+  // Remover cumprimentos e persona
+  t = t.replace(/^\s*(ol[áa]|oi)[^\n]*\n+/i, '');
+  t = t.replace(/Sou seu assistente ShelfMate\.?/gi, '');
+  t = t.replace(/Como posso ajudar você a navegar[^\n]*\n*/gi, '');
+  // Espaços extras
+  t = t.replace(/[\t\r]+/g, ' ');
+  t = t.replace(/\n{3,}/g, '\n\n');
+  return t.trim();
+}
+
 // Chat proxy usando Gemini via @google/genai
 router.post('/', async (req, res) => {
   try {
@@ -45,7 +62,8 @@ router.post('/', async (req, res) => {
 
     let contextLines = [
       'Você é o assistente do ShelfMate e responde em português.',
-      'Responda de forma direta e objetiva ao que foi perguntado.',
+      'Responda somente ao que foi perguntado, sem cumprimentos ou persona.',
+      'Não use formatação Markdown/HTML (negrito, bullets, cabeçalhos); responda em texto simples.',
       'Só descreva navegação quando o usuário pedir explicitamente; não inclua rodapé padrão de páginas.',
       `Projeto: ${SITE_META.name}. Repositório: ${SITE_META.repo}.`,
       `Stack: Frontend=${SITE_META.frontend.framework} (${SITE_META.frontend.hosting}); Backend=${SITE_META.backend.runtime}/${SITE_META.backend.framework} (${SITE_META.backend.hosting}); Banco=${SITE_META.database.engine} - ${SITE_META.database.provider}.`,
@@ -131,7 +149,8 @@ router.post('/', async (req, res) => {
     });
 
     const text = response?.text || response?.response?.text?.() || '';
-    return res.json({ reply: text });
+    const clean = sanitizeReply(text);
+    return res.json({ reply: clean });
   } catch (err) {
     console.error('Erro em POST /chat:', err);
     res.status(500).json({ error: 'Internal server error' });
