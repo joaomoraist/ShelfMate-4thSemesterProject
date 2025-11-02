@@ -1,5 +1,6 @@
 import express from 'express';
 import { GoogleGenAI } from '@google/genai';
+import sql from '../db.js';
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ router.post('/', async (req, res) => {
       return res.status(500).json({ error: 'GOOGLE_API_KEY não configurado' });
     }
 
-    const { message } = req.body || {};
+    const { message, conversation } = req.body || {};
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'message é obrigatório' });
     }
@@ -19,10 +20,74 @@ router.post('/', async (req, res) => {
     const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     const ai = new GoogleGenAI({ apiKey });
 
-    // API simples: envia o texto do usuário e retorna texto
+    // Montar contexto com navegação e dados da empresa do usuário (se autenticado)
+    const sessionUser = req.session && req.session.user ? req.session.user : null;
+    const companyId = sessionUser && sessionUser.company_id ? Number(sessionUser.company_id) : null;
+
+    let contextLines = [
+      'Você é o assistente do ShelfMate e responde em português.',
+      'Ajude o usuário a navegar: páginas disponíveis são Home, Statistics, Products, Reports e Settings.',
+      'Explique caminhos como: Home (visão geral), Statistics (gráficos e métricas), Products (listar/editar/adicionar produtos), Reports (exportar relatórios), Settings (perfil e empresa).',
+    ];
+
+    if (sessionUser) {
+      contextLines.push(`Usuário: ${sessionUser.name || sessionUser.email || 'desconhecido'} (empresa ${companyId ?? 'n/d'})`);
+    }
+
+    // Coletar métricas leves da empresa para dar contexto nas respostas
+    if (companyId) {
+      try {
+        const userAgg = await sql`
+          SELECT COALESCE(SUM(accesses),0) AS accesses_sum,
+                 COALESCE(SUM(changes),0) AS changes_sum,
+                 COALESCE(SUM(downloads),0) AS downloads_sum
+          FROM users
+          WHERE company_id = ${companyId}
+        `;
+        const productsCount = await sql`
+          SELECT COUNT(*)::int AS products_count FROM products WHERE company_id = ${companyId}
+        `;
+        const alertsCount = await sql`
+          SELECT COUNT(a.*)::int AS alerts_count
+          FROM alerts a
+          JOIN products p ON p.id = a.product_id
+          WHERE p.company_id = ${companyId}
+        `;
+        const totalSold = await sql`
+          SELECT COALESCE(SUM(s.qntd),0) AS total_qntd
+          FROM products p
+          LEFT JOIN sales s ON s.product_id = p.id
+          WHERE p.company_id = ${companyId}
+        `;
+        const totalStockValue = await sql`
+          SELECT COALESCE(SUM(p.inventory * p.unit_price),0) AS total_value
+          FROM products p
+          WHERE p.company_id = ${companyId}
+        `;
+
+        const metricsLine = `Métricas: acessos=${userAgg[0].accesses_sum}, alterações=${userAgg[0].changes_sum}, downloads=${userAgg[0].downloads_sum}, produtos=${productsCount[0].products_count}, alertas=${alertsCount[0].alerts_count}, vendas qntd total=${Number(totalSold[0].total_qntd)}, valor de estoque=${Number(totalStockValue[0].total_value)}.`;
+        contextLines.push(metricsLine);
+      } catch (mErr) {
+        // Se falhar, seguimos sem métricas
+      }
+    }
+
+    // Incorporar breve histórico (se fornecido pelo frontend) para manter o contexto da conversa
+    if (Array.isArray(conversation) && conversation.length > 0) {
+      try {
+        const lastUserMsg = conversation.filter(m => m && m.role === 'user').slice(-1)[0];
+        if (lastUserMsg && lastUserMsg.content) {
+          contextLines.push(`Última pergunta anterior: ${String(lastUserMsg.content)}`);
+        }
+      } catch {}
+    }
+
+    // Prompt final combinando contexto e pergunta do usuário
+    const promptText = `${contextLines.join('\n')}\nPergunta do usuário: ${message}`;
+
     const response = await ai.models.generateContent({
       model: modelName,
-      contents: message,
+      contents: promptText,
     });
 
     const text = response?.text || response?.response?.text?.() || '';
