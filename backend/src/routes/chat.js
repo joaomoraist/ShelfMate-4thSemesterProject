@@ -1,6 +1,7 @@
 import express from 'express';
 import { GoogleGenAI } from '@google/genai';
 import sql from '../db.js';
+import { getRequirementsText } from '../utils/requirementsLoader.js';
 
 const SITE_META = {
   name: 'ShelfMate',
@@ -51,6 +52,18 @@ router.post('/', async (req, res) => {
       `Autenticação: ${SITE_META.auth.session}. Rotas principais: ${SITE_META.routes.join(', ')}.`,
       `Estrutura: ${SITE_META.structure.join(' | ')}.`,
     ];
+
+    // Incorporar extrato dos requisitos funcionais (PDF) se disponível
+    try {
+      const reqSummary = await getRequirementsText();
+      if (reqSummary) {
+        contextLines.push('--- Extrato de Requisitos Funcionais (PDF) ---');
+        contextLines.push(reqSummary);
+        contextLines.push('--- Fim do Extrato ---');
+      } else {
+        contextLines.push('Observação: extrato de requisitos funcionais indisponível no momento.');
+      }
+    } catch {}
 
     if (sessionUser) {
       contextLines.push(`Usuário: ${sessionUser.name || sessionUser.email || 'desconhecido'} (empresa ${companyId ?? 'n/d'})`);
