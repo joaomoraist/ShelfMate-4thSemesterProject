@@ -158,10 +158,11 @@ def check_low_stock_and_notify(conn, company_id=None) -> int:
         dynamic_threshold = max(LOW_STOCK_THRESHOLD, daily_avg * DYNAMIC_LOW_STOCK_MULTIPLIER)
         if inv <= dynamic_threshold:
             lows.append(p)
-            # Atualizar status e alerta conforme nível
+            # Atualizar status do produto e usar tipo de alerta compatível com enum do banco
             new_status = 'Indisponível' if inv <= 0 else 'Estoque Baixo'
+            alert_type = 'Estoque Zerado' if inv <= 0 else 'Estoque Baixo'
             update_product_status(conn, p['id'], new_status)
-            insert_alert(conn, p['id'], new_status)
+            insert_alert(conn, p['id'], alert_type)
             cid = p.get('company_id')
             if cid is not None:
                 by_company.setdefault(int(cid), []).append(p)
@@ -220,11 +221,14 @@ def main():
 
     last_sales = 0.0
     last_restock = 0.0
+    loop_num = 0
     try:
         while True:
             now = time.time()
             try:
                 if now - last_sales >= SALES_INTERVAL_SECONDS:
+                    loop_num += 1
+                    print(f"\n===== Loop número {loop_num} - [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] =====")
                     cnt = perform_sales(conn, company_id)
                     print(f"[Sales] {cnt} vendas inseridas às {datetime.now().strftime('%H:%M:%S')}")
                     low_cnt = check_low_stock_and_notify(conn, company_id)
