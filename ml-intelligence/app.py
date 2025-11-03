@@ -58,7 +58,8 @@ app = FastAPI(title="ShelfMate ML Intelligence Service", version="0.1.0")
 # ===========================
 
 SALES_INTERVAL_SECONDS = int(os.environ.get('SALES_INTERVAL_SECONDS', '60'))
-RESTOCK_INTERVAL_SECONDS = int(os.environ.get('RESTOCK_INTERVAL_SECONDS', '120'))
+RESTOCK_INTERVAL_SECONDS = int(os.environ.get('RESTOCK_INTERVAL_SECONDS', '60'))
+EMAIL_INTERVAL_SECONDS = int(os.environ.get('EMAIL_INTERVAL_SECONDS', '60'))
 
 _company_id_env = os.environ.get('SIM_COMPANY_ID')
 try:
@@ -70,60 +71,106 @@ _threads_started = False
 _last_runs: Dict[str, str] = {
     "sales": "never",
     "restock": "never",
+    "email": "never",
 }
 
+# Estado do sequenciador para depuração e controle
+_sequence_state: Dict[str, Any] = {
+    "cycles_completed": 0,
+    "sales_last_count": 0,
+    "restock_last_count": 0,
+    "email_last_low_count": 0,
+    "emails_enabled": False,  # Só habilita após primeira venda + reposição concluídas
+}
 
-def _sales_loop():
+def _sequence_loop():
     global _last_runs
     iteration = 0
     while True:
         iteration += 1
         try:
             ts = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-            print(f"=========== looping {iteration} - [{ts}] ===========")
+            print(f"=========== ciclo {iteration} - [{ts}] ===========")
         except Exception:
             pass
-        conn = get_connection()
+
+        # Etapa 1: Vendas
+        conn1 = get_connection()
         try:
-            cnt = perform_sales(conn, COMPANY_ID)
-            low_cnt = check_low_stock_and_notify(conn, COMPANY_ID)
+            cnt = perform_sales(conn1, COMPANY_ID)
             _last_runs["sales"] = datetime.utcnow().isoformat() + "Z"
-            print(f"[SalesLoop] vendas={cnt}, low_stock={low_cnt}")
+            _sequence_state["sales_last_count"] = cnt
+            print(f"[Seq] vendas inseridas={cnt}")
         except Exception as e:
-            print(f"[SalesLoop:ERR] {e}\n{traceback.format_exc()}")
+            print(f"[Seq:Sales:ERR] {e}\n{traceback.format_exc()}")
             try:
-                rollback(conn)
+                rollback(conn1)
             except Exception:
                 pass
         finally:
             try:
-                conn.close()
+                conn1.close()
             except Exception:
                 pass
         time.sleep(SALES_INTERVAL_SECONDS)
 
-
-def _restock_loop():
-    global _last_runs
-    while True:
-        conn = get_connection()
+        # Etapa 2: Reposição
+        conn2 = get_connection()
         try:
-            updates = perform_random_restock(conn, COMPANY_ID)
-            low_cnt = check_low_stock_and_notify(conn, COMPANY_ID)
+            updates = perform_random_restock(conn2, COMPANY_ID)
             _last_runs["restock"] = datetime.utcnow().isoformat() + "Z"
-            print(f"[RestockLoop] atualizados={len(updates)}, low_stock={low_cnt}")
+            _sequence_state["restock_last_count"] = len(updates)
+            print(f"[Seq] produtos repostos={len(updates)}")
         except Exception as e:
-            print(f"[RestockLoop:ERR] {e}\n{traceback.format_exc()}")
+            print(f"[Seq:Restock:ERR] {e}\n{traceback.format_exc()}")
             try:
-                rollback(conn)
+                rollback(conn2)
             except Exception:
                 pass
         finally:
             try:
-                conn.close()
+                conn2.close()
             except Exception:
                 pass
         time.sleep(RESTOCK_INTERVAL_SECONDS)
+
+        # Etapa 3: Envio de e-mails (estoque baixo)
+        # Habilita e-mails somente após primeira venda + reposição concluídas
+        if not _sequence_state.get("emails_enabled"):
+            _sequence_state["emails_enabled"] = (
+                _sequence_state.get("sales_last_count", 0) > 0 or True  # venda pode ser 0 se estoque zerado
+            ) and (
+                _sequence_state.get("restock_last_count", 0) > 0 or True  # reposição sempre ocorre, mas guardamos contagem
+            )
+            if not _sequence_state["emails_enabled"]:
+                print("[Seq] e-mails desabilitados até concluir primeira venda+reposição")
+            else:
+                print("[Seq] e-mails habilitados após primeira venda+reposição")
+
+        if _sequence_state.get("emails_enabled"):
+            conn3 = get_connection()
+            try:
+                low_cnt = check_low_stock_and_notify(conn3, COMPANY_ID)
+                _last_runs["email"] = datetime.utcnow().isoformat() + "Z"
+                _sequence_state["email_last_low_count"] = low_cnt
+                print(f"[Seq] emails enviados para {low_cnt} itens com estoque baixo")
+            except Exception as e:
+                print(f"[Seq:Email:ERR] {e}\n{traceback.format_exc()}")
+                try:
+                    rollback(conn3)
+                except Exception:
+                    pass
+            finally:
+                try:
+                    conn3.close()
+                except Exception:
+                    pass
+        else:
+            print("[Seq] pulando envio de e-mails neste ciclo inicial")
+        time.sleep(EMAIL_INTERVAL_SECONDS)
+
+        # Atualiza ciclos completos
+        _sequence_state["cycles_completed"] = _sequence_state.get("cycles_completed", 0) + 1
 
 
 @app.on_event("startup")
@@ -131,11 +178,9 @@ def _start_background_threads():
     global _threads_started
     if _threads_started:
         return
-    print(f"[Orchestrator] Iniciando loops: sales={SALES_INTERVAL_SECONDS}s, restock={RESTOCK_INTERVAL_SECONDS}s, company_id={COMPANY_ID}")
-    t1 = threading.Thread(target=_sales_loop, daemon=True)
-    t2 = threading.Thread(target=_restock_loop, daemon=True)
-    t1.start()
-    t2.start()
+    print(f"[Orchestrator] Iniciando ciclo sequencial: vendas={SALES_INTERVAL_SECONDS}s, reposicao={RESTOCK_INTERVAL_SECONDS}s, emails={EMAIL_INTERVAL_SECONDS}s, company_id={COMPANY_ID}")
+    t = threading.Thread(target=_sequence_loop, daemon=True)
+    t.start()
     _threads_started = True
 
 
@@ -147,10 +192,14 @@ def health():
         "version": "0.1.0",
         "time": datetime.utcnow().isoformat() + "Z",
         "orchestrator": {
-            "sales_interval_seconds": SALES_INTERVAL_SECONDS,
-            "restock_interval_seconds": RESTOCK_INTERVAL_SECONDS,
+            "sequence": {
+                "sales_interval_seconds": SALES_INTERVAL_SECONDS,
+                "restock_interval_seconds": RESTOCK_INTERVAL_SECONDS,
+                "email_interval_seconds": EMAIL_INTERVAL_SECONDS,
+            },
             "last_runs": _last_runs,
             "company_id": COMPANY_ID,
+            "state": _sequence_state,
         }
     }
 
