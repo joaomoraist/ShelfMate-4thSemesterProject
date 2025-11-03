@@ -282,6 +282,9 @@ def notify_password_reset(req: PasswordResetEmailRequest):
         if not sent:
             raise HTTPException(status_code=502, detail="email_not_sent")
         return {"sent": True}
+    except HTTPException:
+        # Propaga HTTPException como 502 quando e-mail não foi enviado
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
