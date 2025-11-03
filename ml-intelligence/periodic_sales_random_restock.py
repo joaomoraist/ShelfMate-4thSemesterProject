@@ -23,7 +23,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
 
-from db_utils import (
+from .db_utils import (
     get_connection,
     fetch_all_products,
     insert_sale,
@@ -66,7 +66,7 @@ SMTP_SENDER = os.environ.get('SMTP_SENDER') or SMTP_USER
 SMTP_RECIPIENTS = [r.strip() for r in os.environ.get('SMTP_RECIPIENTS', '').split(',') if r.strip()]
 
 
-def send_email_summary(subject: str, lines: List[str], recipients: List[str] | None = None) -> None:
+def send_email_summary(subject: str, lines: List[str], recipients: List[str] | None = None) -> bool:
     """Envia e-mail via SMTP (Gmail) se configurado; destinatários podem ser dinâmicos.
     Se 'recipients' não for informado, usa SMTP_RECIPIENTS do ambiente; caso não haja, apenas loga no console.
     """
@@ -74,7 +74,7 @@ def send_email_summary(subject: str, lines: List[str], recipients: List[str] | N
     dests = recipients if (recipients and len(recipients) > 0) else SMTP_RECIPIENTS
     if not (SMTP_SENDER and SMTP_USER and SMTP_PASS and dests):
         print(f"[Email:SKIP] {subject}\n{body}")
-        return
+        return False
 
     try:
         msg = MIMEMultipart()
@@ -96,8 +96,10 @@ def send_email_summary(subject: str, lines: List[str], recipients: List[str] | N
             print(f"\n=========== Email de alerta para {', '.join(dests)} em [{ts}] ===========")
         else:
             print(f"[Email:OK] {subject} -> {', '.join(dests)}")
+        return True
     except Exception as e:
         print(f"[Email:ERR] {e}")
+        return False
 
 
 def send_password_reset_email(recipient: str, code: str) -> None:
