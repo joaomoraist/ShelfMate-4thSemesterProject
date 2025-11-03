@@ -275,17 +275,8 @@ def notify_low_stock_email(req: LowStockEmailRequest):
 @app.post("/notify/email/password-reset")
 def notify_password_reset(req: PasswordResetEmailRequest):
     try:
-        sent = False
-        # send_password_reset_email usa send_email_summary internamente
-        send_password_reset_email(req.recipient, req.code)
-        # Como send_password_reset_email não retorna, checar via envio direto também
-        subject = "[ShelfMate] Código de recuperação de senha"
-        lines = [
-            "Você solicitou a recuperação de senha.",
-            f"Seu código é: {req.code}",
-            "Se não foi você, ignore este e-mail.",
-        ]
-        sent = send_email_summary(subject, lines, recipients=[req.recipient])
+        # Envio simples via Gmail SMTP
+        sent = send_password_reset_email(req.recipient, req.code)
         if not sent:
             raise HTTPException(status_code=502, detail="email_not_sent")
         return {"sent": True}

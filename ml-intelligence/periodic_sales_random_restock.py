@@ -102,15 +102,38 @@ def send_email_summary(subject: str, lines: List[str], recipients: List[str] | N
         return False
 
 
-def send_password_reset_email(recipient: str, code: str) -> None:
-    """Envia e-mail de reset de senha (conteúdo simples) via SMTP."""
-    subject = "[ShelfMate] Código de recuperação de senha"
-    lines = [
-        "Você solicitou a recuperação de senha.",
-        f"Seu código é: {code}",
-        "Se não foi você, ignore este e-mail.",
-    ]
-    send_email_summary(subject, lines, recipients=[recipient])
+def send_password_reset_email(recipient: str, code: str) -> bool:
+    """Envia e-mail de reset de senha de forma simples, usando Gmail SMTP.
+
+    Utiliza credenciais do ambiente:
+    - SMTP_USER: e-mail do remetente (ex.: semestretrabalhofecaf@gmail.com)
+    - SMTP_PASS: senha de app do Gmail (16 caracteres, sem espaços)
+
+    Retorna True em caso de sucesso, False em caso de falha.
+    """
+    sender_email = os.environ.get('SMTP_USER') or 'semestretrabalhofecaf@gmail.com'
+    password = os.environ.get('SMTP_PASS')
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = recipient
+        msg['Subject'] = "Seu código do melhor App da Fecaf!!!"
+
+        body = f"Seu código é: {code}."
+        msg.attach(MIMEText(body, 'plain'))
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, password)
+        server.sendmail(sender_email, recipient, msg.as_string())
+        server.quit()
+        ts = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        print(f"\n=========== Email de esqueceu a senha para {recipient} em [{ts}] ===========")
+        return True
+    except Exception as e:
+        print(f"[Email:ERR] {e}")
+        return False
 
 
 def perform_sales(conn, company_id=None) -> int:
