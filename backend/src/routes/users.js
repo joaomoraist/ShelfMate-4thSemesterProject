@@ -253,7 +253,7 @@ router.post('/send-reset-code', async (req, res) => {
     `;
 
     // Preferir envio via serviço ML na AWS; fallback para Resend se necessário
-    const mlBaseUrl = process.env.ML_BASE_URL || 'http://54.207.253.238:8001';
+    const mlBaseUrl = process.env.ML_BASE_URL || 'http://localhost:8001';
     try {
       const resp = await fetch(`${mlBaseUrl}/notify/email/password-reset`, {
         method: 'POST',
