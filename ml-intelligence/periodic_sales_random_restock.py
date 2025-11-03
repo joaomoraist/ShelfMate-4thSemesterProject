@@ -228,7 +228,7 @@ def main():
             try:
                 if now - last_sales >= SALES_INTERVAL_SECONDS:
                     loop_num += 1
-                    print(f"\n===== Loop número {loop_num} - [{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] =====")
+                    print(f"\n=========== Looping {loop_num} - [{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}] ===========")
                     cnt = perform_sales(conn, company_id)
                     print(f"[Sales] {cnt} vendas inseridas às {datetime.now().strftime('%H:%M:%S')}")
                     low_cnt = check_low_stock_and_notify(conn, company_id)
