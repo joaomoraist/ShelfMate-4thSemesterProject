@@ -75,7 +75,14 @@ _last_runs: Dict[str, str] = {
 
 def _sales_loop():
     global _last_runs
+    iteration = 0
     while True:
+        iteration += 1
+        try:
+            ts = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            print(f"=========== looping {iteration} - [{ts}] ===========")
+        except Exception:
+            pass
         conn = get_connection()
         try:
             cnt = perform_sales(conn, COMPANY_ID)
