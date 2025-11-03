@@ -88,7 +88,14 @@ def send_email_summary(subject: str, lines: List[str], recipients: List[str] | N
         server.login(SMTP_USER, SMTP_PASS)
         server.sendmail(SMTP_SENDER, dests, msg.as_string())
         server.quit()
-        print(f"[Email:OK] {subject} -> {', '.join(dests)}")
+        ts = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
+        subj_lower = (subject or '').lower()
+        if 'recuperação de senha' in subj_lower or 'senha' in subj_lower:
+            print(f"\n=========== Email de esqueceu a senha para {', '.join(dests)} em [{ts}] ===========")
+        elif 'estoque baixo' in subj_lower or 'alerta' in subj_lower:
+            print(f"\n=========== Email de alerta para {', '.join(dests)} em [{ts}] ===========")
+        else:
+            print(f"[Email:OK] {subject} -> {', '.join(dests)}")
     except Exception as e:
         print(f"[Email:ERR] {e}")
 
