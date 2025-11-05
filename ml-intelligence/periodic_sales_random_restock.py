@@ -38,8 +38,8 @@ from .db_utils import (
 
 
 # Intervalos
-SALES_INTERVAL_SECONDS = 60
-RESTOCK_INTERVAL_SECONDS = 120
+SALES_INTERVAL_SECONDS = 3600
+RESTOCK_INTERVAL_SECONDS = 7200
 
 # Limiar de estoque baixo (base)
 LOW_STOCK_THRESHOLD = float(os.environ.get('LOW_STOCK_THRESHOLD', 10))
