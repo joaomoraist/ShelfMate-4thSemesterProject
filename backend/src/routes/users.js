@@ -53,6 +53,10 @@ const getResend = () => {
   }
 };
 
+// Simple in-memory rate limit for sending reset codes to avoid duplicates
+const recentResetRequests = new Map(); // email -> timestamp(ms)
+const RESET_COOLDOWN_MS = 15000; // 15 seconds cooldown
+
 // ===============================================
 // 1. Verificar se um usuário existe pelo email e senha
 // ===============================================
@@ -241,6 +245,14 @@ router.post('/send-reset-code', async (req, res) => {
     }
 
     const user = users[0];
+
+    // Prevent duplicate sends within cooldown window
+    const now = Date.now();
+    const last = recentResetRequests.get(email);
+    if (last && (now - last) < RESET_COOLDOWN_MS) {
+      return res.json({ message: 'Recovery code already sent recently' });
+    }
+    recentResetRequests.set(email, now);
 
     // Gerar código de recuperação
     const recoveryCode = crypto.randomBytes(20).toString('hex').toUpperCase();

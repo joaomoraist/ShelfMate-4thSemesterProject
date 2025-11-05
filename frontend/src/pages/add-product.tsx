@@ -19,6 +19,7 @@ const AddProduct: React.FC = () => {
     inventory: 0,
     status: 'Disponível'
   });
+  const [unitPriceInput, setUnitPriceInput] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -27,7 +28,21 @@ const AddProduct: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'unit_price' || name === 'inventory' ? Number(value) : value
+      [name]: name === 'inventory' ? Number(value) : value
+    }));
+  };
+
+  const handleUnitPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    // Permitir apenas dígitos e separador decimal (vírgula ou ponto), até 2 casas decimais
+    const isValid = /^\d*(?:[\.,]\d{0,2})?$/.test(raw);
+    if (!isValid) return; // ignora entradas inválidas
+    setUnitPriceInput(raw);
+    const normalized = raw.replace(',', '.');
+    const num = Number(normalized);
+    setFormData(prev => ({
+      ...prev,
+      unit_price: isNaN(num) ? 0 : num
     }));
   };
 
@@ -43,8 +58,8 @@ const AddProduct: React.FC = () => {
         throw new Error('Nome do produto é obrigatório');
       }
 
-      if (formData.unit_price < 0) {
-        throw new Error('Preço não pode ser negativo');
+      if (formData.unit_price <= 0) {
+        throw new Error('Preço deve ser maior que 0');
       }
 
       if (formData.inventory < 0) {
@@ -128,15 +143,15 @@ const AddProduct: React.FC = () => {
                 Preço Unitário (R$) *
               </label>
               <input
-                type="number"
+                type="text"
                 id="unit_price"
                 name="unit_price"
-                value={formData.unit_price === 0 ? '' : formData.unit_price}
-                onChange={handleInputChange}
+                value={unitPriceInput}
+                onChange={handleUnitPriceChange}
                 className={styles.input}
-                placeholder="0.00"
-                min="0"
-                step="0.01"
+                placeholder="0,00"
+                inputMode="decimal"
+                pattern="^\\d+(?:[\\.,]\\d{1,2})?$"
                 required
               />
             </div>

@@ -8,6 +8,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [toast, setToast] = useState<string>("");
   const [welcomeTitle, setWelcomeTitle] = useState<string>("Bem vindo de Volta");
+  const [forgotLoading, setForgotLoading] = useState<boolean>(false);
   const { navigateTo } = useNavigation();
 
   useEffect(() => {
@@ -25,12 +26,14 @@ export default function Login() {
   }, []);
 
   const handleForgotFromLogin = async () => {
+    if (forgotLoading) return; // evita cliques repetidos
     if (!email) {
       showToast("Informe seu email para enviar o código.");
       return;
     }
 
     try {
+      setForgotLoading(true);
       const response = await fetch(API_URLS.SEND_RESET_CODE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -40,6 +43,7 @@ export default function Login() {
       if (response.ok) {
         showToast("Código enviado. Verifique seu email.");
         localStorage.setItem("resetFlowEmail", email);
+        localStorage.setItem("resetCodeJustSent", "1");
         navigateTo("forgot-password");
       } else {
         const errorData = await response.json();
@@ -56,6 +60,8 @@ export default function Login() {
     } catch (err) {
       console.error(err);
       showToast("Erro ao conectar com o servidor.");
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -132,8 +138,10 @@ export default function Login() {
                   e.preventDefault();
                   handleForgotFromLogin();
                 }}
+                aria-disabled={forgotLoading}
+                style={{ pointerEvents: forgotLoading ? 'none' : 'auto', opacity: forgotLoading ? 0.6 : 1 }}
               >
-                Esqueceu a Senha?
+                {forgotLoading ? 'Enviando...' : 'Esqueceu a Senha?'}
               </a>
             </div>
 

@@ -12,6 +12,7 @@ export default function ForgotPassword() {
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [toast, setToast] = useState<string>("");
+  const [sending, setSending] = useState<boolean>(false);
   const { navigateTo } = useNavigation();
 
   // Prefill email if the login page stored it
@@ -24,9 +25,18 @@ export default function ForgotPassword() {
     }
     setEmail(allowedEmail);
 
-    // Ao montar, já enviar o código e ativar o campo de digitar o código
+    const justSent = localStorage.getItem('resetCodeJustSent');
+    if (justSent === '1') {
+      showToast("Código enviado. Verifique seu email.");
+      setStep(2);
+      localStorage.removeItem('resetCodeJustSent');
+      return;
+    }
+
+    // Ao montar, enviar o código apenas se não tiver sido enviado no login
     (async () => {
       try {
+        setSending(true);
         const response = await fetch(API_URLS.SEND_RESET_CODE, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -44,14 +54,18 @@ export default function ForgotPassword() {
       } catch (err) {
         console.error(err);
         showToast("Erro ao conectar com o servidor.");
+      } finally {
+        setSending(false);
       }
     })();
   }, []);
 
   const handleSendCode = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    if (sending) return;
 
     try {
+      setSending(true);
       const response = await fetch(API_URLS.SEND_RESET_CODE, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -69,6 +83,8 @@ export default function ForgotPassword() {
     } catch (error) {
       console.error(error);
       showToast("Erro ao conectar com o servidor.");
+    } finally {
+      setSending(false);
     }
   };
 
@@ -127,7 +143,7 @@ export default function ForgotPassword() {
               <label htmlFor="email">Email</label>
               <input id="email" type="email" placeholder="Digite seu email" value={email} onChange={(e) => setEmail(e.target.value)} />
               <div className="row" style={{ marginTop: 16 }}>
-                <button className="primary" type="submit">Enviar Código</button>
+                <button className="primary" type="submit" disabled={sending}>{sending ? 'Enviando...' : 'Enviar Código'}</button>
               </div>
             </form>
           )}

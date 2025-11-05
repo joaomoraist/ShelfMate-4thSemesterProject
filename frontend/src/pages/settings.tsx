@@ -6,6 +6,7 @@ import { useNavigation } from "../context/NavigationContext";
 import cssModule from '../styles/settings.module.css';
 import Toast from '../components/Toast';
 import LoadingScreen from '../components/LoadingScreen';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const Settings: React.FC = () => {
     const [user, setUser] = useState<any>(null);
@@ -22,6 +23,7 @@ const Settings: React.FC = () => {
     const { navigateTo } = useNavigation();
     // mirror currentUser into local state for compatibility with existing handlers
     React.useEffect(() => { setUser(currentUser); }, [currentUser]);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     // inicializa campos editáveis com os dados do usuário
     React.useEffect(() => {
@@ -233,28 +235,7 @@ const Settings: React.FC = () => {
                                 </p>
                                 <button
                                     className={cssModule.dangerButton}
-                                    onClick={async () => {
-                                        try {
-                                            const confirmed = window.confirm('Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita.');
-                                            if (!confirmed) return;
-                                            const res = await fetch(API_URLS.ME, { method: 'DELETE', credentials: 'include' });
-                                            if (res.ok) {
-                                                setToastType('success');
-                                                setToastMsg('Conta excluída com sucesso.');
-                                                localStorage.removeItem('user');
-                                                navigateTo('login');
-                                            } else {
-                                                let errMsg = 'Erro ao excluir a conta';
-                                                try { const err = await res.json(); errMsg = err.error || errMsg; } catch {}
-                                                setToastType('error');
-                                                setToastMsg(errMsg);
-                                            }
-                                        } catch (err) {
-                                            console.error(err);
-                                            setToastType('error');
-                                            setToastMsg('Erro inesperado ao excluir a conta');
-                                        }
-                                    }}
+                                    onClick={() => setShowDeleteConfirm(true)}
                                 >
                                     <img src="/trash.png" alt="Excluir" className={cssModule.saveIconImg} />
                                     Excluir minha conta
@@ -273,6 +254,39 @@ const Settings: React.FC = () => {
                     message={toastMsg}
                     type={toastType}
                     onClose={() => setToastMsg('')}
+                />
+            )}
+
+            {showDeleteConfirm && (
+                <ConfirmDialog
+                    title="Excluir conta"
+                    message="Tem certeza de que deseja excluir sua conta? Esta ação é permanente e não poderá ser desfeita."
+                    confirmText="Excluir"
+                    cancelText="Cancelar"
+                    iconSrc="/trash.png"
+                    onCancel={() => setShowDeleteConfirm(false)}
+                    onConfirm={async () => {
+                        try {
+                            const res = await fetch(API_URLS.ME, { method: 'DELETE', credentials: 'include' });
+                            if (res.ok) {
+                                setToastType('success');
+                                setToastMsg('Conta excluída com sucesso.');
+                                localStorage.removeItem('user');
+                                navigateTo('login');
+                            } else {
+                                let errMsg = 'Erro ao excluir a conta';
+                                try { const err = await res.json(); errMsg = err.error || errMsg; } catch {}
+                                setToastType('error');
+                                setToastMsg(errMsg);
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            setToastType('error');
+                            setToastMsg('Erro inesperado ao excluir a conta');
+                        } finally {
+                            setShowDeleteConfirm(false);
+                        }
+                    }}
                 />
             )}
         </div>

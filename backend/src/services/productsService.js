@@ -23,7 +23,10 @@ export async function createProduct(payload, companyId) {
     return { conflict: true };
   }
 
-  const unitPriceFixed = Number.isFinite(productPrice) ? Number(productPrice.toFixed(2)) : null;
+  if (!Number.isFinite(productPrice) || productPrice <= 0) {
+    return { error: 'Preço do produto deve ser maior que 0' };
+  }
+  const unitPriceFixed = Number(productPrice.toFixed(2));
   const product = await insertProduct({
     name: String(name).trim(),
     unit_price: unitPriceFixed,
