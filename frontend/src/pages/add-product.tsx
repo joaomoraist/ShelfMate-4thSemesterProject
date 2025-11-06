@@ -205,7 +205,6 @@ const AddProduct: React.FC = () => {
               <option value="Disponível">Disponível</option>
               <option value="Estoque Baixo">Estoque Baixo</option>
               <option value="Estoque Alto">Estoque Alto</option>
-              <option value="Estoque Zerado">Estoque Zerado</option>
             </select>
           </div>
 

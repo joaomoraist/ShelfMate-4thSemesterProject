@@ -55,14 +55,13 @@ CREATE TABLE IF NOT EXISTS sales (
 CREATE OR REPLACE FUNCTION set_company_id()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- If the table has a product_id, inherit the company from product
+    
     IF NEW.product_id IS NOT NULL THEN
         SELECT company_id INTO NEW.company_id
         FROM products
         WHERE id = NEW.product_id;
     END IF;
 
-    -- If the table has a user_id (future use), inherit from user
     IF (TG_ARGV[0] = 'user') THEN
         SELECT company_id INTO NEW.company_id
         FROM users
