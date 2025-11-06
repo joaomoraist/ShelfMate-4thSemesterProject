@@ -169,7 +169,6 @@ const AddProduct: React.FC = () => {
                 className={styles.input}
                 placeholder="0,00"
                 inputMode="decimal"
-                pattern="^(?:\\d{1,10}|\\d{1,3}(?:\\.\\d{3})+)(?:,\\d{1,2})?$"
                 required
               />
             </div>
