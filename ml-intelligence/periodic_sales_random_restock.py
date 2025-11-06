@@ -203,10 +203,21 @@ def check_low_stock_and_notify(conn, company_id=None) -> int:
     if lows:
         # Enviar por empresa para todos os usuários da empresa correspondente
         for cid, items in by_company.items():
-            lines = [
-                f"id={p['id']} | {p['name']} | estoque={p['inventory']}"
-                for p in items
-            ]
+            # Mensagem mais humanizada, incluindo média diária de vendas
+            human_lines = []
+            for p in items:
+                try:
+                    daily_avg = get_product_sales_daily_avg(conn, p['id'])
+                except Exception:
+                    daily_avg = 0.0
+                inv_val = float(p.get('inventory') or 0)
+                inv_fmt = f"{inv_val:.0f}"
+                avg_fmt = f"{daily_avg:.2f}"
+                human_lines.append(
+                    f"O produto {p['name']} está com {inv_fmt} unidades em estoque. "
+                    f"Sua média de vendas é maior do que isso: {avg_fmt}."
+                )
+            lines = human_lines
             recipients = []
             try:
                 recipients = fetch_company_user_emails(conn, cid)
@@ -227,17 +238,24 @@ def check_low_stock_and_notify(conn, company_id=None) -> int:
 
 
 def get_low_stock_lines(conn, company_id=None) -> List[str]:
-    """Retorna linhas de produtos com estoque baixo sem enviar e-mail."""
+    """Retorna linhas (humanizadas) de produtos com estoque baixo sem enviar e-mail."""
     products = fetch_all_products(conn, company_id)
     lows = []
     for p in products:
         inv = float(p['inventory'] or 0)
+        try:
+            daily_avg = get_product_sales_daily_avg(conn, p['id'])
+        except Exception:
+            daily_avg = 0.0
+        # Mantém a lógica simples aqui (base threshold); check_low_stock_and_notify usa limiar dinâmico
         if inv <= LOW_STOCK_THRESHOLD:
-            lows.append(p)
-    return [
-        f"id={p['id']} | {p['name']} | estoque={p['inventory']}"
-        for p in lows
-    ]
+            inv_fmt = f"{inv:.0f}"
+            avg_fmt = f"{daily_avg:.2f}"
+            lows.append(
+                f"O produto {p['name']} está com {inv_fmt} unidades em estoque. "
+                f"Sua média de vendas é maior do que isso: {avg_fmt}."
+            )
+    return lows
 
 
 def main():

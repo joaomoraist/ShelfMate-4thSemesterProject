@@ -254,8 +254,8 @@ router.post('/send-reset-code', async (req, res) => {
     }
     recentResetRequests.set(email, now);
 
-    // Gerar código de recuperação
-    const recoveryCode = crypto.randomBytes(20).toString('hex').toUpperCase();
+    // Gerar código de recuperação: 6 dígitos numéricos
+    const recoveryCode = String(crypto.randomInt(0, 1000000)).padStart(6, '0');
 
     // Salvar código no banco de dados
     await sql`

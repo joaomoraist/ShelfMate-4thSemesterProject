@@ -34,15 +34,33 @@ const AddProduct: React.FC = () => {
 
   const handleUnitPriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value;
-    // Permitir apenas dígitos e separador decimal (vírgula ou ponto), até 2 casas decimais
-    const isValid = /^\d*(?:[\.,]\d{0,2})?$/.test(raw);
-    if (!isValid) return; // ignora entradas inválidas
+    // Permitir apenas dígitos, ponto (milhar) e vírgula (decimal)
+    if (!/^[\d.,]*$/.test(raw)) return;
+
+    // Garantir no máximo uma vírgula e até 2 casas decimais
+    const parts = raw.split(',');
+    if (parts.length > 2) return;
+    const intPartRaw = parts[0] || '';
+    const decPart = parts[1] || '';
+    if (decPart.length > 2) return;
+
+    // Parte inteira: aceitar somente dígitos até 10 OU grupos de milhar (1-3 dígitos seguidos de .xxx)
+    const intIsValid = /^(\d{1,10}|\d{1,3}(?:\.\d{3})+)$/.test(intPartRaw) || intPartRaw === '';
+    if (!intIsValid) return;
+
+    // Limite: até 10 dígitos ignorando pontos
+    const intDigitsCount = intPartRaw.replace(/\./g, '').length;
+    if (intDigitsCount > 10) return;
+
     setUnitPriceInput(raw);
-    const normalized = raw.replace(',', '.');
-    const num = Number(normalized);
+
+    // Sanitizar: remover pontos de milhar e trocar vírgula por ponto para número
+    const normalizedInt = intPartRaw.replace(/\./g, '');
+    const normalized = normalizedInt + (parts.length === 2 ? '.' + decPart : '');
+    const num = normalized ? Number(normalized) : 0;
     setFormData(prev => ({
       ...prev,
-      unit_price: isNaN(num) ? 0 : num
+      unit_price: Number.isFinite(num) ? num : 0
     }));
   };
 
@@ -151,7 +169,7 @@ const AddProduct: React.FC = () => {
                 className={styles.input}
                 placeholder="0,00"
                 inputMode="decimal"
-                pattern="^\\d+(?:[\\.,]\\d{1,2})?$"
+                pattern="^(?:\\d{1,10}|\\d{1,3}(?:\\.\\d{3})+)(?:,\\d{1,2})?$"
                 required
               />
             </div>
