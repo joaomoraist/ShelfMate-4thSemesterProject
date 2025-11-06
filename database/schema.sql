@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     downloads INT DEFAULT 0,
     changes INT DEFAULT 0,
     password VARCHAR(100),
-    image VARCHAR(200);
+    image VARCHAR(200),
     created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS alerts (
     id SERIAL PRIMARY KEY,
     alert_type alerts_type_enum DEFAULT 'Disponível' NOT NULL,
     product_id INT REFERENCES products(id) NOT NULL,
-    company_id INT REFERENCES companies(id),
+    company_id INT REFERENCES companies(id)
 );
 
 CREATE TABLE IF NOT EXISTS sales (
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS sales (
     product_id INT REFERENCES products(id) NOT NULL, 
     qntd FLOAT NOT NULL CHECK (qntd > 0),
     value FLOAT NOT NULL CHECK (value > 0),
-    company_id INT REFERENCES companies(id),
+    company_id INT REFERENCES companies(id)
 );
 
 ----------------------- TRIGGERS -------------------------

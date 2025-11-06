@@ -14,11 +14,14 @@ else:
 
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
-    raise RuntimeError('DATABASE_URL not found. Set env var or ensure backend/.env is present.')
+    # Não interrompe import; funções que usam DB irão falhar apenas quando chamadas
+    print('[db_utils] DATABASE_URL não encontrado. Defina a env var ou garanta backend/.env.')
 
 
 def get_connection():
     """Create a new psycopg2 connection using DATABASE_URL."""
+    if not DATABASE_URL:
+        raise RuntimeError('DATABASE_URL not configured.')
     conn = psycopg2.connect(DATABASE_URL)
     conn.autocommit = False
     return conn

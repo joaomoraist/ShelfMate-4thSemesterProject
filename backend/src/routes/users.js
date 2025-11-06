@@ -9,6 +9,39 @@ import { fileURLToPath } from 'url';
 
 const router = express.Router();
 
+// ===============================================
+// Integração Pepper's Ghost (ML)
+// Envia "Bem vindo [nome]" para o serviço ML após login
+// ===============================================
+async function enqueuePepperWelcome(name) {
+  try {
+    const base = process.env.ML_BASE_URL;
+    if (!base) {
+      console.warn('ML_BASE_URL não configurado; pulando enqueue Pepper\'s Ghost');
+      return;
+    }
+    const url = new URL('/peppersghost/enqueue', base).toString();
+
+    // Timeout control para evitar pendurar o fluxo
+    const controller = new AbortController();
+    const timeoutMs = 3000;
+    const toRef = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+      signal: controller.signal
+    });
+    clearTimeout(toRef);
+    if (!res.ok) {
+      const txt = await res.text().catch(() => '');
+      console.warn('Falha ao enfileirar Pepper\'s Ghost:', res.status, txt);
+    }
+  } catch (err) {
+    console.warn('Erro no enqueue Pepper\'s Ghost:', err && err.message ? err.message : err);
+  }
+}
+
 // setup multer storage for user images (save by user ID under public/user_photos)
 // Resolve path relative to this file location to avoid relying on process.cwd()
 const __filename = fileURLToPath(import.meta.url);
@@ -122,6 +155,17 @@ router.post('/login', async (req, res) => {
       console.log('Sessão criada:', req.sessionID, req.session.user);
     } catch (e) {
       console.warn('Não foi possível logar informações da sessão:', e && e.message);
+    }
+
+    // Disparar overlay de boas-vindas no Pepper's Ghost (não bloqueante)
+    try {
+      const displayName = userWithoutPassword.name || userWithoutPassword.email || 'Usuário';
+      // Executa em background para não atrasar a resposta de login
+      setImmediate(() => {
+        enqueuePepperWelcome(displayName).catch(() => {});
+      });
+    } catch (pgErr) {
+      console.warn('Erro ao disparar Pepper\'s Ghost:', pgErr && pgErr.message);
     }
 
     res.json({

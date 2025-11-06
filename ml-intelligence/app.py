@@ -1,4 +1,7 @@
 from fastapi import FastAPI, Body, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Any, Dict
 from datetime import datetime
@@ -6,9 +9,10 @@ import os
 import threading
 import time
 import traceback
+from collections import deque
 
 from .stock_alert_system import StockAlertSystem
-from .db_utils import get_connection, fetch_all_products, update_inventory, insert_alert, commit, rollback
+from .db_utils import get_connection, fetch_all_products, update_inventory, insert_alert, commit, rollback, DATABASE_URL
 from .periodic_sales_random_restock import (
     perform_sales,
     perform_random_restock,
@@ -52,6 +56,133 @@ class GenerateAlertsRequest(BaseModel):
 
 
 app = FastAPI(title="ShelfMate ML Intelligence Service", version="0.1.0")
+
+# ===========================
+# Static files (serve frontend logo)
+# ===========================
+# Monta os arquivos estáticos do diretório frontend/public para reutilizar a logo
+_repo_root = os.path.dirname(os.path.dirname(__file__))
+_frontend_public = os.path.join(_repo_root, 'frontend', 'public')
+try:
+    if os.path.isdir(_frontend_public):
+        app.mount("/static", StaticFiles(directory=_frontend_public), name="static")
+    else:
+        print(f"[Static] Diretório não encontrado: {_frontend_public}")
+except Exception as e:
+    print(f"[Static] Falha ao montar estáticos: {e}")
+
+# ===========================
+# Visual Pepper's Ghost
+# ===========================
+@app.get("/peppers-ghost", response_class=HTMLResponse)
+@app.get("/peppersghost", response_class=HTMLResponse)
+def peppers_ghost():
+    """
+    Página simples em fundo preto com a logo girando e inclinada a 45°,
+    adequada para uso em montagem Pepper's Ghost.
+    """
+    html = """
+    <!DOCTYPE html>
+    <html lang="pt-BR">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>ShelfMate • Pepper's Ghost</title>
+      <style>
+        html, body { height: 100%; }
+        body { margin:0; background:#000; color:#fff; display:grid; place-items:center; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+        .scene { width: 100vw; height: 100vh; display:flex; align-items:center; justify-content:center; perspective: 900px; }
+        .rotating-logo {
+          width: 200px; height: 200px; object-fit: contain;
+          transform-style: preserve-3d; backface-visibility: visible;
+          animation: spinY 6s linear infinite;
+        }
+        @keyframes spinY {
+          0%   { transform: rotateY(0deg)  rotateX(45deg); }
+          100% { transform: rotateY(360deg) rotateX(45deg); }
+        }
+        /* Opcional: deixar a imagem mais "brilhante" para melhor reflexão */
+        .rotating-logo { filter: brightness(1.2) contrast(1.1); }
+
+        /* Overlay de boas-vindas */
+        .welcome-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 10; }
+        .welcome-card { padding: 24px 32px; border-radius: 12px; background: #0f1330; color: #e6e9f2; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 60px rgba(0,0,0,.4); font-size: 22px; font-weight: 700; }
+        .welcome-name { color: #6ee7b7; }
+      </style>
+    </head>
+    <body>
+      <div class="scene" aria-label="Pepper's Ghost">
+        <img src="/static/logo-removebg.png" alt="Logo ShelfMate" class="rotating-logo" />
+      </div>
+
+      <div id="welcome" class="welcome-overlay" role="status" aria-live="polite" aria-hidden="true">
+        <div class="welcome-card">Bem vindo <span id="welcome-name" class="welcome-name"></span>!</div>
+      </div>
+
+      <script>
+        (function(){
+          const overlay = document.getElementById('welcome');
+          const nameEl = document.getElementById('welcome-name');
+          let showing = false;
+          let hideTimer = null;
+          const hideDelayMs = 7000; // duração de exibição por pessoa
+
+          async function pollNext(){
+            if (showing) return; // pausa enquanto mostra
+            try {
+              const res = await fetch('/peppersghost/next', { cache: 'no-store' });
+              if (!res.ok) return;
+              const data = await res.json();
+              if (data && data.message) {
+                nameEl.textContent = data.message.replace(/^Bem vindo\s+/i, '');
+                overlay.style.display = 'flex';
+                overlay.setAttribute('aria-hidden', 'false');
+                showing = true;
+                if (hideTimer) { clearTimeout(hideTimer); }
+                hideTimer = setTimeout(() => {
+                  overlay.style.display = 'none';
+                  overlay.setAttribute('aria-hidden', 'true');
+                  showing = false;
+                  // Buscar imediatamente o próximo item da fila
+                  pollNext();
+                }, hideDelayMs);
+              }
+            } catch (e) {
+              // silencioso
+            }
+          }
+
+          setInterval(pollNext, 1000);
+        })();
+      </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html, status_code=200)
+
+# ===========================
+# FIFO de mensagens de boas-vindas
+# ===========================
+_welcome_queue = deque()
+_welcome_lock = threading.Lock()
+
+class WelcomePayload(BaseModel):
+    name: str
+
+@app.post("/peppersghost/enqueue")
+def enqueue_welcome(payload: WelcomePayload):
+    msg = f"Bem vindo {payload.name}"
+    with _welcome_lock:
+        _welcome_queue.append(msg)
+    return {"enqueued": True, "size": len(_welcome_queue)}
+
+@app.get("/peppersghost/next")
+def next_welcome():
+    with _welcome_lock:
+        if _welcome_queue:
+            msg = _welcome_queue.popleft()
+            return {"message": msg}
+    return {"message": None}
 
 # ===========================
 # Orquestrador de tarefas
@@ -177,6 +308,9 @@ def _sequence_loop():
 def _start_background_threads():
     global _threads_started
     if _threads_started:
+        return
+    if not DATABASE_URL:
+        print("[Orchestrator] DATABASE_URL ausente — threads de sequenciamento desativadas.")
         return
     print(f"[Orchestrator] Iniciando ciclo sequencial: vendas={SALES_INTERVAL_SECONDS}s, reposicao={RESTOCK_INTERVAL_SECONDS}s, emails={EMAIL_INTERVAL_SECONDS}s, company_id={COMPANY_ID}")
     t = threading.Thread(target=_sequence_loop, daemon=True)
