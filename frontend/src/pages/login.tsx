@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
+import { Eye, EyeOff } from "lucide-react";
 import "../styles/auth.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [eyeBlink, setEyeBlink] = useState(false); // 👁️ animação
   const [toast, setToast] = useState<string>("");
   const [welcomeTitle, setWelcomeTitle] = useState<string>("Bem vindo de Volta");
   const [forgotLoading, setForgotLoading] = useState<boolean>(false);
@@ -20,13 +23,13 @@ export default function Login() {
       } else {
         setWelcomeTitle("Bem vindo de Volta");
       }
-    } catch (e) {
+    } catch {
       setWelcomeTitle("Bem vindo");
     }
   }, []);
 
   const handleForgotFromLogin = async () => {
-    if (forgotLoading) return; // evita cliques repetidos
+    if (forgotLoading) return;
     if (!email) {
       showToast("Informe seu email para enviar o código.");
       return;
@@ -91,6 +94,12 @@ export default function Login() {
     }
   };
 
+  const togglePassword = () => {
+    setShowPassword(!showPassword);
+    setEyeBlink(true);
+    setTimeout(() => setEyeBlink(false), 200); // pisca por 200ms
+  };
+
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(""), 2500);
@@ -99,7 +108,7 @@ export default function Login() {
   return (
     <div className="page-auth">
       <div className="auth-shell">
-        {/* Logo girando (substitui o carrossel) */}
+        {/* Logo girando */}
         <div className="auth-logo-container">
           <img src="/logo-removebg.png" alt="Logo" className="rotating-logo" />
         </div>
@@ -122,13 +131,27 @@ export default function Login() {
             />
 
             <label htmlFor="password">Senha</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Digite sua senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="password-wrapper">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Digite sua senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className={`toggle-password ${eyeBlink ? "blink" : ""}`}
+                onClick={togglePassword}
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} strokeWidth={1.8} />
+                ) : (
+                  <Eye size={20} strokeWidth={1.8} />
+                )}
+              </button>
+            </div>
 
             <div className="inline">
               <span></span>
@@ -139,9 +162,12 @@ export default function Login() {
                   handleForgotFromLogin();
                 }}
                 aria-disabled={forgotLoading}
-                style={{ pointerEvents: forgotLoading ? 'none' : 'auto', opacity: forgotLoading ? 0.6 : 1 }}
+                style={{
+                  pointerEvents: forgotLoading ? "none" : "auto",
+                  opacity: forgotLoading ? 0.6 : 1,
+                }}
               >
-                {forgotLoading ? 'Enviando...' : 'Esqueceu a Senha?'}
+                {forgotLoading ? "Enviando..." : "Esqueceu a Senha?"}
               </a>
             </div>
 
@@ -167,7 +193,12 @@ export default function Login() {
           </div>
         </div>
       </div>
-      {toast && <div className="toast show" id="toast">{toast}</div>}
+
+      {toast && (
+        <div className="toast show" id="toast" aria-live="polite">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
