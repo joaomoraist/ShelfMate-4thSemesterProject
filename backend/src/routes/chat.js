@@ -12,7 +12,9 @@ const SITE_META = {
   auth: { session: 'express-session, SameSite="none" em produção com Secure' },
   routes: ['users', 'stats', 'imports', 'chat', 'health', 'home'],
   team: [
-    { name: 'William Cesar', github: 'https://github.com/will-csc', linkedin: 'https://www.linkedin.com/in/william-cesar-7b7b89202/?locale=en_US' }
+  { name: 'Eduardo Oliveira', github: 'https://github.com/EduardoOLSLRT', linkedin: 'www.linkedin.com/in/eduardooliveira1706' }
+  { name: 'João Morais', github: 'https://github.com/joaomoraist', linkedin: 'https://www.linkedin.com/in/jo%C3%A3o-morais-t?trk=blended-typeahead' }
+ { name: 'William Cesar', github: 'https://github.com/will-csc', linkedin: 'https://www.linkedin.com/in/william-cesar-7b7b89202/?locale=en_US' }
   ],
   structure: [
     'backend/src (routes: users, stats, imports, chat; db.js; index.js; openapi.json; public)',
