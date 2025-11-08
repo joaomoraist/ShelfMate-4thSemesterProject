@@ -8,7 +8,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [eyeBlink, setEyeBlink] = useState(false); // 👁️ animação
+  const [eyeBlink, setEyeBlink] = useState(false);
   const [toast, setToast] = useState<string>("");
   const [welcomeTitle, setWelcomeTitle] = useState<string>("Bem vindo de Volta");
   const [forgotLoading, setForgotLoading] = useState<boolean>(false);
@@ -97,7 +97,7 @@ export default function Login() {
   const togglePassword = () => {
     setShowPassword(!showPassword);
     setEyeBlink(true);
-    setTimeout(() => setEyeBlink(false), 200); // pisca por 200ms
+    setTimeout(() => setEyeBlink(false), 400); // piscar suave (400ms)
   };
 
   const showToast = (msg: string) => {
@@ -108,7 +108,6 @@ export default function Login() {
   return (
     <div className="page-auth">
       <div className="auth-shell">
-        {/* Logo girando */}
         <div className="auth-logo-container">
           <img src="/logo-removebg.png" alt="Logo" className="rotating-logo" />
         </div>
