@@ -9,13 +9,13 @@ export default function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [cnpj, setCnpj] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [toast, setToast] = useState<string>("");
   const { navigateTo } = useNavigation();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Remove formatação para enviar ao servidor
     const cleanCnpj = cnpj.replace(/\D/g, "");
     if (cleanCnpj.length !== 14) {
       showToast("CNPJ inválido. Informe 14 dígitos numéricos.");
@@ -53,16 +53,12 @@ export default function Signup() {
     setTimeout(() => setToast(""), 2500);
   };
 
-  // Limitando e formatando CNPJ enquanto digita
   const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/\D/g, "");
     if (value.length > 14) value = value.slice(0, 14);
-
-    // aplica máscara de CNPJ
     value = value.replace(/^(\d{2})(\d)/, "$1.$2");
     value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
     value = value.replace(/\.(\d{3})(\d{4})(\d)/, ".$1/$2-$3");
-
     setCnpj(value);
   };
 
@@ -102,17 +98,39 @@ export default function Signup() {
               placeholder="00.000.000/0000-00"
               value={cnpj}
               onChange={handleCnpjChange}
-              maxLength={18} // impede ultrapassar o tamanho total
+              maxLength={18}
             />
 
             <label htmlFor="password">Senha</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Digite sua senha"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="password-wrapper">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Digite sua senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                className="eye-button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+              >
+                {showPassword ? (
+                  <img
+                    src="/icons/eye-off.svg"
+                    alt="Ocultar senha"
+                    className="eye-icon"
+                  />
+                ) : (
+                  <img
+                    src="/icons/eye.svg"
+                    alt="Mostrar senha"
+                    className="eye-icon"
+                  />
+                )}
+              </button>
+            </div>
 
             <div className="row" style={{ marginTop: 16 }}>
               <button className="primary" type="submit">
@@ -141,6 +159,6 @@ export default function Signup() {
         </div>
       </div>
       {toast && <div className="toast show" id="toast">{toast}</div>}
-      </div>
+    </div>
   );
 }
