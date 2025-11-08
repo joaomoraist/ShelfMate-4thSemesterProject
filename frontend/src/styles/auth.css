@@ -180,3 +180,57 @@ button.secondary:hover {
 .toggle-password.blink {
   animation: blinkEye 0.2s ease-in-out;
 }
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  width: 100%;
+  padding-right: 40px; /* espaço pro ícone do olho */
+}
+
+/* botão do olho fixo */
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  transition: opacity 0.25s ease;
+  line-height: 0;
+  user-select: none;
+}
+
+.toggle-password:hover {
+  opacity: 0.75;
+}
+
+.toggle-password:focus,
+.toggle-password:active,
+.toggle-password:focus-visible {
+  outline: none;
+  transform: translateY(-50%);
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Ícone fixo e centralizado */
+.toggle-password svg {
+  transition: opacity 0.3s ease, filter 0.3s ease;
+  pointer-events: none;
+}
+
+/* Efeito "piscar" suave — tipo fade */
+.toggle-password.blink svg {
+  opacity: 0.4;
+  filter: brightness(0.8);
+}
