@@ -5,35 +5,33 @@ import "../styles/auth.css";
 import AuthIllustration from "../components/AuthIllustration";
 
 export default function ForgotPassword() {
-  // Steps: 1 = enviar código (fallback), 2 = inserir código e nova senha
   const [step, setStep] = useState<number>(1);
   const [email, setEmail] = useState<string>("");
   const [recoveryCode, setRecoveryCode] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [showNewPass, setShowNewPass] = useState<boolean>(false);
+  const [showConfirmPass, setShowConfirmPass] = useState<boolean>(false);
   const [toast, setToast] = useState<string>("");
   const [sending, setSending] = useState<boolean>(false);
   const { navigateTo } = useNavigation();
 
-  // Prefill email if the login page stored it
   useEffect(() => {
     const allowedEmail = localStorage.getItem("resetFlowEmail");
     if (!allowedEmail) {
-      // Não redireciona; apenas informa que o email deve ser preenchido no login
       showToast("Informe seu email na página de login para enviar o código.");
       return;
     }
     setEmail(allowedEmail);
 
-    const justSent = localStorage.getItem('resetCodeJustSent');
-    if (justSent === '1') {
+    const justSent = localStorage.getItem("resetCodeJustSent");
+    if (justSent === "1") {
       showToast("Código enviado. Verifique seu email.");
       setStep(2);
-      localStorage.removeItem('resetCodeJustSent');
+      localStorage.removeItem("resetCodeJustSent");
       return;
     }
 
-    // Ao montar, enviar o código apenas se não tiver sido enviado no login
     (async () => {
       try {
         setSending(true);
@@ -48,8 +46,13 @@ export default function ForgotPassword() {
           setStep(2);
         } else {
           const errorData = await response.json();
-          const details = (errorData && (errorData.details || errorData.error)) ? (errorData.details || errorData.error) : null;
-          showToast("Falha ao enviar código: " + (errorData.error || "Erro desconhecido") + (details ? " - " + details : ""));
+          const details =
+            errorData?.details || errorData?.error ? errorData.details || errorData.error : null;
+          showToast(
+            "Falha ao enviar código: " +
+              (errorData.error || "Erro desconhecido") +
+              (details ? " - " + details : "")
+          );
         }
       } catch (err) {
         console.error(err);
@@ -77,8 +80,13 @@ export default function ForgotPassword() {
         showToast("Código de recuperação enviado para seu email.");
       } else {
         const error = await response.json();
-        const details = (error && (error.details || error.error)) ? (error.details || error.error) : null;
-        showToast("Falha ao enviar código: " + (error.error || "Erro desconhecido") + (details ? " - " + details : ""));
+        const details =
+          error?.details || error?.error ? error.details || error.error : null;
+        showToast(
+          "Falha ao enviar código: " +
+            (error.error || "Erro desconhecido") +
+            (details ? " - " + details : "")
+        );
       }
     } catch (error) {
       console.error(error);
@@ -88,7 +96,6 @@ export default function ForgotPassword() {
     }
   };
 
-  // Unificado: o usuário informa código, nova senha e confirmação
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -131,8 +138,7 @@ export default function ForgotPassword() {
     <div className="page-auth">
       <div className="auth-shell">
         <div className="auth-content">
-          <div style={{ textAlign: 'center' }}>
-            {/* Logo adicionada */}
+          <div style={{ textAlign: "center" }}>
             <img
               src="/logo.png"
               alt="Logo ShelfMate"
@@ -147,41 +153,131 @@ export default function ForgotPassword() {
           {step === 1 && (
             <form onSubmit={handleSendCode}>
               <label htmlFor="email">Email</label>
-              <input id="email" type="email" placeholder="Digite seu email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <input
+                id="email"
+                type="email"
+                placeholder="Digite seu email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
               <div className="row" style={{ marginTop: 16 }}>
-                <button className="primary" type="submit" disabled={sending}>{sending ? 'Enviando...' : 'Enviar Código'}</button>
+                <button className="primary" type="submit" disabled={sending}>
+                  {sending ? "Enviando..." : "Enviar Código"}
+                </button>
               </div>
             </form>
           )}
 
           {step === 2 && (
             <form onSubmit={handleResetPassword}>
-              {/* Email já foi informado antes; manter oculto/disabled se necessário */}
-              {/* <input type="hidden" value={email} /> */}
-
               <label htmlFor="code">Código encaminhado</label>
-              <input id="code" type="text" placeholder="Digite o código encaminhado" value={recoveryCode} onChange={(e) => setRecoveryCode(e.target.value)} />
+              <input
+                id="code"
+                type="text"
+                placeholder="Digite o código encaminhado"
+                value={recoveryCode}
+                onChange={(e) => setRecoveryCode(e.target.value)}
+              />
 
+              {/* Campo de nova senha */}
               <label htmlFor="newpass">Nova senha</label>
-              <input id="newpass" type="password" placeholder="Digite sua nova senha" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+              <div className="password-field">
+                <input
+                  id="newpass"
+                  type={showNewPass ? "text" : "password"}
+                  placeholder="Digite sua nova senha"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <span
+                  className="eye-icon"
+                  onClick={() => setShowNewPass(!showNewPass)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    transition: "opacity 0.3s ease",
+                    opacity: showNewPass ? 0.6 : 1,
+                  }}
+                >
+                  <img
+                    src={showNewPass ? "/eye-open.svg" : "/eye-closed.svg"}
+                    alt="Mostrar senha"
+                    style={{
+                      width: "22px",
+                      height: "22px",
+                      pointerEvents: "none",
+                      transition: "opacity 0.3s ease",
+                    }}
+                  />
+                </span>
+              </div>
 
+              {/* Campo de confirmação */}
               <label htmlFor="confirmpass">Confirmar nova senha</label>
-              <input id="confirmpass" type="password" placeholder="Confirme sua nova senha" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+              <div className="password-field">
+                <input
+                  id="confirmpass"
+                  type={showConfirmPass ? "text" : "password"}
+                  placeholder="Confirme sua nova senha"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+                <span
+                  className="eye-icon"
+                  onClick={() => setShowConfirmPass(!showConfirmPass)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    cursor: "pointer",
+                    transition: "opacity 0.3s ease",
+                    opacity: showConfirmPass ? 0.6 : 1,
+                  }}
+                >
+                  <img
+                    src={showConfirmPass ? "/eye-open.svg" : "/eye-closed.svg"}
+                    alt="Mostrar senha"
+                    style={{
+                      width: "22px",
+                      height: "22px",
+                      pointerEvents: "none",
+                      transition: "opacity 0.3s ease",
+                    }}
+                  />
+                </span>
+              </div>
 
               <div className="row" style={{ marginTop: 16 }}>
-                <button className="primary" type="submit">Redefinir</button>
+                <button className="primary" type="submit">
+                  Redefinir
+                </button>
               </div>
             </form>
           )}
 
-          <hr style={{ margin: '18px 0', border: 0, borderTop: '1px solid #e5e7eb' }} />
+          <hr
+            style={{
+              margin: "18px 0",
+              border: 0,
+              borderTop: "1px solid #e5e7eb",
+            }}
+          />
 
           <div className="row" style={{ marginTop: 4 }}>
-            <button className="secondary" onClick={() => navigateTo("login")}>Login</button>
+            <button className="secondary" onClick={() => navigateTo("login")}>
+              Login
+            </button>
           </div>
         </div>
 
-        <AuthIllustration images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]} intervalMs={3500} />
+        <AuthIllustration
+          images={["/image1.jpg", "/image2.png", "/image3.jpg", "/image4.jpg"]}
+          intervalMs={3500}
+        />
       </div>
       {toast && <div className="toast show" id="toast">{toast}</div>}
     </div>
