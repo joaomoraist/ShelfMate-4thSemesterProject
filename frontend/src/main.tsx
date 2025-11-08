@@ -37,6 +37,10 @@ function App() {
   // Determinar páginas de autenticação e estado atual
   const authPages = ["login", "signup", "forgot-password"];
   const isAuthPage = authPages.includes(currentPage);
+   // Sempre voltar ao topo ao trocar de página
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
 
   // Aplicar classe no body baseada na página atual
   React.useEffect(() => {

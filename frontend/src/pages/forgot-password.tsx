@@ -89,7 +89,6 @@ export default function ForgotPassword() {
   };
 
   // Unificado: o usuário informa código, nova senha e confirmação
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -133,6 +132,13 @@ export default function ForgotPassword() {
       <div className="auth-shell">
         <div className="auth-content">
           <div style={{ textAlign: 'center' }}>
+            {/* Logo adicionada */}
+            <img
+              src="/logo.png"
+              alt="Logo ShelfMate"
+              style={{ width: "120px", marginBottom: "16px" }}
+            />
+
             <img src="/forget-password.png" alt="Redefinir senha" className="auth-icon" />
             <h1 className="auth-title">Redefinir a Senha</h1>
             <p className="auth-sub">Digite as suas informações</p>

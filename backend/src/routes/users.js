@@ -95,7 +95,8 @@ const RESET_COOLDOWN_MS = 15000; // 15 seconds cooldown
 // ===============================================
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password;
 
     if (!email || !password) {
       return res.status(400).json({
@@ -186,7 +187,11 @@ router.post('/login', async (req, res) => {
 // =============================================
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, company_cnpj } = req.body;
+    const name = req.body.name;
+    const email = req.body.email?.toLowerCase().trim();
+    const password = req.body.password;
+    const company_cnpj = req.body.company_cnpj;
+
 
     if (!name || !email || !password || !company_cnpj) {
       return res.status(400).json({
