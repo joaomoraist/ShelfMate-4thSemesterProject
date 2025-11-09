@@ -34,12 +34,22 @@ function App() {
     setCurrentPage(page);
   };
 
+  // Forçar controle manual de restauração de scroll do browser
+  React.useEffect(() => {
+    try { window.history.scrollRestoration = 'manual'; } catch {}
+  }, []);
+
   // Determinar páginas de autenticação e estado atual
   const authPages = ["login", "signup", "forgot-password"];
   const isAuthPage = authPages.includes(currentPage);
-   // Sempre voltar ao topo ao trocar de página
+  // Sempre voltar ao topo ao trocar de página (instantâneo)
   React.useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      // Garantias adicionais para navegadores que usam scroll em documentElement/body
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    } catch {}
   }, [currentPage]);
 
   // Aplicar classe no body baseada na página atual
