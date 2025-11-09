@@ -2,6 +2,7 @@ import express from 'express';
 import { GoogleGenAI } from '@google/genai';
 import sql from '../db.js';
 import { getRequirementsText } from '../utils/requirementsLoader.js';
+import { getDocsDigest } from '../utils/docsLoader.js';
 
 const SITE_META = {
   name: 'ShelfMate',
@@ -32,8 +33,7 @@ function sanitizeReply(text) {
   t = t.replace(/\*\*+/g, '');
   t = t.replace(/(^|\n)[\s]*[\-*]\s+/g, '$1');
   t = t.replace(/(^|\n)#{1,6}\s+/g, '$1');
-  // Remover cumprimentos e persona
-  t = t.replace(/^\s*(ol[áa]|oi)[^\n]*\n+/i, '');
+  // Remover persona e frases padrão (mas manter cumprimentos curtos)
   t = t.replace(/Sou seu assistente ShelfMate\.?/gi, '');
   t = t.replace(/Como posso ajudar você a navegar[^\n]*\n*/gi, '');
   // Espaços extras
@@ -55,6 +55,14 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'message é obrigatório' });
     }
 
+    // Fallback rápido para cumprimentos simples (evita respostas vazias)
+    const isGreetingOnly = /^\s*(oi|ol[áa]|ola|bom dia|boa tarde|boa noite)\s*[!.]?\s*$/i.test(message);
+    if (isGreetingOnly) {
+      return res.json({
+        reply: 'Olá! Posso ajudar com dúvidas sobre o ShelfMate: login, cadastro de produtos, relatórios, estatísticas ou configurações. Pergunte algo como "Como cadastrar produto?" ou "Como gerar relatório?".'
+      });
+    }
+
     const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
     const ai = new GoogleGenAI({ apiKey });
 
@@ -64,7 +72,7 @@ router.post('/', async (req, res) => {
 
     let contextLines = [
       'Você é o assistente do ShelfMate e responde em português.',
-      'Responda somente ao que foi perguntado, sem cumprimentos ou persona.',
+      'Responda somente ao que foi perguntado; seja direto e claro.',
       'Não use formatação Markdown/HTML (negrito, bullets, cabeçalhos); responda em texto simples.',
       'Só descreva navegação quando o usuário pedir explicitamente; não inclua rodapé padrão de páginas.',
       `Projeto: ${SITE_META.name}. Repositório: ${SITE_META.repo}.`,
@@ -82,6 +90,16 @@ router.post('/', async (req, res) => {
         contextLines.push('--- Fim do Extrato ---');
       } else {
         contextLines.push('Observação: extrato de requisitos funcionais não disponível no momento.');
+      }
+    } catch {}
+
+    // Incorporar digest de documentação (README, OpenAPI e schema.sql)
+    try {
+      const docsDigest = await getDocsDigest();
+      if (docsDigest) {
+        contextLines.push('--- Documentação do Projeto (Digest) ---');
+        contextLines.push(docsDigest);
+        contextLines.push('--- Fim da Documentação ---');
       }
     } catch {}
 
@@ -152,7 +170,11 @@ router.post('/', async (req, res) => {
 
     const text = response?.text || response?.response?.text?.() || '';
     const clean = sanitizeReply(text);
-    return res.json({ reply: clean });
+    // Se a sanitização deixar vazio, retornar fallback informativo
+    const finalReply = clean && clean.trim().length > 0
+      ? clean
+      : 'Posso ajudar com funcionalidades do ShelfMate (produtos, relatórios, estatísticas, alertas). Faça uma pergunta específica, por exemplo: "Como exportar relatório de produtos?"';
+    return res.json({ reply: finalReply });
   } catch (err) {
     console.error('Erro em POST /chat:', err);
     res.status(500).json({ error: 'Internal server error' });
