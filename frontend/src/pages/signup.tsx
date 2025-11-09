@@ -16,9 +16,9 @@ export default function Signup() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const cleanCnpj = cnpj.replace(/\D/g, "");
-    if (cleanCnpj.length !== 14) {
-      showToast("CNPJ inválido. Informe 14 dígitos numéricos.");
+    const cleanDoc = cnpj.replace(/\D/g, "");
+    if (!(cleanDoc.length === 11 || cleanDoc.length === 14)) {
+      showToast("Documento inválido. Informe 11 (CPF) ou 14 (CNPJ) dígitos.");
       return;
     }
 
@@ -31,7 +31,7 @@ export default function Signup() {
       const response = await fetch(API_URLS.REGISTER, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, company_cnpj: cleanCnpj }),
+        body: JSON.stringify({ name, email, password, company_cnpj: cleanDoc }),
       });
 
       if (response.ok) {
@@ -54,12 +54,23 @@ export default function Signup() {
   };
 
   const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/\D/g, "");
-    if (value.length > 14) value = value.slice(0, 14);
-    value = value.replace(/^(\d{2})(\d)/, "$1.$2");
-    value = value.replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3");
-    value = value.replace(/\.(\d{3})(\d{4})(\d)/, ".$1/$2-$3");
-    setCnpj(value);
+    let digits = e.target.value.replace(/\D/g, "");
+    if (digits.length > 14) digits = digits.slice(0, 14);
+    let formatted = digits;
+    if (digits.length <= 11) {
+      // CPF mask: 000.000.000-00
+      formatted = digits
+        .replace(/^(\d{3})(\d)/, "$1.$2")
+        .replace(/^(\d{3})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d{2})$/, ".$1-$2");
+    } else {
+      // CNPJ mask: 00.000.000/0000-00
+      formatted = digits
+        .replace(/^(\d{2})(\d)/, "$1.$2")
+        .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+        .replace(/\.(\d{3})(\d{4})(\d)/, ".$1/$2-$3");
+    }
+    setCnpj(formatted);
   };
 
   return (
@@ -91,11 +102,11 @@ export default function Signup() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            <label htmlFor="cnpj">CNPJ da Empresa</label>
+            <label htmlFor="cnpj">CNPJ ou CPF</label>
             <input
               id="cnpj"
               type="text"
-              placeholder="00.000.000/0000-00"
+              placeholder={cnpj.replace(/\D/g, "").length <= 11 ? "000.000.000-00" : "00.000.000/0000-00"}
               value={cnpj}
               onChange={handleCnpjChange}
               maxLength={18}

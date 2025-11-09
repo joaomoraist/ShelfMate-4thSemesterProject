@@ -203,11 +203,12 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'A senha deve ter pelo menos 6 caracteres' });
     }
 
-    // Normalizar CNPJ (apenas dígitos)
-    const cleanCnpj = String(company_cnpj).replace(/\D/g, '');
-    if (cleanCnpj.length !== 14) {
-      return res.status(400).json({ error: 'CNPJ inválido. Informe 14 dígitos.' });
+    // Normalizar documento (apenas dígitos) e aceitar CPF (11) ou CNPJ (14)
+    const cleanDoc = String(company_cnpj).replace(/\D/g, '');
+    if (!(cleanDoc.length === 11 || cleanDoc.length === 14)) {
+      return res.status(400).json({ error: 'Documento inválido. Informe 11 (CPF) ou 14 (CNPJ) dígitos.' });
     }
+    const isCpf = cleanDoc.length === 11;
 
     // Verificar se o email já existe
     const existingUsers = await sql`
@@ -223,24 +224,24 @@ router.post('/register', async (req, res) => {
     // Buscar empresa por CNPJ; se não existir, criar
     let company_id = null;
     const companies = await sql`
-      SELECT id FROM companies WHERE cnpj = ${cleanCnpj}
+      SELECT id FROM companies WHERE cnpj = ${cleanDoc}
     `;
 
     if (companies.length > 0) {
       company_id = companies[0].id;
     } else {
-      const companyName = `Empresa ${cleanCnpj}`;
+      const companyName = isCpf ? `Pessoa Física ${cleanDoc}` : `Empresa ${cleanDoc}`;
       try {
         const created = await sql`
           INSERT INTO companies (name, cnpj)
-          VALUES (${companyName}, ${cleanCnpj})
+          VALUES (${companyName}, ${cleanDoc})
           RETURNING id
         `;
         company_id = created[0].id;
       } catch (err) {
         // Concorrência: outra requisição pode ter inserido o mesmo CNPJ
         if (err && err.code === '23505') { // unique_violation
-          const existing = await sql`SELECT id FROM companies WHERE cnpj = ${cleanCnpj}`;
+          const existing = await sql`SELECT id FROM companies WHERE cnpj = ${cleanDoc}`;
           if (existing.length === 0) throw err;
           company_id = existing[0].id;
         } else {
