@@ -39,6 +39,30 @@ function sanitizeReply(text) {
   // Espaços extras
   t = t.replace(/[\t\r]+/g, ' ');
   t = t.replace(/\n{3,}/g, '\n\n');
+
+  // Traduzir slugs de páginas para nomes em português, exceto em linhas NAVIGATE:
+  const SLUG_TO_PT = {
+    'login': 'Login',
+    'signup': 'Cadastro',
+    'forgot-password': 'Esqueci a Senha',
+    'home': 'Início',
+    'statistics': 'Estatísticas',
+    'products': 'Produtos',
+    'add-product': 'Adicionar Produto',
+    'reports': 'Relatórios',
+    'settings': 'Configurações',
+  };
+  const lines = t.split('\n');
+  const processed = lines.map((line) => {
+    if (/^\s*NAVIGATE:/i.test(line)) return line; // preservar marcador
+    let l = line;
+    for (const [slug, name] of Object.entries(SLUG_TO_PT)) {
+      const re = new RegExp(`\\b${slug}\\b`, 'gi');
+      l = l.replace(re, name);
+    }
+    return l;
+  });
+  t = processed.join('\n');
   return t.trim();
 }
 
@@ -75,6 +99,7 @@ router.post('/', async (req, res) => {
       'Responda somente ao que foi perguntado; seja direto e claro.',
       'Não use formatação Markdown/HTML (negrito, bullets, cabeçalhos); responda em texto simples.',
       'Só descreva navegação quando o usuário pedir explicitamente; não inclua rodapé padrão de páginas.',
+      'Nas respostas, use nomes de páginas em português (Produtos, Relatórios, Configurações, etc.) e evite usar slugs como "products" ou "settings".',
       `Projeto: ${SITE_META.name}. Repositório: ${SITE_META.repo}.`,
       `Stack: Frontend=${SITE_META.frontend.framework} (${SITE_META.frontend.hosting}); Backend=${SITE_META.backend.runtime}/${SITE_META.backend.framework} (${SITE_META.backend.hosting}); Banco=${SITE_META.database.engine} - ${SITE_META.database.provider}.`,
       `Autenticação: ${SITE_META.auth.session}. Rotas principais: ${SITE_META.routes.join(', ')}.`,
@@ -102,6 +127,27 @@ router.post('/', async (req, res) => {
         contextLines.push('--- Fim da Documentação ---');
       }
     } catch {}
+
+    // Guia rápido de uso e páginas (texto simples, sem formatação)
+    contextLines.push('Guia rápido:');
+    contextLines.push('Criar produto: vá à página "Adicionar Produto"; preencha Nome, Preço Unitário, Estoque e Status; clique em Salvar.');
+    contextLines.push('Gerar/retirar relatório: na página "Relatórios", selecione filtros desejados e clique em "Exportar PDF".');
+    contextLines.push('Páginas: Login (entrar), Cadastro (criar conta), Esqueci a Senha (código e nova senha), Início (visão geral), Estatísticas (gráficos e métricas), Produtos (lista, busca e edição), Adicionar Produto (formulário), Relatórios (exportar PDF), Configurações (perfil e conta).');
+    contextLines.push('Se o usuário pedir para abrir uma página específica, inclua no final uma linha isolada: NAVIGATE:<slug> onde <slug> ∈ login|signup|forgot-password|home|statistics|products|add-product|reports|settings. Use apenas quando a intenção de navegação for clara (ex.: "quero adicionar um produto" → NAVIGATE:add-product).');
+
+    // Guia detalhado de funcionalidades por página (texto simples, sem formatação)
+    contextLines.push('Detalhes: Login — Informe email e senha e clique em Login; há botão para mostrar/ocultar senha; o link "Esqueceu a Senha?" envia um código por email e leva para Esqueci a Senha. Em caso de sucesso, navegar para Início.');
+    contextLines.push('Detalhes: Cadastro — Preencha Nome, Email, Senha (mínimo 6) e CPF/CNPJ (formatação aplicada); ao cadastrar com sucesso, voltar para Login.');
+    contextLines.push('Detalhes: Esqueci a Senha — Etapa 1: enviar código para o email. Etapa 2: digitar código recebido e nova senha (mínimo 6) com confirmação; ao redefinir, voltar para Login.');
+    contextLines.push('Detalhes: Início — Exibe atividade recente (logins, produtos inseridos, mudanças de perfil, relatórios baixados, alertas emitidos) e Análises com gráficos: Tendência de Crescimento, Distribuição de Produtos e Top 5 Mais Vendidos.');
+    contextLines.push('Detalhes: Estatísticas — Métricas: Total de Produtos, Valor em Estoque, Produtos com Estoque Baixo, Vendas no Período; Gráficos: Evolução do Estoque (linha), Produtos Mais Vendidos (pizza), Vendas por Produto (barra).');
+    contextLines.push('Detalhes: Produtos — Lista com filtros por nome e status; ordenação por Nome, Preço Unitário, Estoque, Status, Vendas e Alertas; ações: Adicionar Produto, Importar vários via CSV (headers: name, unit_price, inventory, status), Excluir produto com confirmação. Mostra preço, estoque, status (Disponível/Estoque Baixo/Estoque Alto), vendas e contagem de alertas.');
+    contextLines.push('Detalhes: Adicionar Produto — Campos obrigatórios: Nome, Preço Unitário (formato brasileiro, até 2 casas), Estoque (não negativo) e Status (Disponível/Estoque Baixo/Estoque Alto). Em sucesso, limpar formulário e retornar para Produtos.');
+    contextLines.push('Detalhes: Relatórios — Exportar PDF de Produtos (colunas: ID, Produto, Preço, Estoque, Status, Alertas) e de Alertas (itens com alerts_count>0 ou estoque baixo); se a sessão estiver expirada, solicitar Login.');
+    contextLines.push('Detalhes: Configurações — Editar Nome e Email; Alterar Senha (mínimo 6); Alterar Foto de Perfil: clicar no avatar para escolher a imagem e visualizar prévia; salvar para aplicar. Excluir Conta: requer confirmação; ao excluir, desconectar e retornar para Login.');
+
+    // Regras de explicação
+    contextLines.push('Explique em passos objetivos e curtos quando o usuário pedir "como fazer". Se houver intenção clara de uma tarefa numa página específica (ex.: adicionar produto, exportar relatório, alterar foto), inclua no final NAVIGATE:<slug> (ex.: NAVIGATE:add-product, NAVIGATE:reports, NAVIGATE:settings). Nos textos para o usuário, use nomes das páginas em português e não exiba o marcador.');
 
     if (sessionUser) {
       contextLines.push(`Usuário: ${sessionUser.name || sessionUser.email || 'desconhecido'} (empresa ${companyId ?? 'n/d'})`);
