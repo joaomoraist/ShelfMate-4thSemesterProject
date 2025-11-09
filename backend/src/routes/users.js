@@ -104,11 +104,11 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Buscar usuário pelo email
+    // Buscar usuário pelo email (case-insensitive)
     const users = await sql`
       SELECT id, name, email, password, user_level, company_id, created_at, image
       FROM users 
-      WHERE email = ${email}
+      WHERE LOWER(email) = ${email}
     `;
 
     if (users.length === 0) {
