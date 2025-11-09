@@ -3,6 +3,7 @@ import { useNavigation } from "../context/NavigationContext";
 import { API_URLS } from "../config/api";
 import "../styles/auth.css";
 import AuthIllustration from "../components/AuthIllustration";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -10,6 +11,7 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [cnpj, setCnpj] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [eyeBlink, setEyeBlink] = useState(false);
   const [toast, setToast] = useState<string>("");
   const { navigateTo } = useNavigation();
 
@@ -51,6 +53,12 @@ export default function Signup() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(""), 2500);
+  };
+
+  const togglePassword = () => {
+    setShowPassword((prev) => !prev);
+    setEyeBlink(true);
+    setTimeout(() => setEyeBlink(false), 400);
   };
 
   const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,22 +131,14 @@ export default function Signup() {
               />
               <button
                 type="button"
-                className="eye-button"
-                onClick={() => setShowPassword((prev) => !prev)}
+                className={`toggle-password ${eyeBlink ? "blink" : ""}`}
+                onClick={togglePassword}
                 aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
               >
                 {showPassword ? (
-                  <img
-                    src="/icons/eye-off.svg"
-                    alt="Ocultar senha"
-                    className="eye-icon"
-                  />
+                  <EyeOff size={20} strokeWidth={1.8} />
                 ) : (
-                  <img
-                    src="/icons/eye.svg"
-                    alt="Mostrar senha"
-                    className="eye-icon"
-                  />
+                  <Eye size={20} strokeWidth={1.8} />
                 )}
               </button>
             </div>
