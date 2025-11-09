@@ -124,7 +124,7 @@ app.get('/home', (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   } catch (err) {
     console.error('Erro em /home:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -132,7 +132,7 @@ app.get('/home', (req, res) => {
 app.use((err, req, res, next) => {
   console.error('Erro no servidor:', err);
   res.status(500).json({
-    error: 'Internal server error',
+    error: 'Erro no servidor',
     message: err.message
   });
 });

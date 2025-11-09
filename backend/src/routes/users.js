@@ -177,7 +177,7 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Erro no login:', error);
     res.status(500).json({
-      error: 'Internal server error'
+      error: 'Erro no servidor'
     });
   }
 });
@@ -277,7 +277,7 @@ router.post('/register', async (req, res) => {
   } catch (error) {
     console.error('Erro ao criar usuário:', error);
     res.status(500).json({
-      error: 'Internal server error'
+      error: 'Erro no servidor'
     });
   }
 });
@@ -383,7 +383,7 @@ router.post('/send-reset-code', async (req, res) => {
   } catch (error) {
     console.error('Erro ao enviar código de recuperação:', error);
     res.status(500).json({
-      error: 'Internal server error'
+      error: 'Erro no servidor'
     });
   }
 });
@@ -436,7 +436,7 @@ router.post('/verify-reset-code', async (req, res) => {
   } catch (error) {
     console.error('Erro ao verificar código de recuperação:', error);
     res.status(500).json({
-      error: 'Internal server error'
+      error: 'Erro no servidor'
     });
   }
 });
@@ -493,7 +493,7 @@ router.post('/reset-password', async (req, res) => {
   } catch (error) {
     console.error('Erro ao resetar senha:', error);
     res.status(500).json({
-      error: 'Internal server error'
+      error: 'Erro no servidor'
     });
   }
 });
@@ -552,7 +552,7 @@ router.put('/me', upload.single('image'), async (req, res) => {
     return res.json({ message: 'User updated', user: req.session.user });
   } catch (err) {
     console.error('Erro em PUT /users/me:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -570,7 +570,7 @@ router.get('/me', (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   } catch (err) {
     console.error('Erro em /users/me:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -587,7 +587,7 @@ router.post('/logout', (req, res) => {
     });
   } catch (err) {
     console.error('Erro em /users/logout:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -637,7 +637,7 @@ router.delete('/me', async (req, res) => {
     });
   } catch (err) {
     console.error('Erro em DELETE /users/me:', err);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -650,7 +650,7 @@ router.get('/home', (req, res) => {
     return res.status(401).json({ error: 'Not authenticated' });
   } catch (err) {
     console.error('Erro em /users/home:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 

@@ -65,7 +65,7 @@ router.get('/overview', ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     console.error('Erro em /stats/overview:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -107,7 +107,7 @@ router.get('/activity-last-30-days', ensureAuthenticated, async (req, res) => {
     });
   } catch (err) {
     console.error('Erro em /stats/activity-last-30-days:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -127,7 +127,7 @@ router.get('/sales-per-product', ensureAuthenticated, async (req, res) => {
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/sales-per-product:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -158,7 +158,7 @@ router.get('/top-products', ensureAuthenticated, async (req, res) => {
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/top-products:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -171,7 +171,7 @@ router.get('/products', ensureAuthenticated, async (req, res) => {
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/products:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -202,7 +202,7 @@ router.get('/products-detailed', ensureAuthenticated, async (req, res) => {
     return res.json({ rows });
   } catch (err) {
     console.error('Erro em /stats/products-detailed:', err);
-    return res.status(500).json({ error: err.message || 'Internal server error' });
+    return res.status(500).json({ error: err.message || 'Erro no servidor' });
   }
 });
 
@@ -357,7 +357,7 @@ router.get('/top-products-by-user/:userId', ensureAuthenticated, async (req, res
     });
   } catch (err) {
     console.error('Erro em /stats/top-products-by-user:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
@@ -385,7 +385,7 @@ router.get('/product/:id/sales', ensureAuthenticated, async (req, res) => {
     return res.json({ product: prod[0], sales: salesRows, totals: agg[0] });
   } catch (err) {
     console.error('Erro em /stats/product/:id/sales:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 

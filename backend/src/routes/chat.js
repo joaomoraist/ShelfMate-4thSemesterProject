@@ -223,7 +223,7 @@ router.post('/', async (req, res) => {
     return res.json({ reply: finalReply });
   } catch (err) {
     console.error('Erro em POST /chat:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Erro no servidor' });
   }
 });
 
