@@ -1,6 +1,7 @@
 import React from 'react';
 import { API_URLS } from '../config/api';
 import styles from '../styles/chat-widget.module.css';
+import { useNavigation } from '../context/NavigationContext';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
 
@@ -11,6 +12,7 @@ const ChatWidget: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   const GROQ_API_KEY: string | undefined = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GROQ_API_KEY) as any;
   const GROQ_MODEL: string = ((typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env as any).VITE_GROQ_MODEL) as any) || 'openai/gpt-oss-20b';
+  const { navigateTo } = useNavigation();
 
   const send = async () => {
     const text = input.trim();
@@ -27,8 +29,31 @@ const ChatWidget: React.FC = () => {
       });
       if (res.ok) {
         const data = await res.json();
-        const reply = (data && data.reply) ? String(data.reply) : 'Sem resposta.';
-        setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+        let reply = (data && data.reply) ? String(data.reply) : 'Sem resposta.';
+
+        // Processa todos os marcadores NAVIGATE:<slug> em qualquer posição; navega no primeiro e oculta todos
+        const navRegex = /\bNAVIGATE:\s*(login|signup|forgot-password|home|statistics|products|add-product|reports|settings)\b/ig;
+        let firstSlug: string | null = null;
+        reply = reply.replace(navRegex, (_m, s: string) => {
+          if (!firstSlug) firstSlug = (s || '').toLowerCase();
+          return '';
+        });
+        if (firstSlug) {
+          try { navigateTo(firstSlug as any); } catch {}
+        }
+        reply = reply.trim();
+        if (reply.length > 0) {
+          setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
+        }
+
+        // Detecção local de intenção de navegação baseada na pergunta do usuário
+        try {
+          const mod = await import('../services/searchNavigation');
+          const page = mod.getBestPageForQuery(text);
+          if (page === 'add-product') {
+            navigateTo('add-product');
+          }
+        } catch {}
       } else {
         const err = await res.json().catch(() => ({} as any));
         const errMsg = String(err?.error || 'Falha ao enviar');
@@ -49,8 +74,21 @@ const ChatWidget: React.FC = () => {
               })
             });
             const groqData = await groqResp.json().catch(() => ({} as any));
-            const groqReply = groqData?.choices?.[0]?.message?.content || 'Sem resposta.';
-            setMessages((prev) => [...prev, { role: 'assistant', content: groqReply }]);
+            let groqReply = groqData?.choices?.[0]?.message?.content || 'Sem resposta.';
+            // Também suporta NAVIGATE no fallback: oculta marcadores e navega
+            const navRegex2 = /\bNAVIGATE:\s*(login|signup|forgot-password|home|statistics|products|add-product|reports|settings)\b/ig;
+            let firstSlug2: string | null = null;
+            groqReply = groqReply.replace(navRegex2, (_m, s: string) => {
+              if (!firstSlug2) firstSlug2 = (s || '').toLowerCase();
+              return '';
+            });
+            if (firstSlug2) {
+              try { navigateTo(firstSlug2 as any); } catch {}
+            }
+            groqReply = groqReply.trim();
+            if (groqReply.length > 0) {
+              setMessages((prev) => [...prev, { role: 'assistant', content: groqReply }]);
+            }
           } catch (ge) {
             setMessages((prev) => [...prev, { role: 'assistant', content: 'Erro ao contatar a Groq diretamente.' }]);
           }
