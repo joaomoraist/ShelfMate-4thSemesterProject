@@ -209,6 +209,18 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Documento inválido. Informe 11 (CPF) ou 14 (CNPJ) dígitos.' });
     }
     const isCpf = cleanDoc.length === 11;
+    // Regras de duplicidade: CPF não pode repetir; CNPJ pode.
+    if (isCpf) {
+      const existingCpfUsers = await sql`
+        SELECT u.id
+        FROM users u
+        JOIN companies c ON u.company_id = c.id
+        WHERE c.cnpj = ${cleanDoc}
+      `;
+      if (existingCpfUsers.length > 0) {
+        return res.status(409).json({ error: 'CPF já cadastrado' });
+      }
+    }
 
     // Verificar se o email já existe
     const existingUsers = await sql`
