@@ -38,7 +38,8 @@ const ChatWidget: React.FC = () => {
           if (!firstSlug) firstSlug = (s || '').toLowerCase();
           return '';
         });
-        if (firstSlug) {
+        const navigatedByMarker = !!firstSlug;
+        if (navigatedByMarker) {
           try { navigateTo(firstSlug as any); } catch {}
         }
         reply = reply.trim();
@@ -46,12 +47,12 @@ const ChatWidget: React.FC = () => {
           setMessages((prev) => [...prev, { role: 'assistant', content: reply }]);
         }
 
-        // Detecção local de intenção de navegação baseada na pergunta do usuário
+        // Detecção local ampla de intenção de navegação baseada na pergunta do usuário
         try {
           const mod = await import('../services/searchNavigation');
           const page = mod.getBestPageForQuery(text);
-          if (page === 'add-product') {
-            navigateTo('add-product');
+          if (page && !navigatedByMarker) {
+            navigateTo(page as any);
           }
         } catch {}
       } else {

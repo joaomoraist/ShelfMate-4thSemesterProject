@@ -23,9 +23,8 @@ const PAGE_KEYWORDS: Record<Page, string[]> = {
     "forgot",
     "esqueci minha senha",
   ],
-  home: ["home", "inicio", "início", "dashboard", "principal"],
-  // Add common variants like "inicial" and phrases users may type
-  home: ["home", "inicio", "início", "dashboard", "principal", "inicial", "pagina inicial", "página inicial", "home page"],
+  // Home: variantes comuns e frases usuais
+  home: ["home", "inicio", "início", "dashboard", "principal", "inicial", "pagina inicial", "página inicial", "home page", "painel", "overview"],
   statistics: [
     "estatistica",
     "estatisticas",
@@ -37,6 +36,11 @@ const PAGE_KEYWORDS: Record<Page, string[]> = {
     "gráficos",
     "metricas",
     "métricas",
+    "minhas estatisticas",
+    "ver estatisticas",
+    "ver minhas estatisticas",
+    "pagina de estatisticas",
+    "como ver estatisticas",
   ],
   products: [
     "produto",
@@ -58,7 +62,22 @@ const PAGE_KEYWORDS: Record<Page, string[]> = {
     "cadastrar produto",
     "cadastar produto",
   ],
-  reports: ["relatorio", "relatórios", "reports", "pdf", "exportar", "report"],
+  reports: [
+    "relatorio",
+    "relatórios",
+    "reports",
+    "pdf",
+    "exportar",
+    "report",
+    "meus relatorios",
+    "ver relatorios",
+    "ver meus relatorios",
+    "pagina de relatorios",
+    "baixar relatorio",
+    "download relatorio",
+    "emitir relatorio",
+    "gerar relatorio",
+  ],
   settings: [
     "config",
     "configuracao",
