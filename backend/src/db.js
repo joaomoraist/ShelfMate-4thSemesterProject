@@ -17,8 +17,9 @@ if (rawUrl) {
 
     // Supabase Pooler normalmente usa porta 6543; se estiver faltando/5432, ajusta.
     const isSupabasePooler = /\.pooler\.supabase\.com$/i.test(urlObj.hostname);
-    if (false && isSupabasePooler && (!urlObj.port || urlObj.port === '5432')) {
-      console.warn('Detectado host Supabase Pooler sem porta 6543; ajustando porta para 6543.');
+    // Se estiver usando o host do Pooler do Supabase, garanta a porta 6543
+    if (isSupabasePooler && (!urlObj.port || urlObj.port === '5432')) {
+      console.warn('Detectado host Supabase Pooler; ajustando porta para 6543.');
       urlObj.port = '6543';
     }
 
