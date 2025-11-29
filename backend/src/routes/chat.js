@@ -66,13 +66,95 @@ function sanitizeReply(text) {
   return t.trim();
 }
 
+// Gera respostas padrão baseadas no domínio do ShelfMate quando o provedor de IA não está disponível
+function buildFallbackReply(userMsg) {
+  const msg = String(userMsg || '').toLowerCase();
+  const contains = (arr) => arr.some((w) => msg.includes(w));
+
+  // Login / autenticação
+  if (contains(['login', 'entrar', 'acesso', 'autentica'])) {
+    return [
+      'Para entrar: vá à página Login, informe email e senha e clique em Login.',
+      'Se esqueceu a senha, use o link "Esqueceu a Senha?" para receber um código e redefinir.',
+      'NAVIGATE:login'
+    ].join('\n');
+  }
+
+  // Esqueci a senha / recuperação
+  if (contains(['esqueci', 'recupera', 'reset', 'recuperação', 'senha'])) {
+    return [
+      'Esqueci a Senha tem duas etapas: 1) Envie o código para seu email. 2) Digite o código recebido e a nova senha (mínimo 6).',
+      'Ao final, você volta para a página de Login.',
+      'NAVIGATE:forgot-password'
+    ].join('\n');
+  }
+
+  // Produtos / cadastro / importação
+  if (contains(['produto', 'produtos', 'cadastrar', 'adicionar', 'novo produto'])) {
+    return [
+      'Para cadastrar produto: abra Adicionar Produto e preencha Nome, Preço Unitário, Estoque e Status (Disponível/Estoque Baixo/Estoque Alto).',
+      'Em sucesso, o formulário é limpo e você retorna à lista de Produtos. Também é possível importar via CSV na página Produtos (headers: name, unit_price, inventory, status).',
+      'NAVIGATE:add-product'
+    ].join('\n');
+  }
+
+  // Estoque / alertas
+  if (contains(['estoque', 'alerta', 'baixo', 'alto'])) {
+    return [
+      'Status de estoque: Disponível (normal), Estoque Baixo (atenção), Estoque Alto (excesso).',
+      'Na página Produtos é possível filtrar, ordenar e ver contagem de alertas por item.',
+      'NAVIGATE:products'
+    ].join('\n');
+  }
+
+  // Relatórios
+  if (contains(['relatório', 'relatorios', 'pdf', 'exportar'])) {
+    return [
+      'Para gerar relatório: abra Relatórios, selecione os filtros desejados e clique em Exportar PDF.',
+      'Há relatórios de Produtos (ID, Produto, Preço, Estoque, Status, Alertas) e de Alertas (itens com alerts_count>0 ou estoque baixo).',
+      'NAVIGATE:reports'
+    ].join('\n');
+  }
+
+  // Estatísticas / gráficos
+  if (contains(['estatística', 'estatisticas', 'gráfico', 'graficos', 'métrica', 'metricas'])) {
+    return [
+      'Em Estatísticas você encontra métricas como Total de Produtos, Valor em Estoque, Produtos com Estoque Baixo e Vendas no Período.',
+      'Os gráficos incluem Evolução do Estoque, Produtos Mais Vendidos e Vendas por Produto.',
+      'NAVIGATE:statistics'
+    ].join('\n');
+  }
+
+  // Configurações / perfil / senha
+  if (contains(['configuração', 'configuracoes', 'perfil', 'senha nova', 'alterar senha', 'foto'])) {
+    return [
+      'Em Configurações é possível editar Nome, Email, alterar Senha e foto de perfil.',
+      'Para alterar a foto, clique no avatar, escolha a imagem e visualize a prévia antes de salvar.',
+      'NAVIGATE:settings'
+    ].join('\n');
+  }
+
+  // Início / dashboard
+  if (contains(['início', 'inicio', 'dashboard', 'home'])) {
+    return [
+      'A página Início mostra atividade recente (logins, mudanças de perfil, relatórios baixados, alertas) e análises com gráficos.',
+      'Use-a para uma visão geral rápida do sistema e da empresa.',
+      'NAVIGATE:home'
+    ].join('\n');
+  }
+
+  // Fallback geral
+  return [
+    'Posso ajudar com funcionalidades do ShelfMate: Login, Cadastro, Produtos, Relatórios, Estatísticas e Configurações.',
+    'Diga o que quer fazer e eu explico os passos. Por exemplo: "Como cadastrar produto?" ou "Como exportar relatório de produtos?".'
+  ].join('\n');
+}
+
 // Chat proxy usando Gemini via @google/genai
 router.post('/', async (req, res) => {
   try {
     const apiKey = process.env.GOOGLE_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'GOOGLE_API_KEY não configurado' });
-    }
+    const aiAvailable = !!apiKey;
 
     const { message, conversation } = req.body || {};
     if (!message || typeof message !== 'string') {
@@ -88,7 +170,7 @@ router.post('/', async (req, res) => {
     }
 
     const modelName = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-    const ai = new GoogleGenAI({ apiKey });
+    const ai = aiAvailable ? new GoogleGenAI({ apiKey }) : null;
 
     // Montar contexto com navegação e dados da empresa do usuário (se autenticado)
     const sessionUser = req.session && req.session.user ? req.session.user : null;
@@ -209,6 +291,12 @@ router.post('/', async (req, res) => {
     // Prompt final combinando contexto e pergunta do usuário
     const promptText = `${contextLines.join('\n')}\nPergunta do usuário: ${message}`;
 
+    // Se IA não está disponível, responder com fallback imediatamente
+    if (!aiAvailable) {
+      const fb = sanitizeReply(buildFallbackReply(message));
+      return res.json({ reply: fb });
+    }
+
     let response;
     try {
       response = await ai.models.generateContent({
@@ -218,17 +306,9 @@ router.post('/', async (req, res) => {
         generationConfig: { maxOutputTokens: 512, temperature: 0.7 }
       });
     } catch (apiErr) {
-      const msg = String(apiErr?.message || '');
-      const status = Number(apiErr?.status || 0);
-      const isQuota = status === 429 || /RESOURCE_EXHAUSTED|quota|rate[- ]?limit/i.test(msg);
-      if (isQuota) {
-        // Retorna erro 429 explícito com mensagem amigável para o frontend poder tratar (ex.: retry/backoff)
-        return res.status(429).json({
-          error: 'Limite de uso do provedor de IA atingido. Tente novamente em alguns minutos ou reduza a frequência.',
-        });
-      }
-      // Propaga outros erros para o handler abaixo
-      throw apiErr;
+      // Qualquer falha do provedor (inclui 429/quota e indisponibilidade) cai no fallback padrão
+      const fb = sanitizeReply(buildFallbackReply(message));
+      return res.json({ reply: fb });
     }
 
     const text = response?.text || response?.response?.text?.() || '';
@@ -236,11 +316,14 @@ router.post('/', async (req, res) => {
     // Se a sanitização deixar vazio, retornar fallback informativo
     const finalReply = clean && clean.trim().length > 0
       ? clean
-      : 'Posso ajudar com funcionalidades do ShelfMate (produtos, relatórios, estatísticas, alertas). Faça uma pergunta específica, por exemplo: "Como exportar relatório de produtos?"';
+      : sanitizeReply(buildFallbackReply(message));
     return res.json({ reply: finalReply });
   } catch (err) {
+    // Mesmo em erros inesperados, responder com mensagem padrão
     console.error('Erro em POST /chat:', err);
-    res.status(500).json({ error: 'Erro no servidor' });
+    const { message } = req.body || {};
+    const fb = sanitizeReply(buildFallbackReply(message));
+    return res.json({ reply: fb });
   }
 });
 
