@@ -209,10 +209,27 @@ router.post('/', async (req, res) => {
     // Prompt final combinando contexto e pergunta do usuário
     const promptText = `${contextLines.join('\n')}\nPergunta do usuário: ${message}`;
 
-    const response = await ai.models.generateContent({
-      model: modelName,
-      contents: promptText,
-    });
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: modelName,
+        contents: promptText,
+        // Limita tokens para reduzir custo/uso e evitar exceder quotas rapidamente
+        generationConfig: { maxOutputTokens: 512, temperature: 0.7 }
+      });
+    } catch (apiErr) {
+      const msg = String(apiErr?.message || '');
+      const status = Number(apiErr?.status || 0);
+      const isQuota = status === 429 || /RESOURCE_EXHAUSTED|quota|rate[- ]?limit/i.test(msg);
+      if (isQuota) {
+        // Retorna erro 429 explícito com mensagem amigável para o frontend poder tratar (ex.: retry/backoff)
+        return res.status(429).json({
+          error: 'Limite de uso do provedor de IA atingido. Tente novamente em alguns minutos ou reduza a frequência.',
+        });
+      }
+      // Propaga outros erros para o handler abaixo
+      throw apiErr;
+    }
 
     const text = response?.text || response?.response?.text?.() || '';
     const clean = sanitizeReply(text);
